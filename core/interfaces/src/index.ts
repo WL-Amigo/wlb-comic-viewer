@@ -1,0 +1,1 @@
+export type {IGalleryConfigService} from './gallery/Config'
