@@ -11,8 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/private-gallery-server/env"
-	"github.com/private-gallery-server/graph/generated"
-	"github.com/private-gallery-server/graph/resolvers"
+	"github.com/private-gallery-server/graphql/generated"
+	"github.com/private-gallery-server/graphql/resolvers"
+	"github.com/private-gallery-server/services/directory"
 )
 
 func main() {
@@ -26,14 +27,17 @@ func main() {
 		e.Use(middleware.Logger())
 	}
 
+	// construct services
+	directoryServiceInst := directory.CreateDirectoryService(env)
+
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{
-				Resolvers: resolvers.CreateResolver(),
+				Resolvers: resolvers.CreateResolver(directoryServiceInst),
 			},
 		),
 	)
-	playgroundHandler := playground.Handler("PSK GraphQL", "/api/query")
+	playgroundHandler := playground.Handler("PG GraphQL", "/api/query")
 	e.POST("/api/query", func(ctx echo.Context) error {
 		graphqlHandler.ServeHTTP(ctx.Response(), ctx.Request())
 		return nil

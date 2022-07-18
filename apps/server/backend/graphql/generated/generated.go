@@ -130,7 +130,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../graphql/schemas/dirs.graphqls", Input: `extend type Query {
+	{Name: "../schemas/dirs.graphqls", Input: `extend type Query {
   dirs(root: String!, includeHidden: Boolean): [String!]!
 }`, BuiltIn: false},
 }
