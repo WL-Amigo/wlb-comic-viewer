@@ -57,14 +57,15 @@ func (r *queryResolver) Library(ctx context.Context, id string) (*model.Library,
 	resultBooks := []*model.BookMin{}
 	for _, book := range books {
 		resultBooks = append(resultBooks, &model.BookMin{
-			ID:   book.Id,
+			ID:   string(book.Id),
 			Name: book.Name,
 		})
 	}
 
 	return &model.Library{
-		ID:    library.Id,
-		Name:  library.Name,
-		Books: resultBooks,
+		ID:      library.Id,
+		Name:    library.Name,
+		RootDir: library.RootDir,
+		Books:   resultBooks,
 	}, nil
 }

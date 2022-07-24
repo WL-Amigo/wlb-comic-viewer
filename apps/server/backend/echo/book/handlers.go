@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
+	"github.com/private-gallery-server/models"
 	"github.com/private-gallery-server/services/library"
 )
 
@@ -17,14 +18,14 @@ func RegisterEchoBookHandlers(e *echo.Echo, libraryService *library.LibraryServi
 		library: libraryService,
 	}
 
-	e.GET("/lib/:libraryId/book/:bookId/:page", func(c echo.Context) error {
+	e.GET("/api/file/lib/:libraryId/book/:bookId/:page", func(c echo.Context) error {
 		libraryId := c.Param("libraryId")
-		bookId := c.Param("bookId")
+		bookIdRaw := c.Param("bookId")
 		pageFilePath := c.Param("page")
-		if libraryId == "" || bookId == "" || pageFilePath == "" {
+		if libraryId == "" || bookIdRaw == "" || pageFilePath == "" {
 			return c.NoContent(http.StatusBadRequest)
 		}
-		bookId, err := url.QueryUnescape(bookId)
+		bookId, err := models.CastToBookId(bookIdRaw)
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bookId decode failed")
 		}

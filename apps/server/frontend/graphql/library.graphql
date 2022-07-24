@@ -1,0 +1,21 @@
+query loadAllLibraries {
+  libraries {
+    id
+    name
+  }
+}
+
+query loadLibrary($libraryId: ID!) {
+  library(id: $libraryId) {
+    id
+    name
+    books {
+      id
+      name
+    }
+  }
+}
+
+mutation createLibrary($input: LibraryInput!) {
+  createLibrary(input: $input)
+}

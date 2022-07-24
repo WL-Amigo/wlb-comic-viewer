@@ -43,7 +43,7 @@ func (db *JsonFileDatabase) UpdateLibrary(id string, model models.LibrarySetting
 	panic("not implemented") // TODO: Implement
 }
 
-func (db *JsonFileDatabase) CreateBook(libraryId string, bookDir string, settings models.BookSettings) (string, error) {
+func (db *JsonFileDatabase) CreateBook(libraryId string, bookDir string, settings models.BookSettings) (models.BookId, error) {
 	lib, err := db.ReadLibrary(libraryId)
 	if err != nil {
 		return "", err
@@ -54,13 +54,13 @@ func (db *JsonFileDatabase) CreateBook(libraryId string, bookDir string, setting
 		return "", err
 	}
 
-	return bookDir, err
+	return models.CreateBookId(bookDir), err
 }
 
-func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId string, settings models.BookSettings) (string, error) {
+func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId models.BookId, settings models.BookSettings) (models.BookId, error) {
 	panic("not implemented") // TODO: Implement
 }
 
-func (db *JsonFileDatabase) DeleteBook(libraryId string, bookId string) error {
+func (db *JsonFileDatabase) DeleteBook(libraryId string, bookId models.BookId) error {
 	panic("not implemented") // TODO: Implement
 }

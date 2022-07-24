@@ -25,11 +25,11 @@ func (s *LibraryService) GetAllBooksInLibrary(libraryId string) ([]models.BookMo
 	return books, nil
 }
 
-func getBookBaseCacheKey(libraryId string, bookId string) string {
-	return libraryId + ":" + bookId
+func getBookBaseCacheKey(libraryId string, bookId models.BookId) string {
+	return libraryId + ":" + string(bookId)
 }
 
-func (s *LibraryService) ReadBookBase(libraryId string, bookId string) (models.BookModelBase, error) {
+func (s *LibraryService) ReadBookBase(libraryId string, bookId models.BookId) (models.BookModelBase, error) {
 	cacheBook, ok := s.bookCacheMap[getBookBaseCacheKey(libraryId, bookId)]
 	if ok {
 		return cacheBook, nil
@@ -44,7 +44,7 @@ func (s *LibraryService) ReadBookBase(libraryId string, bookId string) (models.B
 	return bookBase, nil
 }
 
-func (s *LibraryService) ReadBook(libraryId string, bookId string) (models.BookModelDetail, error) {
+func (s *LibraryService) ReadBook(libraryId string, bookId models.BookId) (models.BookModelDetail, error) {
 	bookBase, err := s.ReadBookBase(libraryId, bookId)
 	if err != nil {
 		return models.BookModelDetail{}, nil
@@ -67,7 +67,7 @@ func (s *LibraryService) ReadBook(libraryId string, bookId string) (models.BookM
 	}, nil
 }
 
-func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings models.BookSettings) (string, error) {
+func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings models.BookSettings) (models.BookId, error) {
 	if settings.Name == "" {
 		settings.Name = filepath.Base(bookDir)
 	}

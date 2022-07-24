@@ -23,9 +23,10 @@ type BookMin struct {
 }
 
 type Library struct {
-	ID    string     `json:"id"`
-	Name  string     `json:"name"`
-	Books []*BookMin `json:"books"`
+	ID      string     `json:"id"`
+	Name    string     `json:"name"`
+	RootDir string     `json:"rootDir"`
+	Books   []*BookMin `json:"books"`
 }
 
 type LibraryInput struct {

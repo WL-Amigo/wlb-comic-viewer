@@ -1,8 +1,12 @@
 package echo_book_handlers
 
-import "path/filepath"
+import (
+	"path/filepath"
 
-func (h *BookHandler) GetPageFullPath(libraryId string, bookId string, pageFilePath string) (string, error) {
+	"github.com/private-gallery-server/models"
+)
+
+func (h *BookHandler) GetPageFullPath(libraryId string, bookId models.BookId, pageFilePath string) (string, error) {
 	bookBase, err := h.library.ReadBookBase(libraryId, bookId)
 	if err != nil {
 		return "", err

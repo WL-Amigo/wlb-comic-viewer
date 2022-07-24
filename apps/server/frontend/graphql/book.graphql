@@ -1,0 +1,11 @@
+query getBook($libraryId: ID!, $bookId: ID!) {
+  book(libraryId: $libraryId, bookId: $bookId) {
+    id
+    name
+    pages
+  }
+}
+
+mutation createBook($libraryId: ID!, $bookDir: String!, $bookInput: BookInput!) {
+  createBook(libraryId: $libraryId, init: {dir: $bookDir}, input: $bookInput)
+}

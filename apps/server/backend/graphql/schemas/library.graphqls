@@ -6,6 +6,7 @@ type LibraryMin {
 type Library {
   id: ID!
   name: String!
+  rootDir: String!
   books: [BookMin!]!
 }
 

@@ -53,7 +53,7 @@ func (db *JsonFileDatabase) ReadLibrary(id string) (models.LibraryModel, error) 
 
 func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, dirPath string, basePath string) models.BookModelBase {
 	return models.BookModelBase{
-		Id:          dirPath,
+		Id:          models.CreateBookId(dirPath),
 		Dir:         dirPath,
 		DirFullPath: filepath.Join(basePath, dirPath),
 		BookSettings: models.BookSettings{
@@ -92,16 +92,20 @@ func (db *JsonFileDatabase) ReadBooks(libraryId string) ([]models.BookModelBase,
 	return findBookRecursive("./", lib.RootDirFullPath)
 }
 
-func (db *JsonFileDatabase) ReadBook(libraryId string, bookId string) (models.BookModelBase, error) {
+func (db *JsonFileDatabase) ReadBook(libraryId string, bookId models.BookId) (models.BookModelBase, error) {
 	lib, err := db.ReadLibrary(libraryId)
 	if err != nil {
 		return models.BookModelBase{}, err
 	}
 
-	bookJson, err := db.readBookJson(lib.RootDir, bookId)
+	bookDirPath, err := bookId.ToDirPath()
+	if err != nil {
+		return models.BookModelBase{}, err
+	}
+	bookJson, err := db.readBookJson(lib.RootDir, bookDirPath)
 	if err != nil {
 		return models.BookModelBase{}, err
 	}
 
-	return createBookModelFromJsonStructure(bookJson, bookId, lib.RootDirFullPath), nil
+	return createBookModelFromJsonStructure(bookJson, bookDirPath, lib.RootDirFullPath), nil
 }

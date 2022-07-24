@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import {resolve as pathResolve} from 'node:path'
+import { resolve as pathResolve } from 'node:path';
 import solidPlugin from 'vite-plugin-solid';
 import windiCSS from 'vite-plugin-windicss';
 
@@ -12,11 +12,12 @@ export default defineConfig({
     lib: {
       entry: pathResolve(__dirname, 'src/index.tsx'),
       formats: ['es'],
-      fileName: 'index'
+      fileName: 'index',
     },
     rollupOptions: {
-      external: ['solid-js']
+      external: ['solid-js'],
     },
     target: 'esnext',
+    emptyOutDir: false,
   },
 });

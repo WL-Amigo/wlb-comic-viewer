@@ -1,12 +1,19 @@
 package models
 
+import (
+	"encoding/base64"
+	"strings"
+)
+
 type BookSettings struct {
 	Name string
 }
 
+type BookId string
+
 type BookModelBase struct {
 	BookSettings
-	Id          string
+	Id          BookId
 	Dir         string
 	DirFullPath string
 }
@@ -14,4 +21,26 @@ type BookModelBase struct {
 type BookModelDetail struct {
 	BookModelBase
 	PageFilePaths []string
+}
+
+func CreateBookId(bookDirPath string) BookId {
+	bookDirPath = strings.TrimPrefix(bookDirPath, "/")
+	b64EncodedDirPath := base64.URLEncoding.EncodeToString([]byte(bookDirPath))
+	return BookId(b64EncodedDirPath)
+}
+
+func CastToBookId(bookId string) (BookId, error) {
+	_, err := base64.URLEncoding.DecodeString(string(bookId))
+	if err != nil {
+		return "", err
+	}
+	return BookId(bookId), nil
+}
+
+func (id BookId) ToDirPath() (string, error) {
+	decoded, err := base64.URLEncoding.DecodeString(string(id))
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
 }

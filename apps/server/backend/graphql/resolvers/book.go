@@ -15,9 +15,10 @@ import (
 
 // CreateBook is the resolver for the createBook field.
 func (r *mutationResolver) CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput) (string, error) {
-	return r.library.CreateBook(libraryID, init.Dir, models.BookSettings{
+	id, err := r.library.CreateBook(libraryID, init.Dir, models.BookSettings{
 		Name: utils.UnwrapStringPtr(input.Name),
 	})
+	return string(id), err
 }
 
 // UpdateBook is the resolver for the updateBook field.
@@ -32,7 +33,11 @@ func (r *mutationResolver) DeleteBook(ctx context.Context, libraryID string, boo
 
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
-	bookDetail, err := r.library.ReadBook(libraryID, bookID)
+	bookIdLocal, err := models.CastToBookId(bookID)
+	if err != nil {
+		return nil, err
+	}
+	bookDetail, err := r.library.ReadBook(libraryID, bookIdLocal)
 	if err != nil {
 		return nil, err
 	}
