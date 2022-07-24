@@ -6,19 +6,10 @@ package resolvers
 import (
 	"context"
 
-	"github.com/private-gallery-server/graphql/generated"
+	"github.com/private-gallery-server/utils"
 )
 
 // Dirs is the resolver for the dirs field.
 func (r *queryResolver) Dirs(ctx context.Context, root string, includeHidden *bool) ([]string, error) {
-	includeHiddenLocal := false
-	if includeHidden != nil {
-		includeHiddenLocal = *includeHidden
-	}
-	return r.directory.GetDirs(root, includeHiddenLocal)
+	return r.directory.GetDirs(root, utils.UnwrapBoolPtr(includeHidden))
 }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type queryResolver struct{ *Resolver }

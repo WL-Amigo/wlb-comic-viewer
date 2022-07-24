@@ -1,0 +1,26 @@
+type LibraryMin {
+  id: ID!
+  name: String!
+}
+
+type Library {
+  id: ID!
+  name: String!
+  books: [BookMin!]!
+}
+
+extend type Query {
+  libraries: [LibraryMin!]!
+  library(id: ID!): Library!
+}
+
+input LibraryInput {
+  name: String
+  rootDir: String!
+}
+
+extend type Mutation {
+  createLibrary(input: LibraryInput!): ID!
+  updateLibrary(id: ID!, input: LibraryInput!): ID!
+  #deleteLibrary
+}

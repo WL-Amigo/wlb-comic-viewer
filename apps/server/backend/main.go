@@ -10,10 +10,13 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echo_book_handlers "github.com/private-gallery-server/echo/book"
 	"github.com/private-gallery-server/env"
 	"github.com/private-gallery-server/graphql/generated"
 	"github.com/private-gallery-server/graphql/resolvers"
 	"github.com/private-gallery-server/services/directory"
+	"github.com/private-gallery-server/services/json_file_database"
+	"github.com/private-gallery-server/services/library"
 )
 
 func main() {
@@ -29,11 +32,13 @@ func main() {
 
 	// construct services
 	directoryServiceInst := directory.CreateDirectoryService(env)
+	databaseInst := json_file_database.CreateJsonFileDatabase(env)
+	libraryServiceInst := library.CreateLibraryService(env, databaseInst, databaseInst)
 
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{
-				Resolvers: resolvers.CreateResolver(directoryServiceInst),
+				Resolvers: resolvers.CreateResolver(directoryServiceInst, libraryServiceInst),
 			},
 		),
 	)
@@ -46,6 +51,7 @@ func main() {
 		playgroundHandler.ServeHTTP(ctx.Response(), ctx.Request())
 		return nil
 	})
+	echo_book_handlers.RegisterEchoBookHandlers(e, libraryServiceInst)
 
 	go func() {
 		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed {

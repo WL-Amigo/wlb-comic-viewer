@@ -1,0 +1,29 @@
+type BookMin {
+  id: ID!
+  name: String!
+}
+
+type Book {
+  id: ID!
+  name: String!
+  dir: String!
+  pages: [String!]!
+}
+
+extend type Query {
+  book(libraryId: ID!, bookId: ID!): Book!
+}
+
+input BookInput {
+  name: String
+}
+
+input BookInitInput {
+  dir: String!
+}
+
+extend type Mutation {
+  createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!): ID!
+  updateBook(libraryId: ID!, bookId: ID!, input: BookInput!): ID!
+  deleteBook(libraryId: ID!, bookId: ID!): ID!
+}
