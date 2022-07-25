@@ -2,3 +2,5 @@ node_modules
 dist
 *.local
 *.local.sh
+*.log
+l_*
