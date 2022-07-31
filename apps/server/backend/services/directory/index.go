@@ -39,7 +39,7 @@ func (s *DirectoryService) GetDirs(path string, includeHidden bool) ([]string, e
 		if !includeHidden && strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
-		dirNames = append(dirNames, entry.Name())
+		dirNames = append(dirNames, entry.Name()+"/")
 	}
 
 	return dirNames, nil

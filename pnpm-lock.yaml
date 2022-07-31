@@ -61,6 +61,7 @@ importers:
       solid-app-router: ^0.4.1
       solid-js: ^1.4.7
       solid-transition-group: ^0.0.10
+      ts-pattern: ^4.0.5
       typescript: ^4.7.4
       vite: ^3.0.0
       vite-plugin-solid: ^2.3.0
@@ -70,6 +71,7 @@ importers:
       clsx: 1.2.1
       solid-app-router: 0.4.1_solid-js@1.4.7
       solid-transition-group: 0.0.10_solid-js@1.4.7
+      ts-pattern: 4.0.5
     devDependencies:
       '@local-config/prettier': link:../../config/prettier
       '@local-core/interfaces': link:../interfaces
@@ -3906,6 +3908,10 @@ packages:
       typescript: 4.7.4
       yn: 3.1.1
     dev: true
+
+  /ts-pattern/4.0.5:
+    resolution: {integrity: sha512-Bq44KCEt7JVaNLa148mBCJkcQf4l7jtLEBDuDdeuLynWDA+1a60P4D0rMkqSM9mOKLQbIWUddE9h3XKyKwBeqA==}
+    dev: false
 
   /ts-toolbelt/9.6.0:
     resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}

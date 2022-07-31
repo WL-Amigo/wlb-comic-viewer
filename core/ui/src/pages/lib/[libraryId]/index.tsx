@@ -1,6 +1,7 @@
 import { Link } from 'solid-app-router';
 import { Component, For } from 'solid-js';
 import { useLibraryDataContext } from './Context';
+import { AddBookButton } from './partials/AddBook';
 
 export const BookListPage: Component = () => {
   const libCtx = useLibraryDataContext();
@@ -22,6 +23,7 @@ export const BookListPage: Component = () => {
               </Link>
             )}
           </For>
+          <AddBookButton onFinishAdd={() => libCtx.reloadLibrary()} />
         </div>
       </div>
     </div>

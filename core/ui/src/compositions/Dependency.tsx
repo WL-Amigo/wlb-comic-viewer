@@ -1,7 +1,14 @@
-import { IBookMutationService, IBookService, ILibraryMutationService, ILibraryService } from '@local-core/interfaces';
+import {
+  IBookMutationService,
+  IBookService,
+  IDirectoryService,
+  ILibraryMutationService,
+  ILibraryService,
+} from '@local-core/interfaces';
 import { createContext, ParentComponent, useContext } from 'solid-js';
 
 export interface Services {
+  directory: IDirectoryService;
   library: ILibraryService;
   libraryMutation: ILibraryMutationService;
   book: IBookService;

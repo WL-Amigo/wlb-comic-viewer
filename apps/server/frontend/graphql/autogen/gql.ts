@@ -138,6 +138,13 @@ export type CreateBookMutationVariables = Exact<{
 
 export type CreateBookMutation = { __typename?: 'Mutation', createBook: string };
 
+export type GetDirsQueryVariables = Exact<{
+  root: Scalars['String'];
+}>;
+
+
+export type GetDirsQuery = { __typename?: 'Query', dirs: Array<string> };
+
 export type LoadAllLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -149,6 +156,13 @@ export type LoadLibraryQueryVariables = Exact<{
 
 
 export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string }> } };
+
+export type LoadLibrarySettingsQueryVariables = Exact<{
+  libraryId: Scalars['ID'];
+}>;
+
+
+export type LoadLibrarySettingsQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, rootDir: string } };
 
 export type CreateLibraryMutationVariables = Exact<{
   input: LibraryInput;
@@ -172,6 +186,11 @@ export const CreateBookDocument = gql`
   createBook(libraryId: $libraryId, init: {dir: $bookDir}, input: $bookInput)
 }
     `;
+export const GetDirsDocument = gql`
+    query getDirs($root: String!) {
+  dirs(root: $root)
+}
+    `;
 export const LoadAllLibrariesDocument = gql`
     query loadAllLibraries {
   libraries {
@@ -189,6 +208,15 @@ export const LoadLibraryDocument = gql`
       id
       name
     }
+  }
+}
+    `;
+export const LoadLibrarySettingsDocument = gql`
+    query loadLibrarySettings($libraryId: ID!) {
+  library(id: $libraryId) {
+    id
+    name
+    rootDir
   }
 }
     `;
@@ -211,11 +239,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     createBook(variables: CreateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateBookMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateBookMutation>(CreateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createBook', 'mutation');
     },
+    getDirs(variables: GetDirsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDirsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetDirsQuery>(GetDirsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getDirs', 'query');
+    },
     loadAllLibraries(variables?: LoadAllLibrariesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoadAllLibrariesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<LoadAllLibrariesQuery>(LoadAllLibrariesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'loadAllLibraries', 'query');
     },
     loadLibrary(variables: LoadLibraryQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoadLibraryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<LoadLibraryQuery>(LoadLibraryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'loadLibrary', 'query');
+    },
+    loadLibrarySettings(variables: LoadLibrarySettingsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoadLibrarySettingsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LoadLibrarySettingsQuery>(LoadLibrarySettingsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'loadLibrarySettings', 'query');
     },
     createLibrary(variables: CreateLibraryMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateLibraryMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateLibraryMutation>(CreateLibraryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createLibrary', 'mutation');

@@ -16,6 +16,14 @@ query loadLibrary($libraryId: ID!) {
   }
 }
 
+query loadLibrarySettings($libraryId: ID!) {
+  library(id: $libraryId) {
+    id
+    name
+    rootDir
+  }
+}
+
 mutation createLibrary($input: LibraryInput!) {
   createLibrary(input: $input)
 }

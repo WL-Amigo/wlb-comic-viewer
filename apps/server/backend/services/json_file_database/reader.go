@@ -16,7 +16,7 @@ func createLibraryModelFromJsonStruct(lib serializable.LibrarySettingsJson, root
 		Id: lib.Id,
 		LibrarySettings: models.LibrarySettings{
 			Name:    lib.Name,
-			RootDir: lib.RootDir,
+			RootDir: lib.RootDir + "/",
 		},
 		RootDirFullPath: filepath.Join(rootDirPath, lib.RootDir),
 	}

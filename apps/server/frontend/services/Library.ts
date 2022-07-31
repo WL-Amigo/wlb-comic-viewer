@@ -14,8 +14,9 @@ export class LibraryService implements ILibraryService, ILibraryMutationService 
     return result.library;
   }
 
-  loadLibrarySettings(libraryId: string): Promise<LibrarySettings> {
-    throw new Error("Method not implemented.");
+  async loadLibrarySettings(libraryId: string): Promise<LibrarySettings> {
+    const result = await this.gqlClient.loadLibrarySettings({libraryId});
+    return result.library;
   }
 
   async createLibrary(settings: LibrarySettings): Promise<string> {
