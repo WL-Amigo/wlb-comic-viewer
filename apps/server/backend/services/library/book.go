@@ -3,7 +3,6 @@ package library
 import (
 	"io/fs"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/private-gallery-server/models"
@@ -59,11 +58,10 @@ func (s *LibraryService) ReadBook(libraryId string, bookId models.BookId) (model
 		}
 		return nil
 	})
-	sort.Strings(imageFilePaths)
 
 	return models.BookModelDetail{
 		BookModelBase: bookBase,
-		PageFilePaths: imageFilePaths,
+		PageFilePaths: utils.SortStringSlice(imageFilePaths, utils.NaturalNumberOrder, false),
 	}, nil
 }
 
