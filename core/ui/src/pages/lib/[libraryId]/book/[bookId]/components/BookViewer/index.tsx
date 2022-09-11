@@ -44,6 +44,10 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
     });
   };
   const [isFullScreen, toggleFullScreen] = createDocumentFullScreenSignal();
+  const onClose = () => {
+    toggleFullScreen(false);
+    props.onClose();
+  };
   const [isControlsVisible, setIsControlsVisible] = createSignal(false);
   const hideControlsDebounced = createDebouncedFn(() => setIsControlsVisible(false), 3000);
   const showControls = () => {
@@ -68,7 +72,7 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
         )}
         onClick={showControls}
       >
-        <ViewerButton class="left-0 top-0" onClick={props.onClose}>
+        <ViewerButton class="left-0 top-0" onClick={onClose}>
           閉じる
         </ViewerButton>
         <ViewerButton class="top-0 right-0" onClick={() => toggleFullScreen()}>

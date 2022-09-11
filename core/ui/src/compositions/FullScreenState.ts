@@ -14,7 +14,11 @@ export const createDocumentFullScreenSignal = (): [
     onCleanup(() => document.removeEventListener('fullscreenchange', listener));
   });
   const toggleFullScreen = (next?: boolean) => {
-    const isFullScreenRequested = next ?? !isFullScreen();
+    const isFullScreenCurrent = isFullScreen();
+    const isFullScreenRequested = next ?? !isFullScreenCurrent;
+    if (isFullScreenCurrent === isFullScreenRequested) {
+      return;
+    }
     if (isFullScreenRequested) {
       document.documentElement.requestFullscreen();
     } else {
