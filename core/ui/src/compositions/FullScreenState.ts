@@ -15,7 +15,8 @@ export const createDocumentFullScreenSignal = (): [
   });
   const toggleFullScreen = (next?: boolean) => {
     const isFullScreenCurrent = isFullScreen();
-    const isFullScreenRequested = next ?? !isFullScreenCurrent;
+    const nextLocal = typeof next === 'boolean' ? next : undefined;
+    const isFullScreenRequested = nextLocal ?? !isFullScreenCurrent;
     if (isFullScreenCurrent === isFullScreenRequested) {
       return;
     }
