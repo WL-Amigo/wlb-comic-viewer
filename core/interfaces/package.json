@@ -9,5 +9,8 @@
   "devDependencies": {
     "@local-config/prettier": "workspace:*"
   },
-  "prettier": "@local-config/prettier"
+  "prettier": "@local-config/prettier",
+  "dependencies": {
+    "zod": "^3.19.1"
+  }
 }

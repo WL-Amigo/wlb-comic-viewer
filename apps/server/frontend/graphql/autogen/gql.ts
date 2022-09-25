@@ -17,11 +17,49 @@ export type Scalars = {
 
 export type Book = {
   __typename?: 'Book';
+  attributes: Array<BookAttribute>;
   dir: Scalars['String'];
   id: Scalars['ID'];
   name: Scalars['String'];
   pages: Array<Scalars['String']>;
 };
+
+export type BookAttribute = {
+  __typename?: 'BookAttribute';
+  displayName: Scalars['String'];
+  id: Scalars['ID'];
+  value: Scalars['String'];
+  valueType: BookAttributeValueTypeEnum;
+};
+
+export type BookAttributeInput = {
+  id: Scalars['ID'];
+  value: Scalars['String'];
+};
+
+export type BookAttributeSetting = {
+  __typename?: 'BookAttributeSetting';
+  displayName: Scalars['String'];
+  id: Scalars['ID'];
+  valueType: BookAttributeValueTypeEnum;
+};
+
+export type BookAttributeSettingCreateInput = {
+  displayName: Scalars['String'];
+  id?: InputMaybe<Scalars['ID']>;
+  valueType: BookAttributeValueTypeEnum;
+};
+
+export type BookAttributeSettingUpdateInput = {
+  displayName?: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+  valueType?: InputMaybe<BookAttributeValueTypeEnum>;
+};
+
+export enum BookAttributeValueTypeEnum {
+  Int = 'INT',
+  String = 'STRING'
+}
 
 export type BookInitInput = {
   dir: Scalars['String'];
@@ -39,13 +77,14 @@ export type BookMin = {
 
 export type Library = {
   __typename?: 'Library';
+  attributes: Array<BookAttributeSetting>;
   books: Array<BookMin>;
   id: Scalars['ID'];
   name: Scalars['String'];
   rootDir: Scalars['String'];
 };
 
-export type LibraryInput = {
+export type LibraryCreateInput = {
   name?: InputMaybe<Scalars['String']>;
   rootDir: Scalars['String'];
 };
@@ -56,25 +95,39 @@ export type LibraryMin = {
   name: Scalars['String'];
 };
 
+export type LibraryUpdateInput = {
+  name?: InputMaybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createBook: Scalars['ID'];
+  createBookAttributeSettings: Array<Scalars['ID']>;
   createLibrary: Scalars['ID'];
   deleteBook: Scalars['ID'];
   updateBook: Scalars['ID'];
+  updateBookAttributeSettings: Array<Scalars['ID']>;
   updateLibrary: Scalars['ID'];
 };
 
 
 export type MutationCreateBookArgs = {
+  attributesInput?: InputMaybe<Array<BookAttributeInput>>;
   init: BookInitInput;
   input: BookInput;
   libraryId: Scalars['ID'];
 };
 
 
+export type MutationCreateBookAttributeSettingsArgs = {
+  input?: InputMaybe<Array<BookAttributeSettingCreateInput>>;
+  libraryId: Scalars['ID'];
+};
+
+
 export type MutationCreateLibraryArgs = {
-  input: LibraryInput;
+  attributesInput?: InputMaybe<Array<BookAttributeSettingCreateInput>>;
+  input: LibraryCreateInput;
 };
 
 
@@ -85,15 +138,22 @@ export type MutationDeleteBookArgs = {
 
 
 export type MutationUpdateBookArgs = {
+  attributesInput?: InputMaybe<Array<BookAttributeInput>>;
   bookId: Scalars['ID'];
   input: BookInput;
   libraryId: Scalars['ID'];
 };
 
 
+export type MutationUpdateBookAttributeSettingsArgs = {
+  input?: InputMaybe<Array<BookAttributeSettingUpdateInput>>;
+  libraryId: Scalars['ID'];
+};
+
+
 export type MutationUpdateLibraryArgs = {
   id: Scalars['ID'];
-  input: LibraryInput;
+  input: LibraryUpdateInput;
 };
 
 export type Query = {
@@ -127,16 +187,27 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
   bookDir: Scalars['String'];
   bookInput: BookInput;
+  attributesInput?: InputMaybe<Array<BookAttributeInput> | BookAttributeInput>;
 }>;
 
 
 export type CreateBookMutation = { __typename?: 'Mutation', createBook: string };
+
+export type UpdateBookMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  bookInput: BookInput;
+  attributesInput?: InputMaybe<Array<BookAttributeInput> | BookAttributeInput>;
+}>;
+
+
+export type UpdateBookMutation = { __typename?: 'Mutation', updateBook: string };
 
 export type GetDirsQueryVariables = Exact<{
   root: Scalars['String'];
@@ -162,14 +233,30 @@ export type LoadLibrarySettingsQueryVariables = Exact<{
 }>;
 
 
-export type LoadLibrarySettingsQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, rootDir: string } };
+export type LoadLibrarySettingsQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, rootDir: string, attributes: Array<{ __typename?: 'BookAttributeSetting', id: string, displayName: string, valueType: BookAttributeValueTypeEnum }> } };
 
 export type CreateLibraryMutationVariables = Exact<{
-  input: LibraryInput;
+  input: LibraryCreateInput;
 }>;
 
 
 export type CreateLibraryMutation = { __typename?: 'Mutation', createLibrary: string };
+
+export type CreateBookAttributeSettingsMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  input?: InputMaybe<Array<BookAttributeSettingCreateInput> | BookAttributeSettingCreateInput>;
+}>;
+
+
+export type CreateBookAttributeSettingsMutation = { __typename?: 'Mutation', createBookAttributeSettings: Array<string> };
+
+export type UpdateBookAttributeSettingsMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  input?: InputMaybe<Array<BookAttributeSettingUpdateInput> | BookAttributeSettingUpdateInput>;
+}>;
+
+
+export type UpdateBookAttributeSettingsMutation = { __typename?: 'Mutation', updateBookAttributeSettings: Array<string> };
 
 
 export const GetBookDocument = gql`
@@ -178,12 +265,33 @@ export const GetBookDocument = gql`
     id
     name
     pages
+    attributes {
+      id
+      displayName
+      valueType
+      value
+    }
   }
 }
     `;
 export const CreateBookDocument = gql`
-    mutation createBook($libraryId: ID!, $bookDir: String!, $bookInput: BookInput!) {
-  createBook(libraryId: $libraryId, init: {dir: $bookDir}, input: $bookInput)
+    mutation createBook($libraryId: ID!, $bookDir: String!, $bookInput: BookInput!, $attributesInput: [BookAttributeInput!]) {
+  createBook(
+    libraryId: $libraryId
+    init: {dir: $bookDir}
+    input: $bookInput
+    attributesInput: $attributesInput
+  )
+}
+    `;
+export const UpdateBookDocument = gql`
+    mutation UpdateBook($libraryId: ID!, $bookId: ID!, $bookInput: BookInput!, $attributesInput: [BookAttributeInput!]) {
+  updateBook(
+    libraryId: $libraryId
+    bookId: $bookId
+    input: $bookInput
+    attributesInput: $attributesInput
+  )
 }
     `;
 export const GetDirsDocument = gql`
@@ -217,12 +325,27 @@ export const LoadLibrarySettingsDocument = gql`
     id
     name
     rootDir
+    attributes {
+      id
+      displayName
+      valueType
+    }
   }
 }
     `;
 export const CreateLibraryDocument = gql`
-    mutation createLibrary($input: LibraryInput!) {
+    mutation createLibrary($input: LibraryCreateInput!) {
   createLibrary(input: $input)
+}
+    `;
+export const CreateBookAttributeSettingsDocument = gql`
+    mutation createBookAttributeSettings($libraryId: ID!, $input: [BookAttributeSettingCreateInput!]) {
+  createBookAttributeSettings(libraryId: $libraryId, input: $input)
+}
+    `;
+export const UpdateBookAttributeSettingsDocument = gql`
+    mutation updateBookAttributeSettings($libraryId: ID!, $input: [BookAttributeSettingUpdateInput!]) {
+  updateBookAttributeSettings(libraryId: $libraryId, input: $input)
 }
     `;
 
@@ -239,6 +362,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     createBook(variables: CreateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateBookMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateBookMutation>(CreateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createBook', 'mutation');
     },
+    UpdateBook(variables: UpdateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookMutation>(UpdateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateBook', 'mutation');
+    },
     getDirs(variables: GetDirsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDirsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDirsQuery>(GetDirsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getDirs', 'query');
     },
@@ -253,6 +379,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     createLibrary(variables: CreateLibraryMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateLibraryMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateLibraryMutation>(CreateLibraryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createLibrary', 'mutation');
+    },
+    createBookAttributeSettings(variables: CreateBookAttributeSettingsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateBookAttributeSettingsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateBookAttributeSettingsMutation>(CreateBookAttributeSettingsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createBookAttributeSettings', 'mutation');
+    },
+    updateBookAttributeSettings(variables: UpdateBookAttributeSettingsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookAttributeSettingsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookAttributeSettingsMutation>(UpdateBookAttributeSettingsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookAttributeSettings', 'mutation');
     }
   };
 }

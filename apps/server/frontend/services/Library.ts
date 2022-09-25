@@ -1,7 +1,18 @@
-import { ILibraryMutationService, ILibraryService, LibraryForView, LibraryMin, LibrarySettings} from "@local-core/interfaces";
+import {
+  BookAttributeSettingsCreateParams,
+  BookAttributeSettingsUpdateParams,
+  ILibraryMutationService,
+  ILibraryService,
+  LibraryForView,
+  LibraryMin,
+  LibrarySettings,
+} from "@local-core/interfaces";
+import { BookAttributeValueTypeOps } from "../enum/BookAttributeValueType";
 import { Sdk } from "../graphql/autogen/gql";
 
-export class LibraryService implements ILibraryService, ILibraryMutationService {
+export class LibraryService
+  implements ILibraryService, ILibraryMutationService
+{
   public constructor(private readonly gqlClient: Sdk) {}
 
   async loadAllLibraries(): Promise<readonly LibraryMin[]> {
@@ -15,12 +26,44 @@ export class LibraryService implements ILibraryService, ILibraryMutationService 
   }
 
   async loadLibrarySettings(libraryId: string): Promise<LibrarySettings> {
-    const result = await this.gqlClient.loadLibrarySettings({libraryId});
+    const result = await this.gqlClient.loadLibrarySettings({ libraryId });
     return result.library;
   }
 
   async createLibrary(settings: LibrarySettings): Promise<string> {
     const result = await this.gqlClient.createLibrary({ input: settings });
     return result.createLibrary;
+  }
+
+  async createBookAttributeSettings(
+    libraryId: string,
+    attributeSettings: readonly BookAttributeSettingsCreateParams[]
+  ): Promise<readonly string[]> {
+    const result = await this.gqlClient.createBookAttributeSettings({
+      libraryId,
+      input: attributeSettings.map((p) => ({
+        id: p.preferredId,
+        displayName: p.displayName,
+        valueType: BookAttributeValueTypeOps.toGql(p.valueType),
+      })),
+    });
+    return result.createBookAttributeSettings;
+  }
+
+  async updateBookAttributeSettings(
+    libraryId: string,
+    attributeSettings: readonly BookAttributeSettingsUpdateParams[]
+  ): Promise<readonly string[]> {
+    const result = await this.gqlClient.updateBookAttributeSettings({
+      libraryId,
+      input: attributeSettings.map((p) => ({
+        id: p.id,
+        displayName: p.displayName,
+        valueType: p.valueType
+          ? BookAttributeValueTypeOps.toGql(p.valueType)
+          : undefined,
+      })),
+    });
+    return result.updateBookAttributeSettings;
   }
 }

@@ -6,9 +6,10 @@ import { useLibraryDataContext } from '../../Context';
 import { AllPagesTabContent } from './components/AllPagesTabContent';
 import { BookmarksTabContent } from './components/BookmarksTabContent';
 import { BookViewer } from './components/BookViewer';
+import { BookDescriptionTabContent } from './components/DescriptionTabContent';
 import { useBookDataContext } from './Context';
 
-type TabKeys = 'bookmarks' | 'pages';
+type TabKeys = 'bookmarks' | 'pages' | 'descriptions';
 
 const TabButton: ParentComponent<{ onClick: () => void; isActive: boolean }> = (props) => (
   <button
@@ -29,7 +30,7 @@ export const BookMainPage: Component = () => {
   const [isViewerOpen, setIsViewerOpen] = createSignal(false);
   const [firstOpenPageIndex, setFirstOpenPageIndex] = createSignal(0);
   const onPageOpenRequested = (pageName: string) => {
-    const idx = bookCtx.book.pages.indexOf(pageName);
+    const idx = bookCtx.book().pages.indexOf(pageName);
     if (idx >= 0) {
       setFirstOpenPageIndex(idx);
       setIsViewerOpen(true);
@@ -54,6 +55,9 @@ export const BookMainPage: Component = () => {
         <TabButton isActive={tab() === 'pages'} onClick={() => setTab('pages')}>
           ページ一覧
         </TabButton>
+        <TabButton isActive={tab() === 'descriptions'} onClick={() => setTab('descriptions')}>
+          本の情報
+        </TabButton>
       </div>
       <div class="flex-1 overflow-hidden overflow-x-auto w-full">
         <Switch>
@@ -62,6 +66,9 @@ export const BookMainPage: Component = () => {
           </Match>
           <Match when={tab() === 'pages'}>
             <AllPagesTabContent onPageOpenRequested={onPageOpenRequested} />
+          </Match>
+          <Match when={tab() === 'descriptions'}>
+            <BookDescriptionTabContent />
           </Match>
         </Switch>
       </div>

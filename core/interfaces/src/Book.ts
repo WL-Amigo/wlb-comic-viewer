@@ -1,3 +1,4 @@
+import { BookAttribute, BookAttributeCreateParams, BookAttributeUpdateParams } from './BookAttribute';
 import { BookId, LibraryId } from './Id';
 
 export interface BookMin {
@@ -9,11 +10,24 @@ export interface Book {
   readonly id: string;
   readonly name: string;
   readonly pages: readonly string[];
+  readonly attributes: readonly BookAttribute[];
 }
 
 export interface BookSettings {
+  readonly id: string;
+  readonly name: string;
+  readonly attributes: readonly BookAttribute[];
+}
+
+export interface BookCreateParams {
   name: string;
   dir: string;
+  attributes?: readonly BookAttributeCreateParams[];
+}
+
+export interface BookUpdateParams {
+  name?: string;
+  attributes?: readonly BookAttributeUpdateParams[];
 }
 
 export interface IBookService {
@@ -23,5 +37,6 @@ export interface IBookService {
 }
 
 export interface IBookMutationService {
-  createBook(libraryId: LibraryId, settings: BookSettings): Promise<BookId>;
+  createBook(libraryId: LibraryId, params: BookCreateParams): Promise<BookId>;
+  updateBook(libraryId: LibraryId, bookId: BookId, params: BookUpdateParams): Promise<BookId>;
 }

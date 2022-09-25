@@ -1,5 +1,10 @@
 import { BookMin } from './Book';
-import { LibraryId } from './Id';
+import {
+  BookAttributeSettings,
+  BookAttributeSettingsCreateParams,
+  BookAttributeSettingsUpdateParams,
+} from './BookAttribute';
+import { BookAttributeId, LibraryId } from './Id';
 
 export interface LibraryMin {
   readonly id: LibraryId;
@@ -15,6 +20,7 @@ export interface LibraryForView {
 export interface LibrarySettings {
   readonly name: string;
   readonly rootDir: string;
+  readonly attributes: readonly BookAttributeSettings[];
 }
 
 export interface ILibraryService {
@@ -25,4 +31,12 @@ export interface ILibraryService {
 
 export interface ILibraryMutationService {
   createLibrary(settings: LibrarySettings): Promise<LibraryId>;
+  createBookAttributeSettings(
+    libraryId: string,
+    attributeSettings: readonly BookAttributeSettingsCreateParams[],
+  ): Promise<readonly BookAttributeId[]>;
+  updateBookAttributeSettings(
+    libraryId: string,
+    attributeSettings: readonly BookAttributeSettingsUpdateParams[],
+  ): Promise<readonly BookAttributeId[]>;
 }

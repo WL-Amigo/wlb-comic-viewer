@@ -27,7 +27,7 @@ const AllRoutes: Component = () => {
 const App: Component = () => {
   return (
     <Router>
-      <div class="w-full h-full overflow-hidden">
+      <div class="w-full h-full overflow-hidden relative">
         <AllRoutes />
       </div>
     </Router>

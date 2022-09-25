@@ -27,12 +27,12 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
   const goNext = () => {
     setCurrentImageIndex((currentIdx) => {
       const nextIdx = currentIdx + 1;
-      return nextIdx >= bookCtx.book.pages.length ? 0 : nextIdx;
+      return nextIdx >= bookCtx.book().pages.length ? 0 : nextIdx;
     });
   };
   const goPrev = () => {
     setCurrentImageIndex((currentIdx) => {
-      return currentIdx <= 0 ? bookCtx.book.pages.length - 1 : currentIdx - 1;
+      return currentIdx <= 0 ? bookCtx.book().pages.length - 1 : currentIdx - 1;
     });
   };
   const [isFullScreen, toggleFullScreen] = createDocumentFullScreenSignal();
@@ -43,10 +43,10 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
 
   return (
     <div class="w-full h-full relative" onClick={(ev) => ev.stopPropagation()}>
-      <Show when={bookCtx.book.pages.at(currentImageIndex())}>
+      <Show when={bookCtx.book().pages.at(currentImageIndex())}>
         {(pageName) => (
           <img
-            src={bookService.getBookPageUrl(libCtx.library.id, bookCtx.book.id, pageName)}
+            src={bookService.getBookPageUrl(libCtx.library.id, bookCtx.book().id, pageName)}
             class="w-full h-full object-contain"
           />
         )}

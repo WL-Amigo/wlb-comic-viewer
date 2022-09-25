@@ -1,11 +1,12 @@
 import { Book } from '@local-core/interfaces';
 import { Outlet, useParams } from 'solid-app-router';
-import { Component, createContext, createResource, Show, useContext } from 'solid-js';
+import { Accessor, Component, createContext, createResource, Show, useContext } from 'solid-js';
+import { SquareLoader } from '../../../../../component/Spinners/SquareLoader';
 import { useService } from '../../../../../compositions/Dependency';
 import { useLibraryDataContext } from '../../Context';
 
 interface BookDataContextValues {
-  readonly book: Book;
+  readonly book: Accessor<Book>;
   reloadBook(): Promise<void>;
 }
 const BookDataContext = createContext<BookDataContextValues>();
@@ -32,14 +33,11 @@ export const BookDataProvider: Component = () => {
   };
 
   return (
-    <Show when={!data.loading}>
-      <Show when={data()}>
-        {(book) => (
-          <BookDataContext.Provider value={{ book, reloadBook }}>
-            <Outlet />
-          </BookDataContext.Provider>
-        )}
-      </Show>
+    <Show when={data.latest !== undefined}>
+      <BookDataContext.Provider value={{ book: () => data.latest!, reloadBook }}>
+        <Outlet />
+        <SquareLoader size="2x" isLoading={data.loading} />
+      </BookDataContext.Provider>
     </Show>
   );
 };

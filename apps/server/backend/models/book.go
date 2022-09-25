@@ -6,7 +6,13 @@ import (
 )
 
 type BookSettings struct {
-	Name string
+	Name       string
+	Attributes []BookAttribute
+}
+
+type BookSettingsUpdateInput struct {
+	Name       *string
+	Attributes []BookAttribute
 }
 
 type BookId string

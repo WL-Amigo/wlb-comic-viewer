@@ -8,6 +8,7 @@ type Book {
   name: String!
   dir: String!
   pages: [String!]!
+  attributes: [BookAttribute!]!
 }
 
 extend type Query {
@@ -23,7 +24,7 @@ input BookInitInput {
 }
 
 extend type Mutation {
-  createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!): ID!
-  updateBook(libraryId: ID!, bookId: ID!, input: BookInput!): ID!
+  createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
+  updateBook(libraryId: ID!, bookId: ID!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   deleteBook(libraryId: ID!, bookId: ID!): ID!
 }

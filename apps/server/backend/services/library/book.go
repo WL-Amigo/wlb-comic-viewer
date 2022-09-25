@@ -77,3 +77,44 @@ func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings m
 	delete(s.booksCacheMap, libraryId)
 	return id, nil
 }
+
+func (s *LibraryService) UpdateBook(libraryId string, bookId string, input models.BookSettingsUpdateInput) (models.BookId, error) {
+	bookIdLocal, err := models.CastToBookId(bookId)
+	if err != nil {
+		return "", err
+	}
+
+	updateTargetBook, err := s.dbReader.ReadBook(libraryId, bookIdLocal)
+	if err != nil {
+		return "", err
+	}
+	settings := updateTargetBook.BookSettings
+
+	if input.Name != nil {
+		settings.Name = *input.Name
+	}
+
+	if len(input.Attributes) > 0 {
+		attrMap := map[models.BookAttributeId]models.BookAttribute{}
+		for _, existingAttr := range settings.Attributes {
+			attrMap[existingAttr.Id] = existingAttr
+		}
+		for _, attrInput := range input.Attributes {
+			attrMap[attrInput.Id] = attrInput
+		}
+		nextAttrs := []models.BookAttribute{}
+		for _, v := range attrMap {
+			nextAttrs = append(nextAttrs, v)
+		}
+		settings.Attributes = nextAttrs
+	}
+
+	_, err = s.dbWriter.UpdateBook(libraryId, bookIdLocal, settings)
+	if err != nil {
+		return "", err
+	}
+
+	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
+
+	return bookIdLocal, nil
+}

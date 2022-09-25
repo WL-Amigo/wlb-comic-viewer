@@ -6,6 +6,7 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/private-gallery-server/graphql/generated"
 	"github.com/private-gallery-server/graphql/model"
@@ -14,7 +15,15 @@ import (
 )
 
 // CreateBook is the resolver for the createBook field.
-func (r *mutationResolver) CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput) (string, error) {
+func (r *mutationResolver) CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error) {
+	attrs := []models.BookAttribute{}
+	for _, attrInput := range attributesInput {
+		attrs = append(attrs, models.BookAttribute{
+			Id:    models.BookAttributeId(attrInput.ID),
+			Value: attrInput.Value,
+		})
+	}
+
 	id, err := r.library.CreateBook(libraryID, init.Dir, models.BookSettings{
 		Name: utils.UnwrapStringPtr(input.Name),
 	})
@@ -22,8 +31,24 @@ func (r *mutationResolver) CreateBook(ctx context.Context, libraryID string, ini
 }
 
 // UpdateBook is the resolver for the updateBook field.
-func (r *mutationResolver) UpdateBook(ctx context.Context, libraryID string, bookID string, input model.BookInput) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UpdateBook(ctx context.Context, libraryID string, bookID string, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error) {
+	attrs := []models.BookAttribute{}
+	for _, attrInput := range attributesInput {
+		attrs = append(attrs, models.BookAttribute{
+			Id:    models.BookAttributeId(attrInput.ID),
+			Value: attrInput.Value,
+		})
+	}
+
+	updatedId, err := r.library.UpdateBook(libraryID, bookID, models.BookSettingsUpdateInput{
+		Name:       input.Name,
+		Attributes: attrs,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return string(updatedId), nil
 }
 
 // DeleteBook is the resolver for the deleteBook field.
@@ -33,6 +58,10 @@ func (r *mutationResolver) DeleteBook(ctx context.Context, libraryID string, boo
 
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
+	attrSettingsMap, err := r.library.GetAttributeSettings(libraryID)
+	if err != nil {
+		return nil, err
+	}
 	bookIdLocal, err := models.CastToBookId(bookID)
 	if err != nil {
 		return nil, err
@@ -42,11 +71,39 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 		return nil, err
 	}
 
+	bookAttrMap := map[models.BookAttributeId]models.BookAttribute{}
+	for _, attr := range bookDetail.Attributes {
+		bookAttrMap[attr.Id] = attr
+	}
+
+	attrs := []*model.BookAttribute{}
+	for _, attrSettingsModel := range attrSettingsMap {
+		attr, ok := bookAttrMap[attrSettingsModel.Id]
+		if !ok {
+			attrs = append(attrs, &model.BookAttribute{
+				ID:          string(attrSettingsModel.Id),
+				DisplayName: attrSettingsModel.DisplayName,
+				ValueType:   model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
+				Value:       "",
+			})
+			continue
+		}
+		attrs = append(attrs, &model.BookAttribute{
+			ID:          string(attrSettingsModel.Id),
+			DisplayName: attrSettingsModel.DisplayName,
+			ValueType:   model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
+			Value:       attr.Value,
+		})
+	}
+	// TODO: sort by explicitly specified order
+	sort.Slice(attrs, func(i, j int) bool { return attrs[i].DisplayName < attrs[j].DisplayName })
+
 	return &model.Book{
-		ID:    bookID,
-		Name:  bookDetail.Name,
-		Dir:   bookDetail.Dir,
-		Pages: bookDetail.PageFilePaths,
+		ID:         bookID,
+		Name:       bookDetail.Name,
+		Dir:        bookDetail.Dir,
+		Pages:      bookDetail.PageFilePaths,
+		Attributes: attrs,
 	}, nil
 }
 

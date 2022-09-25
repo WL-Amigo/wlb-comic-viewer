@@ -45,10 +45,24 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Book struct {
-		Dir   func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
-		Pages func(childComplexity int) int
+		Attributes func(childComplexity int) int
+		Dir        func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Pages      func(childComplexity int) int
+	}
+
+	BookAttribute struct {
+		DisplayName func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Value       func(childComplexity int) int
+		ValueType   func(childComplexity int) int
+	}
+
+	BookAttributeSetting struct {
+		DisplayName func(childComplexity int) int
+		ID          func(childComplexity int) int
+		ValueType   func(childComplexity int) int
 	}
 
 	BookMin struct {
@@ -57,10 +71,11 @@ type ComplexityRoot struct {
 	}
 
 	Library struct {
-		Books   func(childComplexity int) int
-		ID      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		RootDir func(childComplexity int) int
+		Attributes func(childComplexity int) int
+		Books      func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Name       func(childComplexity int) int
+		RootDir    func(childComplexity int) int
 	}
 
 	LibraryMin struct {
@@ -69,11 +84,13 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateBook    func(childComplexity int, libraryID string, init model.BookInitInput, input model.BookInput) int
-		CreateLibrary func(childComplexity int, input model.LibraryInput) int
-		DeleteBook    func(childComplexity int, libraryID string, bookID string) int
-		UpdateBook    func(childComplexity int, libraryID string, bookID string, input model.BookInput) int
-		UpdateLibrary func(childComplexity int, id string, input model.LibraryInput) int
+		CreateBook                  func(childComplexity int, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) int
+		CreateBookAttributeSettings func(childComplexity int, libraryID string, input []*model.BookAttributeSettingCreateInput) int
+		CreateLibrary               func(childComplexity int, input model.LibraryCreateInput, attributesInput []*model.BookAttributeSettingCreateInput) int
+		DeleteBook                  func(childComplexity int, libraryID string, bookID string) int
+		UpdateBook                  func(childComplexity int, libraryID string, bookID string, input model.BookInput, attributesInput []*model.BookAttributeInput) int
+		UpdateBookAttributeSettings func(childComplexity int, libraryID string, input []*model.BookAttributeSettingUpdateInput) int
+		UpdateLibrary               func(childComplexity int, id string, input model.LibraryUpdateInput) int
 	}
 
 	Query struct {
@@ -85,11 +102,13 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput) (string, error)
-	UpdateBook(ctx context.Context, libraryID string, bookID string, input model.BookInput) (string, error)
+	CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error)
+	UpdateBook(ctx context.Context, libraryID string, bookID string, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error)
 	DeleteBook(ctx context.Context, libraryID string, bookID string) (string, error)
-	CreateLibrary(ctx context.Context, input model.LibraryInput) (string, error)
-	UpdateLibrary(ctx context.Context, id string, input model.LibraryInput) (string, error)
+	CreateLibrary(ctx context.Context, input model.LibraryCreateInput, attributesInput []*model.BookAttributeSettingCreateInput) (string, error)
+	UpdateLibrary(ctx context.Context, id string, input model.LibraryUpdateInput) (string, error)
+	CreateBookAttributeSettings(ctx context.Context, libraryID string, input []*model.BookAttributeSettingCreateInput) ([]string, error)
+	UpdateBookAttributeSettings(ctx context.Context, libraryID string, input []*model.BookAttributeSettingUpdateInput) ([]string, error)
 }
 type QueryResolver interface {
 	Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error)
@@ -112,6 +131,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Book.attributes":
+		if e.complexity.Book.Attributes == nil {
+			break
+		}
+
+		return e.complexity.Book.Attributes(childComplexity), true
 
 	case "Book.dir":
 		if e.complexity.Book.Dir == nil {
@@ -141,6 +167,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Book.Pages(childComplexity), true
 
+	case "BookAttribute.displayName":
+		if e.complexity.BookAttribute.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.BookAttribute.DisplayName(childComplexity), true
+
+	case "BookAttribute.id":
+		if e.complexity.BookAttribute.ID == nil {
+			break
+		}
+
+		return e.complexity.BookAttribute.ID(childComplexity), true
+
+	case "BookAttribute.value":
+		if e.complexity.BookAttribute.Value == nil {
+			break
+		}
+
+		return e.complexity.BookAttribute.Value(childComplexity), true
+
+	case "BookAttribute.valueType":
+		if e.complexity.BookAttribute.ValueType == nil {
+			break
+		}
+
+		return e.complexity.BookAttribute.ValueType(childComplexity), true
+
+	case "BookAttributeSetting.displayName":
+		if e.complexity.BookAttributeSetting.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.BookAttributeSetting.DisplayName(childComplexity), true
+
+	case "BookAttributeSetting.id":
+		if e.complexity.BookAttributeSetting.ID == nil {
+			break
+		}
+
+		return e.complexity.BookAttributeSetting.ID(childComplexity), true
+
+	case "BookAttributeSetting.valueType":
+		if e.complexity.BookAttributeSetting.ValueType == nil {
+			break
+		}
+
+		return e.complexity.BookAttributeSetting.ValueType(childComplexity), true
+
 	case "BookMin.id":
 		if e.complexity.BookMin.ID == nil {
 			break
@@ -154,6 +229,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BookMin.Name(childComplexity), true
+
+	case "Library.attributes":
+		if e.complexity.Library.Attributes == nil {
+			break
+		}
+
+		return e.complexity.Library.Attributes(childComplexity), true
 
 	case "Library.books":
 		if e.complexity.Library.Books == nil {
@@ -207,7 +289,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateBook(childComplexity, args["libraryId"].(string), args["init"].(model.BookInitInput), args["input"].(model.BookInput)), true
+		return e.complexity.Mutation.CreateBook(childComplexity, args["libraryId"].(string), args["init"].(model.BookInitInput), args["input"].(model.BookInput), args["attributesInput"].([]*model.BookAttributeInput)), true
+
+	case "Mutation.createBookAttributeSettings":
+		if e.complexity.Mutation.CreateBookAttributeSettings == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createBookAttributeSettings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateBookAttributeSettings(childComplexity, args["libraryId"].(string), args["input"].([]*model.BookAttributeSettingCreateInput)), true
 
 	case "Mutation.createLibrary":
 		if e.complexity.Mutation.CreateLibrary == nil {
@@ -219,7 +313,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateLibrary(childComplexity, args["input"].(model.LibraryInput)), true
+		return e.complexity.Mutation.CreateLibrary(childComplexity, args["input"].(model.LibraryCreateInput), args["attributesInput"].([]*model.BookAttributeSettingCreateInput)), true
 
 	case "Mutation.deleteBook":
 		if e.complexity.Mutation.DeleteBook == nil {
@@ -243,7 +337,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateBook(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["input"].(model.BookInput)), true
+		return e.complexity.Mutation.UpdateBook(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["input"].(model.BookInput), args["attributesInput"].([]*model.BookAttributeInput)), true
+
+	case "Mutation.updateBookAttributeSettings":
+		if e.complexity.Mutation.UpdateBookAttributeSettings == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateBookAttributeSettings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateBookAttributeSettings(childComplexity, args["libraryId"].(string), args["input"].([]*model.BookAttributeSettingUpdateInput)), true
 
 	case "Mutation.updateLibrary":
 		if e.complexity.Mutation.UpdateLibrary == nil {
@@ -255,7 +361,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateLibrary(childComplexity, args["id"].(string), args["input"].(model.LibraryInput)), true
+		return e.complexity.Mutation.UpdateLibrary(childComplexity, args["id"].(string), args["input"].(model.LibraryUpdateInput)), true
 
 	case "Query.book":
 		if e.complexity.Query.Book == nil {
@@ -308,9 +414,13 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputBookAttributeInput,
+		ec.unmarshalInputBookAttributeSettingCreateInput,
+		ec.unmarshalInputBookAttributeSettingUpdateInput,
 		ec.unmarshalInputBookInitInput,
 		ec.unmarshalInputBookInput,
-		ec.unmarshalInputLibraryInput,
+		ec.unmarshalInputLibraryCreateInput,
+		ec.unmarshalInputLibraryUpdateInput,
 	)
 	first := true
 
@@ -381,6 +491,7 @@ type Book {
   name: String!
   dir: String!
   pages: [String!]!
+  attributes: [BookAttribute!]!
 }
 
 extend type Query {
@@ -396,9 +507,43 @@ input BookInitInput {
 }
 
 extend type Mutation {
-  createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!): ID!
-  updateBook(libraryId: ID!, bookId: ID!, input: BookInput!): ID!
+  createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
+  updateBook(libraryId: ID!, bookId: ID!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   deleteBook(libraryId: ID!, bookId: ID!): ID!
+}`, BuiltIn: false},
+	{Name: "../schemas/book_attribute.graphqls", Input: `enum BookAttributeValueTypeEnum {
+  STRING
+  INT
+}
+
+type BookAttributeSetting {
+  id: ID!
+  displayName: String!
+  valueType: BookAttributeValueTypeEnum!
+}
+
+input BookAttributeSettingCreateInput {
+  id: ID
+  displayName: String!
+  valueType: BookAttributeValueTypeEnum!
+}
+
+input BookAttributeSettingUpdateInput {
+  id: ID!
+  displayName: String
+  valueType: BookAttributeValueTypeEnum
+}
+
+type BookAttribute {
+  id: ID!
+  displayName: String!
+  valueType: BookAttributeValueTypeEnum!
+  value: String!
+}
+
+input BookAttributeInput {
+  id: ID!
+  value: String!
 }`, BuiltIn: false},
 	{Name: "../schemas/dirs.graphqls", Input: `extend type Query {
   dirs(root: String!, includeHidden: Boolean): [String!]!
@@ -413,6 +558,7 @@ type Library {
   name: String!
   rootDir: String!
   books: [BookMin!]!
+  attributes: [BookAttributeSetting!]!
 }
 
 extend type Query {
@@ -420,14 +566,20 @@ extend type Query {
   library(id: ID!): Library!
 }
 
-input LibraryInput {
+input LibraryCreateInput {
   name: String
   rootDir: String!
 }
 
+input LibraryUpdateInput {
+  name: String
+}
+
 extend type Mutation {
-  createLibrary(input: LibraryInput!): ID!
-  updateLibrary(id: ID!, input: LibraryInput!): ID!
+  createLibrary(input: LibraryCreateInput!, attributesInput: [BookAttributeSettingCreateInput!]): ID!
+  updateLibrary(id: ID!, input: LibraryUpdateInput!): ID!
+  createBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingCreateInput!]): [ID!]!
+  updateBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingUpdateInput!]): [ID!]!
   #deleteLibrary
 }`, BuiltIn: false},
 }
@@ -436,6 +588,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createBookAttributeSettings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["libraryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["libraryId"] = arg0
+	var arg1 []*model.BookAttributeSettingCreateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg1, err = ec.unmarshalOBookAttributeSettingCreateInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingCreateInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createBook_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -467,21 +643,39 @@ func (ec *executionContext) field_Mutation_createBook_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg2
+	var arg3 []*model.BookAttributeInput
+	if tmp, ok := rawArgs["attributesInput"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attributesInput"))
+		arg3, err = ec.unmarshalOBookAttributeInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributesInput"] = arg3
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_createLibrary_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.LibraryInput
+	var arg0 model.LibraryCreateInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNLibraryInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryInput(ctx, tmp)
+		arg0, err = ec.unmarshalNLibraryCreateInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryCreateInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["input"] = arg0
+	var arg1 []*model.BookAttributeSettingCreateInput
+	if tmp, ok := rawArgs["attributesInput"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attributesInput"))
+		arg1, err = ec.unmarshalOBookAttributeSettingCreateInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingCreateInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributesInput"] = arg1
 	return args, nil
 }
 
@@ -506,6 +700,30 @@ func (ec *executionContext) field_Mutation_deleteBook_args(ctx context.Context, 
 		}
 	}
 	args["bookId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateBookAttributeSettings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["libraryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["libraryId"] = arg0
+	var arg1 []*model.BookAttributeSettingUpdateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg1, err = ec.unmarshalOBookAttributeSettingUpdateInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingUpdateInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -539,6 +757,15 @@ func (ec *executionContext) field_Mutation_updateBook_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg2
+	var arg3 []*model.BookAttributeInput
+	if tmp, ok := rawArgs["attributesInput"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attributesInput"))
+		arg3, err = ec.unmarshalOBookAttributeInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributesInput"] = arg3
 	return args, nil
 }
 
@@ -554,10 +781,10 @@ func (ec *executionContext) field_Mutation_updateLibrary_args(ctx context.Contex
 		}
 	}
 	args["id"] = arg0
-	var arg1 model.LibraryInput
+	var arg1 model.LibraryUpdateInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNLibraryInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryInput(ctx, tmp)
+		arg1, err = ec.unmarshalNLibraryUpdateInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryUpdateInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -858,6 +1085,368 @@ func (ec *executionContext) fieldContext_Book_pages(ctx context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Book_attributes(ctx context.Context, field graphql.CollectedField, obj *model.Book) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Book_attributes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Attributes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.BookAttribute)
+	fc.Result = res
+	return ec.marshalNBookAttribute2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Book_attributes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_BookAttribute_id(ctx, field)
+			case "displayName":
+				return ec.fieldContext_BookAttribute_displayName(ctx, field)
+			case "valueType":
+				return ec.fieldContext_BookAttribute_valueType(ctx, field)
+			case "value":
+				return ec.fieldContext_BookAttribute_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BookAttribute", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttribute_id(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttribute_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttribute_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttribute_displayName(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttribute_displayName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttribute_displayName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttribute_valueType(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttribute_valueType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValueType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.BookAttributeValueTypeEnum)
+	fc.Result = res
+	return ec.marshalNBookAttributeValueTypeEnum2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttribute_valueType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BookAttributeValueTypeEnum does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttribute_value(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttribute_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttribute_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttributeSetting_id(ctx context.Context, field graphql.CollectedField, obj *model.BookAttributeSetting) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttributeSetting_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttributeSetting_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttributeSetting",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttributeSetting_displayName(ctx context.Context, field graphql.CollectedField, obj *model.BookAttributeSetting) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttributeSetting_displayName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttributeSetting_displayName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttributeSetting",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttributeSetting_valueType(ctx context.Context, field graphql.CollectedField, obj *model.BookAttributeSetting) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttributeSetting_valueType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValueType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.BookAttributeValueTypeEnum)
+	fc.Result = res
+	return ec.marshalNBookAttributeValueTypeEnum2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttributeSetting_valueType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttributeSetting",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BookAttributeValueTypeEnum does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _BookMin_id(ctx context.Context, field graphql.CollectedField, obj *model.BookMin) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_BookMin_id(ctx, field)
 	if err != nil {
@@ -1128,6 +1717,58 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Library_attributes(ctx context.Context, field graphql.CollectedField, obj *model.Library) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Library_attributes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Attributes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.BookAttributeSetting)
+	fc.Result = res
+	return ec.marshalNBookAttributeSetting2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Library_attributes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Library",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_BookAttributeSetting_id(ctx, field)
+			case "displayName":
+				return ec.fieldContext_BookAttributeSetting_displayName(ctx, field)
+			case "valueType":
+				return ec.fieldContext_BookAttributeSetting_valueType(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BookAttributeSetting", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LibraryMin_id(ctx context.Context, field graphql.CollectedField, obj *model.LibraryMin) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_LibraryMin_id(ctx, field)
 	if err != nil {
@@ -1230,7 +1871,7 @@ func (ec *executionContext) _Mutation_createBook(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateBook(rctx, fc.Args["libraryId"].(string), fc.Args["init"].(model.BookInitInput), fc.Args["input"].(model.BookInput))
+		return ec.resolvers.Mutation().CreateBook(rctx, fc.Args["libraryId"].(string), fc.Args["init"].(model.BookInitInput), fc.Args["input"].(model.BookInput), fc.Args["attributesInput"].([]*model.BookAttributeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1285,7 +1926,7 @@ func (ec *executionContext) _Mutation_updateBook(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateBook(rctx, fc.Args["libraryId"].(string), fc.Args["bookId"].(string), fc.Args["input"].(model.BookInput))
+		return ec.resolvers.Mutation().UpdateBook(rctx, fc.Args["libraryId"].(string), fc.Args["bookId"].(string), fc.Args["input"].(model.BookInput), fc.Args["attributesInput"].([]*model.BookAttributeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1395,7 +2036,7 @@ func (ec *executionContext) _Mutation_createLibrary(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateLibrary(rctx, fc.Args["input"].(model.LibraryInput))
+		return ec.resolvers.Mutation().CreateLibrary(rctx, fc.Args["input"].(model.LibraryCreateInput), fc.Args["attributesInput"].([]*model.BookAttributeSettingCreateInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1450,7 +2091,7 @@ func (ec *executionContext) _Mutation_updateLibrary(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateLibrary(rctx, fc.Args["id"].(string), fc.Args["input"].(model.LibraryInput))
+		return ec.resolvers.Mutation().UpdateLibrary(rctx, fc.Args["id"].(string), fc.Args["input"].(model.LibraryUpdateInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1485,6 +2126,116 @@ func (ec *executionContext) fieldContext_Mutation_updateLibrary(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateLibrary_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createBookAttributeSettings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createBookAttributeSettings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateBookAttributeSettings(rctx, fc.Args["libraryId"].(string), fc.Args["input"].([]*model.BookAttributeSettingCreateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createBookAttributeSettings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createBookAttributeSettings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateBookAttributeSettings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateBookAttributeSettings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateBookAttributeSettings(rctx, fc.Args["libraryId"].(string), fc.Args["input"].([]*model.BookAttributeSettingUpdateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateBookAttributeSettings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateBookAttributeSettings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -1538,6 +2289,8 @@ func (ec *executionContext) fieldContext_Query_book(ctx context.Context, field g
 				return ec.fieldContext_Book_dir(ctx, field)
 			case "pages":
 				return ec.fieldContext_Book_pages(ctx, field)
+			case "attributes":
+				return ec.fieldContext_Book_attributes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
 		},
@@ -1708,6 +2461,8 @@ func (ec *executionContext) fieldContext_Query_library(ctx context.Context, fiel
 				return ec.fieldContext_Library_rootDir(ctx, field)
 			case "books":
 				return ec.fieldContext_Library_books(ctx, field)
+			case "attributes":
+				return ec.fieldContext_Library_attributes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Library", field.Name)
 		},
@@ -3628,6 +4383,130 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputBookAttributeInput(ctx context.Context, obj interface{}) (model.BookAttributeInput, error) {
+	var it model.BookAttributeInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputBookAttributeSettingCreateInput(ctx context.Context, obj interface{}) (model.BookAttributeSettingCreateInput, error) {
+	var it model.BookAttributeSettingCreateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "displayName", "valueType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "displayName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("displayName"))
+			it.DisplayName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "valueType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueType"))
+			it.ValueType, err = ec.unmarshalNBookAttributeValueTypeEnum2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputBookAttributeSettingUpdateInput(ctx context.Context, obj interface{}) (model.BookAttributeSettingUpdateInput, error) {
+	var it model.BookAttributeSettingUpdateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "displayName", "valueType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "displayName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("displayName"))
+			it.DisplayName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "valueType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueType"))
+			it.ValueType, err = ec.unmarshalOBookAttributeValueTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookInitInput(ctx context.Context, obj interface{}) (model.BookInitInput, error) {
 	var it model.BookInitInput
 	asMap := map[string]interface{}{}
@@ -3684,8 +4563,8 @@ func (ec *executionContext) unmarshalInputBookInput(ctx context.Context, obj int
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputLibraryInput(ctx context.Context, obj interface{}) (model.LibraryInput, error) {
-	var it model.LibraryInput
+func (ec *executionContext) unmarshalInputLibraryCreateInput(ctx context.Context, obj interface{}) (model.LibraryCreateInput, error) {
+	var it model.LibraryCreateInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3711,6 +4590,34 @@ func (ec *executionContext) unmarshalInputLibraryInput(ctx context.Context, obj 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rootDir"))
 			it.RootDir, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputLibraryUpdateInput(ctx context.Context, obj interface{}) (model.LibraryUpdateInput, error) {
+	var it model.LibraryUpdateInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3762,6 +4669,104 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 		case "pages":
 
 			out.Values[i] = ec._Book_pages(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "attributes":
+
+			out.Values[i] = ec._Book_attributes(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var bookAttributeImplementors = []string{"BookAttribute"}
+
+func (ec *executionContext) _BookAttribute(ctx context.Context, sel ast.SelectionSet, obj *model.BookAttribute) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookAttributeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BookAttribute")
+		case "id":
+
+			out.Values[i] = ec._BookAttribute_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "displayName":
+
+			out.Values[i] = ec._BookAttribute_displayName(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "valueType":
+
+			out.Values[i] = ec._BookAttribute_valueType(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+
+			out.Values[i] = ec._BookAttribute_value(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var bookAttributeSettingImplementors = []string{"BookAttributeSetting"}
+
+func (ec *executionContext) _BookAttributeSetting(ctx context.Context, sel ast.SelectionSet, obj *model.BookAttributeSetting) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookAttributeSettingImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BookAttributeSetting")
+		case "id":
+
+			out.Values[i] = ec._BookAttributeSetting_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "displayName":
+
+			out.Values[i] = ec._BookAttributeSetting_displayName(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "valueType":
+
+			out.Values[i] = ec._BookAttributeSetting_valueType(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3846,6 +4851,13 @@ func (ec *executionContext) _Library(ctx context.Context, sel ast.SelectionSet, 
 		case "books":
 
 			out.Values[i] = ec._Library_books(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "attributes":
+
+			out.Values[i] = ec._Library_attributes(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3955,6 +4967,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateLibrary(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createBookAttributeSettings":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createBookAttributeSettings(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateBookAttributeSettings":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateBookAttributeSettings(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -4437,6 +5467,139 @@ func (ec *executionContext) marshalNBook2ᚖgithubᚗcomᚋprivateᚑgalleryᚑs
 	return ec._Book(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNBookAttribute2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BookAttribute) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBookAttribute2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttribute(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNBookAttribute2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttribute(ctx context.Context, sel ast.SelectionSet, v *model.BookAttribute) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._BookAttribute(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBookAttributeInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInput(ctx context.Context, v interface{}) (*model.BookAttributeInput, error) {
+	res, err := ec.unmarshalInputBookAttributeInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNBookAttributeSetting2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BookAttributeSetting) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBookAttributeSetting2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSetting(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNBookAttributeSetting2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSetting(ctx context.Context, sel ast.SelectionSet, v *model.BookAttributeSetting) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._BookAttributeSetting(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBookAttributeSettingCreateInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingCreateInput(ctx context.Context, v interface{}) (*model.BookAttributeSettingCreateInput, error) {
+	res, err := ec.unmarshalInputBookAttributeSettingCreateInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNBookAttributeSettingUpdateInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingUpdateInput(ctx context.Context, v interface{}) (*model.BookAttributeSettingUpdateInput, error) {
+	res, err := ec.unmarshalInputBookAttributeSettingUpdateInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNBookAttributeValueTypeEnum2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx context.Context, v interface{}) (model.BookAttributeValueTypeEnum, error) {
+	var res model.BookAttributeValueTypeEnum
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNBookAttributeValueTypeEnum2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx context.Context, sel ast.SelectionSet, v model.BookAttributeValueTypeEnum) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNBookInitInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookInitInput(ctx context.Context, v interface{}) (model.BookInitInput, error) {
 	res, err := ec.unmarshalInputBookInitInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4531,6 +5694,38 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNLibrary2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibrary(ctx context.Context, sel ast.SelectionSet, v model.Library) graphql.Marshaler {
 	return ec._Library(ctx, sel, &v)
 }
@@ -4545,8 +5740,8 @@ func (ec *executionContext) marshalNLibrary2ᚖgithubᚗcomᚋprivateᚑgallery�
 	return ec._Library(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNLibraryInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryInput(ctx context.Context, v interface{}) (model.LibraryInput, error) {
-	res, err := ec.unmarshalInputLibraryInput(ctx, v)
+func (ec *executionContext) unmarshalNLibraryCreateInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryCreateInput(ctx context.Context, v interface{}) (model.LibraryCreateInput, error) {
+	res, err := ec.unmarshalInputLibraryCreateInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4602,6 +5797,11 @@ func (ec *executionContext) marshalNLibraryMin2ᚖgithubᚗcomᚋprivateᚑgalle
 		return graphql.Null
 	}
 	return ec._LibraryMin(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNLibraryUpdateInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐLibraryUpdateInput(ctx context.Context, v interface{}) (model.LibraryUpdateInput, error) {
+	res, err := ec.unmarshalInputLibraryUpdateInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4904,6 +6104,82 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOBookAttributeInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInputᚄ(ctx context.Context, v interface{}) ([]*model.BookAttributeInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.BookAttributeInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBookAttributeInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOBookAttributeSettingCreateInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingCreateInputᚄ(ctx context.Context, v interface{}) ([]*model.BookAttributeSettingCreateInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.BookAttributeSettingCreateInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBookAttributeSettingCreateInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingCreateInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOBookAttributeSettingUpdateInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingUpdateInputᚄ(ctx context.Context, v interface{}) ([]*model.BookAttributeSettingUpdateInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.BookAttributeSettingUpdateInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBookAttributeSettingUpdateInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeSettingUpdateInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOBookAttributeValueTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx context.Context, v interface{}) (*model.BookAttributeValueTypeEnum, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.BookAttributeValueTypeEnum)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOBookAttributeValueTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeValueTypeEnum(ctx context.Context, sel ast.SelectionSet, v *model.BookAttributeValueTypeEnum) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4927,6 +6203,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalID(*v)
 	return res
 }
 

@@ -9,7 +9,7 @@ export const BookmarksTabContent: Component<Props> = (props) => {
 
   return (
     <div class="w-full h-full overflow-y-auto p-2 flex flex-col gap-y-2">
-      <Show when={bookCtx.book.pages.at(0)}>
+      <Show when={bookCtx.book().pages.at(0)}>
         {(firstPage) => (
           <button class="rounded border p-2 text-left" onClick={() => props.onPageOpenRequested(firstPage)}>
             最初のページを開く

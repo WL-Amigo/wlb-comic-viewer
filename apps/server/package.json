@@ -11,7 +11,8 @@
     "@local-core/interfaces": "workspace:*",
     "@local-core/ui": "workspace:*",
     "graphql-request": "^4.3.0",
-    "solid-js": "^1.4.7"
+    "solid-js": "^1.4.7",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.9.1",

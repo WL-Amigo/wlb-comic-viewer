@@ -2,11 +2,48 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Book struct {
-	ID    string   `json:"id"`
-	Name  string   `json:"name"`
-	Dir   string   `json:"dir"`
-	Pages []string `json:"pages"`
+	ID         string           `json:"id"`
+	Name       string           `json:"name"`
+	Dir        string           `json:"dir"`
+	Pages      []string         `json:"pages"`
+	Attributes []*BookAttribute `json:"attributes"`
+}
+
+type BookAttribute struct {
+	ID          string                     `json:"id"`
+	DisplayName string                     `json:"displayName"`
+	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
+	Value       string                     `json:"value"`
+}
+
+type BookAttributeInput struct {
+	ID    string `json:"id"`
+	Value string `json:"value"`
+}
+
+type BookAttributeSetting struct {
+	ID          string                     `json:"id"`
+	DisplayName string                     `json:"displayName"`
+	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
+}
+
+type BookAttributeSettingCreateInput struct {
+	ID          *string                    `json:"id"`
+	DisplayName string                     `json:"displayName"`
+	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
+}
+
+type BookAttributeSettingUpdateInput struct {
+	ID          string                      `json:"id"`
+	DisplayName *string                     `json:"displayName"`
+	ValueType   *BookAttributeValueTypeEnum `json:"valueType"`
 }
 
 type BookInitInput struct {
@@ -23,13 +60,14 @@ type BookMin struct {
 }
 
 type Library struct {
-	ID      string     `json:"id"`
-	Name    string     `json:"name"`
-	RootDir string     `json:"rootDir"`
-	Books   []*BookMin `json:"books"`
+	ID         string                  `json:"id"`
+	Name       string                  `json:"name"`
+	RootDir    string                  `json:"rootDir"`
+	Books      []*BookMin              `json:"books"`
+	Attributes []*BookAttributeSetting `json:"attributes"`
 }
 
-type LibraryInput struct {
+type LibraryCreateInput struct {
 	Name    *string `json:"name"`
 	RootDir string  `json:"rootDir"`
 }
@@ -37,4 +75,49 @@ type LibraryInput struct {
 type LibraryMin struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type LibraryUpdateInput struct {
+	Name *string `json:"name"`
+}
+
+type BookAttributeValueTypeEnum string
+
+const (
+	BookAttributeValueTypeEnumString BookAttributeValueTypeEnum = "STRING"
+	BookAttributeValueTypeEnumInt    BookAttributeValueTypeEnum = "INT"
+)
+
+var AllBookAttributeValueTypeEnum = []BookAttributeValueTypeEnum{
+	BookAttributeValueTypeEnumString,
+	BookAttributeValueTypeEnumInt,
+}
+
+func (e BookAttributeValueTypeEnum) IsValid() bool {
+	switch e {
+	case BookAttributeValueTypeEnumString, BookAttributeValueTypeEnumInt:
+		return true
+	}
+	return false
+}
+
+func (e BookAttributeValueTypeEnum) String() string {
+	return string(e)
+}
+
+func (e *BookAttributeValueTypeEnum) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BookAttributeValueTypeEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BookAttributeValueTypeEnum", str)
+	}
+	return nil
+}
+
+func (e BookAttributeValueTypeEnum) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

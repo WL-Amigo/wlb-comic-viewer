@@ -9,7 +9,7 @@ export const AllPagesTabContent: Component<Props> = (props) => {
 
   return (
     <div class="w-full h-full overflow-y-auto p-2 flex flex-col gap-y-2">
-      <For each={bookCtx.book.pages}>
+      <For each={bookCtx.book().pages}>
         {(pageName) => (
           <button class="rounded border p-2 text-left" onClick={() => props.onPageOpenRequested(pageName)}>
             {pageName}

@@ -12,11 +12,22 @@ import (
 )
 
 func createLibraryModelFromJsonStruct(lib serializable.LibrarySettingsJson, rootDirPath string) models.LibraryModel {
+	attributes := []models.BookAttributeSettings{}
+	for _, attrJson := range lib.Attributes {
+		model, err := attrJson.ToModel()
+		if err != nil {
+			// TODO: log
+			continue
+		}
+		attributes = append(attributes, model)
+	}
+
 	return models.LibraryModel{
 		Id: lib.Id,
 		LibrarySettings: models.LibrarySettings{
-			Name:    lib.Name,
-			RootDir: lib.RootDir + "/",
+			Name:       lib.Name,
+			RootDir:    lib.RootDir + "/",
+			Attributes: attributes,
 		},
 		RootDirFullPath: filepath.Join(rootDirPath, lib.RootDir),
 	}
@@ -52,12 +63,18 @@ func (db *JsonFileDatabase) ReadLibrary(id string) (models.LibraryModel, error) 
 }
 
 func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, dirPath string, basePath string) models.BookModelBase {
+	attributes := []models.BookAttribute{}
+	for _, attrJson := range jsonStruct.Attributes {
+		attributes = append(attributes, attrJson.ToModel())
+	}
+
 	return models.BookModelBase{
 		Id:          models.CreateBookId(dirPath),
 		Dir:         dirPath,
 		DirFullPath: filepath.Join(basePath, dirPath),
 		BookSettings: models.BookSettings{
-			Name: jsonStruct.Name,
+			Name:       jsonStruct.Name,
+			Attributes: attributes,
 		},
 	}
 }

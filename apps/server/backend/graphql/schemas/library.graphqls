@@ -8,6 +8,7 @@ type Library {
   name: String!
   rootDir: String!
   books: [BookMin!]!
+  attributes: [BookAttributeSetting!]!
 }
 
 extend type Query {
@@ -15,13 +16,19 @@ extend type Query {
   library(id: ID!): Library!
 }
 
-input LibraryInput {
+input LibraryCreateInput {
   name: String
   rootDir: String!
 }
 
+input LibraryUpdateInput {
+  name: String
+}
+
 extend type Mutation {
-  createLibrary(input: LibraryInput!): ID!
-  updateLibrary(id: ID!, input: LibraryInput!): ID!
+  createLibrary(input: LibraryCreateInput!, attributesInput: [BookAttributeSettingCreateInput!]): ID!
+  updateLibrary(id: ID!, input: LibraryUpdateInput!): ID!
+  createBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingCreateInput!]): [ID!]!
+  updateBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingUpdateInput!]): [ID!]!
   #deleteLibrary
 }
