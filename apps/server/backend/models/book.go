@@ -8,6 +8,8 @@ import (
 type BookSettings struct {
 	Name       string
 	Attributes []BookAttribute
+	KnownPages []string
+	ReadPages  []string
 }
 
 type BookSettingsUpdateInput struct {

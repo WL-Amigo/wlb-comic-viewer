@@ -12,6 +12,7 @@ query loadLibrary($libraryId: ID!) {
     books {
       id
       name
+      isRead
     }
   }
 }

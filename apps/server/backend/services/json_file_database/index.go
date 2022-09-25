@@ -2,6 +2,7 @@ package json_file_database
 
 import (
 	"path"
+	"sync"
 
 	"github.com/private-gallery-server/env"
 	"github.com/private-gallery-server/services/json_file_database/serializable"
@@ -10,6 +11,7 @@ import (
 
 type JsonFileDatabase struct {
 	rootDir string
+	mtx     sync.Mutex
 }
 
 func CreateJsonFileDatabase(env env.EnvironmentSettings) *JsonFileDatabase {
@@ -26,6 +28,8 @@ func (db *JsonFileDatabase) readLibraryJson() (serializable.LibrarySettingsRootJ
 	var result serializable.LibrarySettingsRootJson
 
 	libraryJsonFilePath := db.getLibraryJsonPath()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	if err := utils.MaybeReadJsonFile(libraryJsonFilePath, &result); err != nil {
 		return result, err
 	}
@@ -34,6 +38,8 @@ func (db *JsonFileDatabase) readLibraryJson() (serializable.LibrarySettingsRootJ
 }
 
 func (db *JsonFileDatabase) writeLibraryJson(settings serializable.LibrarySettingsRootJson) error {
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	return utils.WriteJsonFile(db.getLibraryJsonPath(), &settings)
 }
 
@@ -52,9 +58,13 @@ func readBookJsonWithAbsPath(path string) (serializable.BookSettingsJson, error)
 }
 
 func (db *JsonFileDatabase) readBookJson(libRootPath string, bookSubPath string) (serializable.BookSettingsJson, error) {
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	return readBookJsonWithAbsPath(db.getBookJsonPath(libRootPath, bookSubPath))
 }
 
 func (db *JsonFileDatabase) writeBookJson(libRootPath string, bookSubPath string, settings serializable.BookSettingsJson) error {
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	return utils.WriteJsonFile(db.getBookJsonPath(libRootPath, bookSubPath), &settings)
 }

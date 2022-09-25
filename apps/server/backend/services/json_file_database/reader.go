@@ -26,7 +26,7 @@ func createLibraryModelFromJsonStruct(lib serializable.LibrarySettingsJson, root
 		Id: lib.Id,
 		LibrarySettings: models.LibrarySettings{
 			Name:       lib.Name,
-			RootDir:    lib.RootDir + "/",
+			RootDir:    filepath.Clean(lib.RootDir) + "/",
 			Attributes: attributes,
 		},
 		RootDirFullPath: filepath.Join(rootDirPath, lib.RootDir),
@@ -75,6 +75,8 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 		BookSettings: models.BookSettings{
 			Name:       jsonStruct.Name,
 			Attributes: attributes,
+			KnownPages: jsonStruct.KnownPages,
+			ReadPages:  jsonStruct.ReadPages,
 		},
 	}
 }

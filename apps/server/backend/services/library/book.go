@@ -1,6 +1,7 @@
 package library
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -28,6 +29,20 @@ func getBookBaseCacheKey(libraryId string, bookId models.BookId) string {
 	return libraryId + ":" + string(bookId)
 }
 
+func getAllPagesInBook(dirFullPath string) ([]string, error) {
+	imageFilePaths := []string{}
+	err := filepath.WalkDir(dirFullPath, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() && utils.IsKnownImageFile(path) {
+			filePathTrimmed := strings.TrimPrefix(path, dirFullPath)
+			filePathTrimmed = strings.TrimPrefix(filePathTrimmed, "/")
+			imageFilePaths = append(imageFilePaths, filePathTrimmed)
+		}
+		return nil
+	})
+
+	return imageFilePaths, err
+}
+
 func (s *LibraryService) ReadBookBase(libraryId string, bookId models.BookId) (models.BookModelBase, error) {
 	cacheBook, ok := s.bookCacheMap[getBookBaseCacheKey(libraryId, bookId)]
 	if ok {
@@ -36,7 +51,7 @@ func (s *LibraryService) ReadBookBase(libraryId string, bookId models.BookId) (m
 
 	bookBase, err := s.dbReader.ReadBook(libraryId, bookId)
 	if err != nil {
-		return models.BookModelBase{}, nil
+		return models.BookModelBase{}, err
 	}
 	s.bookCacheMap[getBookBaseCacheKey(libraryId, bookId)] = bookBase
 
@@ -46,29 +61,46 @@ func (s *LibraryService) ReadBookBase(libraryId string, bookId models.BookId) (m
 func (s *LibraryService) ReadBook(libraryId string, bookId models.BookId) (models.BookModelDetail, error) {
 	bookBase, err := s.ReadBookBase(libraryId, bookId)
 	if err != nil {
-		return models.BookModelDetail{}, nil
+		return models.BookModelDetail{}, err
 	}
-
-	imageFilePaths := []string{}
-	err = filepath.WalkDir(bookBase.DirFullPath, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() && utils.IsKnownImageFile(path) {
-			filePathTrimmed := strings.TrimPrefix(path, bookBase.DirFullPath)
-			filePathTrimmed = strings.TrimPrefix(filePathTrimmed, "/")
-			imageFilePaths = append(imageFilePaths, filePathTrimmed)
-		}
-		return nil
-	})
 
 	return models.BookModelDetail{
 		BookModelBase: bookBase,
-		PageFilePaths: utils.SortStringSlice(imageFilePaths, utils.NaturalNumberOrder, false),
+		PageFilePaths: utils.SortStringSlice(bookBase.KnownPages, utils.NaturalNumberOrder, false),
 	}, nil
+}
+
+func (s *LibraryService) CheckIsBookRead(bookBase models.BookModelBase) bool {
+	if len(bookBase.KnownPages) == 0 {
+		return false
+	}
+
+	allReadPageMap := map[string]bool{}
+	for _, readPage := range bookBase.ReadPages {
+		allReadPageMap[readPage] = true
+	}
+
+	for _, page := range bookBase.KnownPages {
+		_, ok := allReadPageMap[page]
+		if !ok {
+			fmt.Println(page)
+			return false
+		}
+	}
+
+	return true
 }
 
 func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings models.BookSettings) (models.BookId, error) {
 	if settings.Name == "" {
 		settings.Name = filepath.Base(bookDir)
 	}
+
+	imageFilePaths, err := getAllPagesInBook(filepath.Join(s.rootDir, bookDir))
+	if err != nil {
+		return "", err
+	}
+	settings.KnownPages = imageFilePaths
 
 	id, err := s.dbWriter.CreateBook(libraryId, bookDir, settings)
 	if err != nil {
@@ -117,4 +149,68 @@ func (s *LibraryService) UpdateBook(libraryId string, bookId string, input model
 	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
 
 	return bookIdLocal, nil
+}
+
+func (s *LibraryService) UpdateKnownPagesInBook(libraryId string, bookId string) ([]string, error) {
+	bookIdLocal, err := models.CastToBookId(bookId)
+	if err != nil {
+		return nil, err
+	}
+
+	book, err := s.dbReader.ReadBook(libraryId, bookIdLocal)
+	if err != nil {
+		return nil, err
+	}
+	settings := book.BookSettings
+
+	imageFilePaths, err := getAllPagesInBook(book.DirFullPath)
+	if err != nil {
+		return nil, err
+	}
+	settings.KnownPages = imageFilePaths
+
+	_, err = s.dbWriter.UpdateBook(libraryId, bookIdLocal, settings)
+	if err != nil {
+		return nil, err
+	}
+
+	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
+
+	return imageFilePaths, nil
+}
+
+func (s *LibraryService) MarkAsReadPage(libraryId string, bookId string, pages []string) ([]string, error) {
+	bookIdLocal, err := models.CastToBookId(bookId)
+	if err != nil {
+		return nil, err
+	}
+
+	updateTargetBook, err := s.dbReader.ReadBook(libraryId, bookIdLocal)
+	if err != nil {
+		return nil, err
+	}
+	settings := updateTargetBook.BookSettings
+
+	readPagesMap := map[string]bool{}
+	for _, readPage := range settings.ReadPages {
+		readPagesMap[readPage] = true
+	}
+	for _, page := range pages {
+		readPagesMap[page] = true
+	}
+
+	nextReadPages := []string{}
+	for p := range readPagesMap {
+		nextReadPages = append(nextReadPages, p)
+	}
+	settings.ReadPages = nextReadPages
+
+	_, err = s.dbWriter.UpdateBook(libraryId, bookIdLocal, settings)
+	if err != nil {
+		return nil, err
+	}
+
+	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
+
+	return pages, nil
 }

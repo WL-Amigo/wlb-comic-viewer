@@ -120,8 +120,9 @@ func (r *queryResolver) Library(ctx context.Context, id string) (*model.Library,
 	resultBooks := []*model.BookMin{}
 	for _, book := range books {
 		resultBooks = append(resultBooks, &model.BookMin{
-			ID:   string(book.Id),
-			Name: book.Name,
+			ID:     string(book.Id),
+			Name:   book.Name,
+			IsRead: r.library.CheckIsBookRead(book),
 		})
 	}
 

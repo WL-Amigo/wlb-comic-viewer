@@ -121,6 +121,8 @@ func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId models.BookId, s
 	if err = db.writeBookJson(lib.RootDir, bookDir, serializable.BookSettingsJson{
 		Name:       settings.Name,
 		Attributes: attrs,
+		KnownPages: settings.KnownPages,
+		ReadPages:  settings.ReadPages,
 	}); err != nil {
 		return "", err
 	}

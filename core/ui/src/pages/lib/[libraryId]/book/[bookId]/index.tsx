@@ -45,8 +45,16 @@ export const BookMainPage: Component = () => {
           ＜ライブラリへ戻る
         </Link>
         <span class="text-xl">
-          {libCtx.library.name}/{bookCtx.book.name}
+          {libCtx.library.name}/{bookCtx.book().name}
         </span>
+        <div class="pl-8 flex flex-row gap-x-2">
+          {bookCtx.book().isRead && (
+            <div class="flex flex-row gap-x-1">
+              <span>✅</span>
+              <span>読了</span>
+            </div>
+          )}
+        </div>
       </div>
       <div class="flex-shrink-0 py-1 px-2 flex flex-row gap-x-2">
         <TabButton isActive={tab() === 'bookmarks'} onClick={() => setTab('bookmarks')}>

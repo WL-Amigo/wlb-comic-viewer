@@ -1,10 +1,22 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Accessor, Component, createEffect, createSignal, Show } from 'solid-js';
 import { ModalBase } from '../../../../../../../component/ModalBase';
 import { useService } from '../../../../../../../compositions/Dependency';
 import { createDocumentFullScreenSignal } from '../../../../../../../compositions/FullScreenState';
 import { useLibraryDataContext } from '../../../../Context';
 import { useBookDataContext } from '../../Context';
 import { BookViewerOperator } from './components/Operator';
+
+const useMarkAsReadEffect = (currentPage: Accessor<string | undefined>) => {
+  const libCtx = useLibraryDataContext();
+  const bookCtx = useBookDataContext();
+  const bookMutationService = useService('bookMutation');
+  createEffect(() => {
+    const currentPageLocal = currentPage();
+    if (currentPageLocal !== undefined) {
+      bookMutationService.markAsReadPage(libCtx.library.id, bookCtx.book().id, currentPageLocal);
+    }
+  });
+};
 
 interface Props {
   open: boolean;
@@ -38,8 +50,11 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
   const [isFullScreen, toggleFullScreen] = createDocumentFullScreenSignal();
   const onClose = () => {
     toggleFullScreen(false);
+    bookCtx.reloadBook();
     props.onClose();
   };
+
+  useMarkAsReadEffect(() => bookCtx.book().pages[currentImageIndex()]);
 
   return (
     <div class="w-full h-full relative" onClick={(ev) => ev.stopPropagation()}>

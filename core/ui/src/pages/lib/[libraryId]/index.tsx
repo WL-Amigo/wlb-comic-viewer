@@ -21,8 +21,17 @@ export const BookListPage: Component = () => {
         <div class="p-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
           <For each={libCtx.library.books}>
             {(book) => (
-              <Link class="no-underline text-black p-2 rounded-lg border" href={`book/${encodeURIComponent(book.id)}/`}>
-                {book.name}
+              <Link
+                class="no-underline text-black p-2 rounded-lg border flex flex-row"
+                href={`book/${encodeURIComponent(book.id)}/`}
+              >
+                <span class="flex-1">{book.name}</span>
+                {book.isRead && (
+                  <div class="flex flex-row items-center">
+                    <span>✅</span>
+                    <span>読了</span>
+                  </div>
+                )}
               </Link>
             )}
           </For>

@@ -56,6 +56,20 @@ func (r *mutationResolver) DeleteBook(ctx context.Context, libraryID string, boo
 	panic(fmt.Errorf("not implemented"))
 }
 
+// BookUpdateKnownPages is the resolver for the bookUpdateKnownPages field.
+func (r *mutationResolver) BookUpdateKnownPages(ctx context.Context, libraryID string, bookID string) ([]string, error) {
+	return r.library.UpdateKnownPagesInBook(libraryID, bookID)
+}
+
+// BookPageMarkAsRead is the resolver for the bookPageMarkAsRead field.
+func (r *mutationResolver) BookPageMarkAsRead(ctx context.Context, libraryID string, bookID string, page string) (string, error) {
+	result, err := r.library.MarkAsReadPage(libraryID, bookID, []string{page})
+	if err != nil || len(result) == 0 {
+		return "", err
+	}
+	return result[0], nil
+}
+
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
 	attrSettingsMap, err := r.library.GetAttributeSettings(libraryID)
@@ -104,6 +118,7 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 		Dir:        bookDetail.Dir,
 		Pages:      bookDetail.PageFilePaths,
 		Attributes: attrs,
+		IsRead:     r.library.CheckIsBookRead(bookDetail.BookModelBase),
 	}, nil
 }
 

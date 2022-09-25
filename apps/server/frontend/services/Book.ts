@@ -55,7 +55,7 @@ export class BookService implements IBookService, IBookMutationService {
     bookId: string,
     params: BookUpdateParams
   ): Promise<string> {
-    const result = await this.gqlClient.UpdateBook({
+    const result = await this.gqlClient.updateBook({
       libraryId, bookId, 
       bookInput: {
         name: params.name
@@ -67,5 +67,15 @@ export class BookService implements IBookService, IBookMutationService {
     })
 
     return result.updateBook
+  }
+
+  async updateKnownPages(libraryId: string, bookId: string): Promise<string[]> {
+    const result = await this.gqlClient.updateBookKnownPages({libraryId, bookId});
+    return result.bookUpdateKnownPages;
+  }
+
+  async markAsReadPage(libraryId: string, bookId: string, page: string): Promise<string> {
+    const result = await this.gqlClient.markAsReadPage({libraryId, bookId, page});
+    return result.bookPageMarkAsRead;
   }
 }

@@ -41,7 +41,7 @@ const ValueViewer: Component<ViewerProps> = (props) => {
     <div class="flex flex-row justify-start">
       <div class="hover:bg-black/5 group px-1 transition-colors cursor-pointer" onClick={props.enterEditMode}>
         <span>{props.value}</span>
-        <span class="pl-1 opacity-0 group-hover:opacity-100 transition-opacity">📝</span>
+        <span class="pl-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">📝</span>
       </div>
     </div>
   );

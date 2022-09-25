@@ -20,6 +20,7 @@ export type Book = {
   attributes: Array<BookAttribute>;
   dir: Scalars['String'];
   id: Scalars['ID'];
+  isRead: Scalars['Boolean'];
   name: Scalars['String'];
   pages: Array<Scalars['String']>;
 };
@@ -72,6 +73,7 @@ export type BookInput = {
 export type BookMin = {
   __typename?: 'BookMin';
   id: Scalars['ID'];
+  isRead: Scalars['Boolean'];
   name: Scalars['String'];
 };
 
@@ -101,6 +103,8 @@ export type LibraryUpdateInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  bookPageMarkAsRead: Scalars['String'];
+  bookUpdateKnownPages: Array<Scalars['String']>;
   createBook: Scalars['ID'];
   createBookAttributeSettings: Array<Scalars['ID']>;
   createLibrary: Scalars['ID'];
@@ -108,6 +112,19 @@ export type Mutation = {
   updateBook: Scalars['ID'];
   updateBookAttributeSettings: Array<Scalars['ID']>;
   updateLibrary: Scalars['ID'];
+};
+
+
+export type MutationBookPageMarkAsReadArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
+  page: Scalars['String'];
+};
+
+
+export type MutationBookUpdateKnownPagesArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
 };
 
 
@@ -187,7 +204,7 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -209,6 +226,23 @@ export type UpdateBookMutationVariables = Exact<{
 
 export type UpdateBookMutation = { __typename?: 'Mutation', updateBook: string };
 
+export type UpdateBookKnownPagesMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+}>;
+
+
+export type UpdateBookKnownPagesMutation = { __typename?: 'Mutation', bookUpdateKnownPages: Array<string> };
+
+export type MarkAsReadPageMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  page: Scalars['String'];
+}>;
+
+
+export type MarkAsReadPageMutation = { __typename?: 'Mutation', bookPageMarkAsRead: string };
+
 export type GetDirsQueryVariables = Exact<{
   root: Scalars['String'];
 }>;
@@ -226,7 +260,7 @@ export type LoadLibraryQueryVariables = Exact<{
 }>;
 
 
-export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string }> } };
+export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string, isRead: boolean }> } };
 
 export type LoadLibrarySettingsQueryVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -265,6 +299,7 @@ export const GetBookDocument = gql`
     id
     name
     pages
+    isRead
     attributes {
       id
       displayName
@@ -285,13 +320,23 @@ export const CreateBookDocument = gql`
 }
     `;
 export const UpdateBookDocument = gql`
-    mutation UpdateBook($libraryId: ID!, $bookId: ID!, $bookInput: BookInput!, $attributesInput: [BookAttributeInput!]) {
+    mutation updateBook($libraryId: ID!, $bookId: ID!, $bookInput: BookInput!, $attributesInput: [BookAttributeInput!]) {
   updateBook(
     libraryId: $libraryId
     bookId: $bookId
     input: $bookInput
     attributesInput: $attributesInput
   )
+}
+    `;
+export const UpdateBookKnownPagesDocument = gql`
+    mutation updateBookKnownPages($libraryId: ID!, $bookId: ID!) {
+  bookUpdateKnownPages(libraryId: $libraryId, bookId: $bookId)
+}
+    `;
+export const MarkAsReadPageDocument = gql`
+    mutation markAsReadPage($libraryId: ID!, $bookId: ID!, $page: String!) {
+  bookPageMarkAsRead(libraryId: $libraryId, bookId: $bookId, page: $page)
 }
     `;
 export const GetDirsDocument = gql`
@@ -315,6 +360,7 @@ export const LoadLibraryDocument = gql`
     books {
       id
       name
+      isRead
     }
   }
 }
@@ -362,8 +408,14 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     createBook(variables: CreateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateBookMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateBookMutation>(CreateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createBook', 'mutation');
     },
-    UpdateBook(variables: UpdateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookMutation>(UpdateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateBook', 'mutation');
+    updateBook(variables: UpdateBookMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookMutation>(UpdateBookDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBook', 'mutation');
+    },
+    updateBookKnownPages(variables: UpdateBookKnownPagesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookKnownPagesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookKnownPagesMutation>(UpdateBookKnownPagesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookKnownPages', 'mutation');
+    },
+    markAsReadPage(variables: MarkAsReadPageMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<MarkAsReadPageMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<MarkAsReadPageMutation>(MarkAsReadPageDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'markAsReadPage', 'mutation');
     },
     getDirs(variables: GetDirsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDirsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDirsQuery>(GetDirsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getDirs', 'query');

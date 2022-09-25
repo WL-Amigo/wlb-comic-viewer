@@ -14,6 +14,7 @@ type Book struct {
 	Dir        string           `json:"dir"`
 	Pages      []string         `json:"pages"`
 	Attributes []*BookAttribute `json:"attributes"`
+	IsRead     bool             `json:"isRead"`
 }
 
 type BookAttribute struct {
@@ -55,8 +56,9 @@ type BookInput struct {
 }
 
 type BookMin struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	IsRead bool   `json:"isRead"`
 }
 
 type Library struct {

@@ -1,6 +1,7 @@
 type BookMin {
   id: ID!
   name: String!
+  isRead: Boolean!
 }
 
 type Book {
@@ -9,6 +10,7 @@ type Book {
   dir: String!
   pages: [String!]!
   attributes: [BookAttribute!]!
+  isRead: Boolean!
 }
 
 extend type Query {
@@ -27,4 +29,6 @@ extend type Mutation {
   createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   updateBook(libraryId: ID!, bookId: ID!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   deleteBook(libraryId: ID!, bookId: ID!): ID!
+  bookUpdateKnownPages(libraryId: ID!, bookId: ID!): [String!]!
+  bookPageMarkAsRead(libraryId: ID!, bookId: ID!, page: String!): String!
 }
