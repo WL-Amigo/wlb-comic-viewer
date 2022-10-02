@@ -7,6 +7,7 @@ import {
   LibraryMin,
   LibrarySettings,
 } from "@local-core/interfaces";
+import { BooksFilterParams } from "@local-core/interfaces/src/Library";
 import { BookAttributeValueTypeOps } from "../enum/BookAttributeValueType";
 import { Sdk } from "../graphql/autogen/gql";
 
@@ -20,8 +21,11 @@ export class LibraryService
     return result.libraries;
   }
 
-  async loadLibrary(libraryId: string): Promise<LibraryForView> {
-    const result = await this.gqlClient.loadLibrary({ libraryId });
+  async loadLibrary(libraryId: string, filter?: BooksFilterParams): Promise<LibraryForView> {
+    const result = await this.gqlClient.loadLibrary({ libraryId, booksFilter: {
+      isRead: filter?.isRead,
+      attributes: filter?.attributes
+    } });
     return result.library;
   }
 

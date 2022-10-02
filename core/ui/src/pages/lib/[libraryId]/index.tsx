@@ -2,6 +2,7 @@ import { Link } from 'solid-app-router';
 import { Component, createSignal, For } from 'solid-js';
 import { useLibraryDataContext } from './Context';
 import { AddBookButton } from './partials/AddBook';
+import { LibraryBooksFilterConditions } from './partials/FilterConditions';
 import { LibrarySettingsDialog } from './partials/LibrarySettings';
 
 export const BookListPage: Component = () => {
@@ -17,6 +18,7 @@ export const BookListPage: Component = () => {
         <div class="flex-1" />
         <SettingsButton libraryId={libCtx.library.id} onRequestedReload={libCtx.reloadLibrary} />
       </div>
+      <LibraryBooksFilterConditions />
       <div class="flex-1 overflow-y-auto">
         <div class="p-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
           <For each={libCtx.library.books}>

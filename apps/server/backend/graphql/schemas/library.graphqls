@@ -3,11 +3,21 @@ type LibraryMin {
   name: String!
 }
 
+input BookFilterParams {
+  isRead: Boolean
+  attributes: [BookFilterAttributeParams!]
+}
+
+input BookFilterAttributeParams {
+  id: ID!
+  value: String!
+}
+
 type Library {
   id: ID!
   name: String!
   rootDir: String!
-  books: [BookMin!]!
+  books(filter: BookFilterParams): [BookMin!]!
   attributes: [BookAttributeSetting!]!
 }
 

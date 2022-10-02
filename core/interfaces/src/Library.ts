@@ -15,6 +15,7 @@ export interface LibraryForView {
   readonly id: LibraryId;
   readonly name: string;
   readonly books: readonly BookMin[];
+  readonly attributes: readonly BookAttributeSettings[];
 }
 
 export interface LibrarySettings {
@@ -23,9 +24,17 @@ export interface LibrarySettings {
   readonly attributes: readonly BookAttributeSettings[];
 }
 
+export interface BooksFilterParams {
+  readonly isRead?: boolean;
+  readonly attributes?: {
+    id: string;
+    value: string;
+  }[];
+}
+
 export interface ILibraryService {
   loadAllLibraries(): Promise<readonly LibraryMin[]>;
-  loadLibrary(libraryId: string): Promise<LibraryForView>;
+  loadLibrary(libraryId: string, filter?: BooksFilterParams): Promise<LibraryForView>;
   loadLibrarySettings(libraryId: string): Promise<LibrarySettings>;
 }
 

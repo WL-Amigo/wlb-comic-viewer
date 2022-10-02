@@ -10,6 +10,26 @@ import (
 	"github.com/private-gallery-server/utils"
 )
 
+type BooksFilter struct {
+	IsRead     *bool
+	Attributes []BooksAttributeFilter
+}
+
+type BooksAttributeFilter struct {
+	Id    models.BookAttributeId
+	Value string
+}
+
+func filterBooks(books []models.BookModelBase, pred func(b models.BookModelBase) bool) []models.BookModelBase {
+	var result []models.BookModelBase
+	for _, b := range books {
+		if pred(b) {
+			result = append(result, b)
+		}
+	}
+	return result
+}
+
 func (s *LibraryService) GetAllBooksInLibrary(libraryId string) ([]models.BookModelBase, error) {
 	cacheBooks, ok := s.booksCacheMap[libraryId]
 	if ok {
@@ -21,6 +41,29 @@ func (s *LibraryService) GetAllBooksInLibrary(libraryId string) ([]models.BookMo
 		return nil, err
 	}
 	s.booksCacheMap[libraryId] = books
+
+	return books, nil
+}
+
+func (s *LibraryService) QueryBooksInLibrary(libraryId string, filter BooksFilter) ([]models.BookModelBase, error) {
+	books, err := s.GetAllBooksInLibrary(libraryId)
+	if err != nil {
+		return nil, err
+	}
+
+	if filter.IsRead != nil {
+		books = filterBooks(books, func(b models.BookModelBase) bool { return s.CheckIsBookRead(b) == *filter.IsRead })
+	}
+	for _, attrFilter := range filter.Attributes {
+		books = filterBooks(books, func(b models.BookModelBase) bool {
+			for _, attr := range b.Attributes {
+				if attr.Id == attrFilter.Id && strings.Contains(attr.Value, attrFilter.Value) {
+					return true
+				}
+			}
+			return false
+		})
+	}
 
 	return books, nil
 }
@@ -96,7 +139,12 @@ func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings m
 		settings.Name = filepath.Base(bookDir)
 	}
 
-	imageFilePaths, err := getAllPagesInBook(filepath.Join(s.rootDir, bookDir))
+	lib, err := s.GetLibrary(libraryId)
+	if err != nil {
+		return "", err
+	}
+
+	imageFilePaths, err := getAllPagesInBook(filepath.Join(lib.RootDirFullPath, bookDir))
 	if err != nil {
 		return "", err
 	}

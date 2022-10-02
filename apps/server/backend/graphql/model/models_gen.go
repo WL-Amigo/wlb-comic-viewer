@@ -47,6 +47,16 @@ type BookAttributeSettingUpdateInput struct {
 	ValueType   *BookAttributeValueTypeEnum `json:"valueType"`
 }
 
+type BookFilterAttributeParams struct {
+	ID    string `json:"id"`
+	Value string `json:"value"`
+}
+
+type BookFilterParams struct {
+	IsRead     *bool                        `json:"isRead"`
+	Attributes []*BookFilterAttributeParams `json:"attributes"`
+}
+
 type BookInitInput struct {
 	Dir string `json:"dir"`
 }

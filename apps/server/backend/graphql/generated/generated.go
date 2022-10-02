@@ -36,6 +36,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Library() LibraryResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -74,7 +75,7 @@ type ComplexityRoot struct {
 
 	Library struct {
 		Attributes func(childComplexity int) int
-		Books      func(childComplexity int) int
+		Books      func(childComplexity int, filter *model.BookFilterParams) int
 		ID         func(childComplexity int) int
 		Name       func(childComplexity int) int
 		RootDir    func(childComplexity int) int
@@ -105,6 +106,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type LibraryResolver interface {
+	Books(ctx context.Context, obj *model.Library, filter *model.BookFilterParams) ([]*model.BookMin, error)
+}
 type MutationResolver interface {
 	CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error)
 	UpdateBook(ctx context.Context, libraryID string, bookID string, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error)
@@ -262,7 +266,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Library.Books(childComplexity), true
+		args, err := ec.field_Library_books_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Library.Books(childComplexity, args["filter"].(*model.BookFilterParams)), true
 
 	case "Library.id":
 		if e.complexity.Library.ID == nil {
@@ -461,6 +470,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBookAttributeInput,
 		ec.unmarshalInputBookAttributeSettingCreateInput,
 		ec.unmarshalInputBookAttributeSettingUpdateInput,
+		ec.unmarshalInputBookFilterAttributeParams,
+		ec.unmarshalInputBookFilterParams,
 		ec.unmarshalInputBookInitInput,
 		ec.unmarshalInputBookInput,
 		ec.unmarshalInputLibraryCreateInput,
@@ -601,11 +612,21 @@ input BookAttributeInput {
   name: String!
 }
 
+input BookFilterParams {
+  isRead: Boolean
+  attributes: [BookFilterAttributeParams!]
+}
+
+input BookFilterAttributeParams {
+  id: ID!
+  value: String!
+}
+
 type Library {
   id: ID!
   name: String!
   rootDir: String!
-  books: [BookMin!]!
+  books(filter: BookFilterParams): [BookMin!]!
   attributes: [BookAttributeSetting!]!
 }
 
@@ -636,6 +657,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Library_books_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.BookFilterParams
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOBookFilterParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterParams(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_bookPageMarkAsRead_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1874,7 +1910,7 @@ func (ec *executionContext) _Library_books(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Books, nil
+		return ec.resolvers.Library().Books(rctx, obj, fc.Args["filter"].(*model.BookFilterParams))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1895,8 +1931,8 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "Library",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -1908,6 +1944,17 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 			}
 			return nil, fmt.Errorf("no field named %q was found under type BookMin", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Library_books_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -4814,6 +4861,78 @@ func (ec *executionContext) unmarshalInputBookAttributeSettingUpdateInput(ctx co
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBookFilterAttributeParams(ctx context.Context, obj interface{}) (model.BookFilterAttributeParams, error) {
+	var it model.BookFilterAttributeParams
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputBookFilterParams(ctx context.Context, obj interface{}) (model.BookFilterParams, error) {
+	var it model.BookFilterParams
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"isRead", "attributes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "isRead":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isRead"))
+			it.IsRead, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "attributes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attributes"))
+			it.Attributes, err = ec.unmarshalOBookFilterAttributeParams2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParamsᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookInitInput(ctx context.Context, obj interface{}) (model.BookInitInput, error) {
 	var it model.BookInitInput
 	asMap := map[string]interface{}{}
@@ -5153,35 +5272,48 @@ func (ec *executionContext) _Library(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Library_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 
 			out.Values[i] = ec._Library_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "rootDir":
 
 			out.Values[i] = ec._Library_rootDir(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "books":
+			field := field
 
-			out.Values[i] = ec._Library_books(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Library_books(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "attributes":
 
 			out.Values[i] = ec._Library_attributes(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -5939,6 +6071,11 @@ func (ec *executionContext) marshalNBookAttributeValueTypeEnum2githubᚗcomᚋpr
 	return v
 }
 
+func (ec *executionContext) unmarshalNBookFilterAttributeParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParams(ctx context.Context, v interface{}) (*model.BookFilterAttributeParams, error) {
+	res, err := ec.unmarshalInputBookFilterAttributeParams(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBookInitInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookInitInput(ctx context.Context, v interface{}) (model.BookInitInput, error) {
 	res, err := ec.unmarshalInputBookInitInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6517,6 +6654,34 @@ func (ec *executionContext) marshalOBookAttributeValueTypeEnum2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOBookFilterAttributeParams2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParamsᚄ(ctx context.Context, v interface{}) ([]*model.BookFilterAttributeParams, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.BookFilterAttributeParams, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNBookFilterAttributeParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParams(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOBookFilterParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterParams(ctx context.Context, v interface{}) (*model.BookFilterParams, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputBookFilterParams(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

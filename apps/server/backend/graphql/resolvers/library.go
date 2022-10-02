@@ -7,10 +7,41 @@ import (
 	"context"
 
 	"github.com/private-gallery-server/graphql/adapters"
+	"github.com/private-gallery-server/graphql/generated"
 	"github.com/private-gallery-server/graphql/model"
 	"github.com/private-gallery-server/models"
+	"github.com/private-gallery-server/services/library"
 	"github.com/private-gallery-server/utils"
 )
+
+// Books is the resolver for the books field.
+func (r *libraryResolver) Books(ctx context.Context, lib *model.Library, filter *model.BookFilterParams) ([]*model.BookMin, error) {
+	booksFilter := library.BooksFilter{}
+	if filter != nil {
+		booksFilter.IsRead = filter.IsRead
+		for _, af := range filter.Attributes {
+			booksFilter.Attributes = append(booksFilter.Attributes, library.BooksAttributeFilter{
+				Id:    models.BookAttributeId(af.ID),
+				Value: af.Value,
+			})
+		}
+	}
+	books, err := r.library.QueryBooksInLibrary(lib.ID, booksFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	resultBooks := []*model.BookMin{}
+	for _, book := range books {
+		resultBooks = append(resultBooks, &model.BookMin{
+			ID:     string(book.Id),
+			Name:   book.Name,
+			IsRead: r.library.CheckIsBookRead(book),
+		})
+	}
+
+	return resultBooks, nil
+}
 
 // CreateLibrary is the resolver for the createLibrary field.
 func (r *mutationResolver) CreateLibrary(ctx context.Context, input model.LibraryCreateInput, attributesInput []*model.BookAttributeSettingCreateInput) (string, error) {
@@ -108,26 +139,13 @@ func (r *queryResolver) Libraries(ctx context.Context) ([]*model.LibraryMin, err
 
 // Library is the resolver for the library field.
 func (r *queryResolver) Library(ctx context.Context, id string) (*model.Library, error) {
-	library, err := r.library.GetLibrary(id)
+	lib, err := r.library.GetLibrary(id)
 	if err != nil {
 		return nil, err
-	}
-	books, err := r.library.GetAllBooksInLibrary(id)
-	if err != nil {
-		return nil, err
-	}
-
-	resultBooks := []*model.BookMin{}
-	for _, book := range books {
-		resultBooks = append(resultBooks, &model.BookMin{
-			ID:     string(book.Id),
-			Name:   book.Name,
-			IsRead: r.library.CheckIsBookRead(book),
-		})
 	}
 
 	resultAttrs := []*model.BookAttributeSetting{}
-	for _, attr := range library.Attributes {
+	for _, attr := range lib.Attributes {
 		resultAttrs = append(resultAttrs, &model.BookAttributeSetting{
 			ID:          string(attr.Id),
 			DisplayName: attr.DisplayName,
@@ -136,10 +154,14 @@ func (r *queryResolver) Library(ctx context.Context, id string) (*model.Library,
 	}
 
 	return &model.Library{
-		ID:         library.Id,
-		Name:       library.Name,
-		RootDir:    library.RootDir,
-		Books:      resultBooks,
+		ID:         lib.Id,
+		Name:       lib.Name,
+		RootDir:    lib.RootDir,
 		Attributes: resultAttrs,
 	}, nil
 }
+
+// Library returns generated.LibraryResolver implementation.
+func (r *Resolver) Library() generated.LibraryResolver { return &libraryResolver{r} }
+
+type libraryResolver struct{ *Resolver }

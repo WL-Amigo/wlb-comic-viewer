@@ -62,6 +62,16 @@ export enum BookAttributeValueTypeEnum {
   String = 'STRING'
 }
 
+export type BookFilterAttributeParams = {
+  id: Scalars['ID'];
+  value: Scalars['String'];
+};
+
+export type BookFilterParams = {
+  attributes?: InputMaybe<Array<BookFilterAttributeParams>>;
+  isRead?: InputMaybe<Scalars['Boolean']>;
+};
+
 export type BookInitInput = {
   dir: Scalars['String'];
 };
@@ -84,6 +94,11 @@ export type Library = {
   id: Scalars['ID'];
   name: Scalars['String'];
   rootDir: Scalars['String'];
+};
+
+
+export type LibraryBooksArgs = {
+  filter?: InputMaybe<BookFilterParams>;
 };
 
 export type LibraryCreateInput = {
@@ -257,10 +272,11 @@ export type LoadAllLibrariesQuery = { __typename?: 'Query', libraries: Array<{ _
 
 export type LoadLibraryQueryVariables = Exact<{
   libraryId: Scalars['ID'];
+  booksFilter?: InputMaybe<BookFilterParams>;
 }>;
 
 
-export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string, isRead: boolean }> } };
+export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string, isRead: boolean }>, attributes: Array<{ __typename?: 'BookAttributeSetting', id: string, displayName: string, valueType: BookAttributeValueTypeEnum }> } };
 
 export type LoadLibrarySettingsQueryVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -353,14 +369,19 @@ export const LoadAllLibrariesDocument = gql`
 }
     `;
 export const LoadLibraryDocument = gql`
-    query loadLibrary($libraryId: ID!) {
+    query loadLibrary($libraryId: ID!, $booksFilter: BookFilterParams) {
   library(id: $libraryId) {
     id
     name
-    books {
+    books(filter: $booksFilter) {
       id
       name
       isRead
+    }
+    attributes {
+      id
+      displayName
+      valueType
     }
   }
 }

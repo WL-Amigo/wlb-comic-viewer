@@ -5,14 +5,19 @@ query loadAllLibraries {
   }
 }
 
-query loadLibrary($libraryId: ID!) {
+query loadLibrary($libraryId: ID!, $booksFilter: BookFilterParams) {
   library(id: $libraryId) {
     id
     name
-    books {
+    books(filter: $booksFilter) {
       id
       name
       isRead
+    }
+    attributes {
+      id
+      displayName
+      valueType
     }
   }
 }
@@ -22,9 +27,11 @@ query loadLibrarySettings($libraryId: ID!) {
     id
     name
     rootDir
-		attributes {
-			id, displayName, valueType
-		}
+    attributes {
+      id
+      displayName
+      valueType
+    }
   }
 }
 
@@ -32,10 +39,16 @@ mutation createLibrary($input: LibraryCreateInput!) {
   createLibrary(input: $input)
 }
 
-mutation createBookAttributeSettings($libraryId: ID!, $input: [BookAttributeSettingCreateInput!]) {
+mutation createBookAttributeSettings(
+  $libraryId: ID!
+  $input: [BookAttributeSettingCreateInput!]
+) {
   createBookAttributeSettings(libraryId: $libraryId, input: $input)
 }
 
-mutation updateBookAttributeSettings($libraryId: ID!, $input: [BookAttributeSettingUpdateInput!]) {
+mutation updateBookAttributeSettings(
+  $libraryId: ID!
+  $input: [BookAttributeSettingUpdateInput!]
+) {
   updateBookAttributeSettings(libraryId: $libraryId, input: $input)
 }
