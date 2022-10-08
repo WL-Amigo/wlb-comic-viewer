@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,6 +20,9 @@ import (
 	"github.com/private-gallery-server/services/json_file_database"
 	"github.com/private-gallery-server/services/library"
 )
+
+//go:embed static/*
+var staticContents embed.FS
 
 func main() {
 	e := echo.New()
@@ -52,6 +57,21 @@ func main() {
 		return nil
 	})
 	echo_book_handlers.RegisterEchoBookHandlers(e, libraryServiceInst)
+
+	// mount static contents
+	staticContentsFS, err := fs.Sub(staticContents, "static")
+	if err != nil {
+		panic(err)
+	}
+	staticContentsHandler := http.FileServer(http.FS(staticContentsFS))
+	e.GET("/assets/*", echo.WrapHandler(staticContentsHandler))
+	e.GET("/*", func(c echo.Context) error {
+		indexHtmlContents, err := fs.ReadFile(staticContentsFS, "index.html")
+		if err != nil {
+			return err
+		}
+		return c.HTMLBlob(http.StatusOK, indexHtmlContents)
+	})
 
 	go func() {
 		if err := e.Start(":" + env.Port); err != nil && err != http.ErrServerClosed {

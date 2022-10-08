@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "vite",
-    "gen:frontend:graphql": "graphql-codegen -c ./frontend/graphql/codegen.yml"
+    "gen:frontend:graphql": "graphql-codegen -c ./frontend/graphql/codegen.yml",
+    "build": "pnpm build:frontend && pnpm build:linux-amd64 && pnpm build:linux-armv7",
+    "build:frontend": "vite build",
+    "build:linux-amd64": "cross-env GOOS=linux GOARCH=amd64 tsx ./scripts/build.ts",
+    "build:linux-armv7": "cross-env GOOS=linux GOARCH=arm GOARM=7 tsx ./scripts/build.ts"
   },
   "dependencies": {
     "@local-core/interfaces": "workspace:*",
@@ -20,9 +24,14 @@
     "@graphql-codegen/typescript-graphql-request": "^4.5.2",
     "@graphql-codegen/typescript-operations": "^2.5.2",
     "@local-config/prettier": "workspace:*",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "16",
+    "cross-env": "^7.0.3",
+    "fs-extra": "^10.1.0",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "typescript": "^4.7.4",
+    "tsx": "^3.10.1",
     "vite": "^3.0.0",
     "vite-plugin-solid": "^2.3.0"
   },
