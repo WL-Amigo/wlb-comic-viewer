@@ -68,6 +68,11 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 		attributes = append(attributes, attrJson.ToModel())
 	}
 
+	bookmarks := []models.Bookmark{}
+	for _, bookmarkJson := range jsonStruct.Bookmarks {
+		bookmarks = append(bookmarks, bookmarkJson.ToModel())
+	}
+
 	return models.BookModelBase{
 		Id:          models.CreateBookId(dirPath),
 		Dir:         dirPath,
@@ -77,6 +82,7 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 			Attributes: attributes,
 			KnownPages: jsonStruct.KnownPages,
 			ReadPages:  jsonStruct.ReadPages,
+			Bookmarks:  bookmarks,
 		},
 	}
 }

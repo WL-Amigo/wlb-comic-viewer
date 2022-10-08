@@ -15,6 +15,8 @@ interface Props {
   onPrev: () => void;
   onClose: () => void;
   onToggleFullScreen: () => void;
+  isBookmarked: boolean;
+  toggleBookmark: () => void;
   isFullScreen: boolean;
 }
 export const BookViewerOperator: VoidComponent<Props> = (props) => {
@@ -47,9 +49,14 @@ export const BookViewerOperator: VoidComponent<Props> = (props) => {
         <ViewerButton class="left-0 top-0" onClick={props.onClose}>
           閉じる
         </ViewerButton>
-        <ViewerButton class="top-0 right-0" onClick={props.onToggleFullScreen}>
-          {props.isFullScreen ? '全画面を終了' : '全画面にする'}
-        </ViewerButton>
+        <div class="absolute top-0 right-0 flex flex-row w-auto">
+          <ViewerButton class="relative" onClick={props.toggleBookmark}>
+            {props.isBookmarked ? 'ブックマーク解除' : 'ブックマークする'}
+          </ViewerButton>
+          <ViewerButton class="relative" onClick={props.onToggleFullScreen}>
+            {props.isFullScreen ? '全画面を終了' : '全画面にする'}
+          </ViewerButton>
+        </div>
         <ViewerButton class="left-0 bottom-0" onClick={props.onPrev}>
           前へ
         </ViewerButton>

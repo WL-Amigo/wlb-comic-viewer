@@ -70,6 +70,25 @@ func (r *mutationResolver) BookPageMarkAsRead(ctx context.Context, libraryID str
 	return result[0], nil
 }
 
+// BookPageCreateBookmark is the resolver for the bookPageCreateBookmark field.
+func (r *mutationResolver) BookPageCreateBookmark(ctx context.Context, libraryID string, bookID string, page string, option *model.BookBookmarkInput) (string, error) {
+	input := models.BookmarkCreateInput{
+		Page: page,
+	}
+	if option != nil {
+		if option.Name != nil {
+			input.Name = *option.Name
+		}
+	}
+
+	return r.library.UpsertBookmark(libraryID, bookID, input)
+}
+
+// BookPageDeleteBookmark is the resolver for the bookPageDeleteBookmark field.
+func (r *mutationResolver) BookPageDeleteBookmark(ctx context.Context, libraryID string, bookID string, page string) (string, error) {
+	return r.library.DeleteBookmark(libraryID, bookID, page)
+}
+
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
 	attrSettingsMap, err := r.library.GetAttributeSettings(libraryID)
@@ -112,12 +131,21 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 	// TODO: sort by explicitly specified order
 	sort.Slice(attrs, func(i, j int) bool { return attrs[i].DisplayName < attrs[j].DisplayName })
 
+	bookmarks := []*model.BookBookmark{}
+	for _, bookmarkModel := range bookDetail.Bookmarks {
+		bookmarks = append(bookmarks, &model.BookBookmark{
+			Page: bookmarkModel.Page,
+			Name: bookmarkModel.Name,
+		})
+	}
+
 	return &model.Book{
 		ID:         bookID,
 		Name:       bookDetail.Name,
 		Dir:        bookDetail.Dir,
 		Pages:      bookDetail.PageFilePaths,
 		Attributes: attrs,
+		Bookmarks:  bookmarks,
 		IsRead:     r.library.CheckIsBookRead(bookDetail.BookModelBase),
 	}, nil
 }

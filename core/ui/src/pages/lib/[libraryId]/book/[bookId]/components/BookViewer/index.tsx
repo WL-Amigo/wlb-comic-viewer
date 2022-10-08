@@ -1,4 +1,4 @@
-import { Accessor, Component, createEffect, createSignal, Show } from 'solid-js';
+import { Accessor, Component, createEffect, createMemo, createSignal, Show } from 'solid-js';
 import { ModalBase } from '../../../../../../../component/ModalBase';
 import { useService } from '../../../../../../../compositions/Dependency';
 import { createDocumentFullScreenSignal } from '../../../../../../../compositions/FullScreenState';
@@ -22,6 +22,7 @@ interface Props {
   open: boolean;
   initPageIndex: number;
   onClose: () => void;
+  onToggleBookmark: (page: string) => void;
 }
 export const BookViewer: Component<Props> = (props) => {
   return (
@@ -56,6 +57,20 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
 
   useMarkAsReadEffect(() => bookCtx.book().pages[currentImageIndex()]);
 
+  const isCurrentPageBookmarked = createMemo(() => {
+    const currentPage = bookCtx.book().pages.at(currentImageIndex());
+    if (currentPage === undefined) {
+      return false;
+    }
+    return bookCtx.book().bookmarks.find((bm) => bm.page === currentPage) !== undefined;
+  });
+  const toggleBookmarkLocal = () => {
+    const currentPage = bookCtx.book().pages.at(currentImageIndex());
+    if (currentPage !== undefined) {
+      props.onToggleBookmark(currentPage);
+    }
+  };
+
   return (
     <div class="w-full h-full relative" onClick={(ev) => ev.stopPropagation()}>
       <Show when={bookCtx.book().pages.at(currentImageIndex())}>
@@ -72,6 +87,8 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
         onPrev={goPrev}
         onToggleFullScreen={toggleFullScreen}
         isFullScreen={isFullScreen()}
+        isBookmarked={isCurrentPageBookmarked()}
+        toggleBookmark={toggleBookmarkLocal}
       />
     </div>
   );

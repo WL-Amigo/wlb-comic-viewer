@@ -54,7 +54,7 @@ func main() {
 	echo_book_handlers.RegisterEchoBookHandlers(e, libraryServiceInst)
 
 	go func() {
-		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(":" + env.Port); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal(err)
 		}
 	}()

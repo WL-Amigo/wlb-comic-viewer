@@ -114,6 +114,10 @@ func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId models.BookId, s
 	for _, attrModel := range settings.Attributes {
 		attrs = append(attrs, serializable.CreateBookAttributeJsonFromModel(attrModel))
 	}
+	bookmarks := []serializable.BookmarkJson{}
+	for _, bookmarkModel := range settings.Bookmarks {
+		bookmarks = append(bookmarks, serializable.CreateBookmarkJsonFromModel(bookmarkModel))
+	}
 	bookDir, err := bookId.ToDirPath()
 	if err != nil {
 		return "", err
@@ -123,6 +127,7 @@ func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId models.BookId, s
 		Attributes: attrs,
 		KnownPages: settings.KnownPages,
 		ReadPages:  settings.ReadPages,
+		Bookmarks:  bookmarks,
 	}); err != nil {
 		return "", err
 	}

@@ -1,7 +1,6 @@
 package library
 
 import (
-	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -126,7 +125,6 @@ func (s *LibraryService) CheckIsBookRead(bookBase models.BookModelBase) bool {
 	for _, page := range bookBase.KnownPages {
 		_, ok := allReadPageMap[page]
 		if !ok {
-			fmt.Println(page)
 			return false
 		}
 	}
@@ -261,4 +259,76 @@ func (s *LibraryService) MarkAsReadPage(libraryId string, bookId string, pages [
 	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
 
 	return pages, nil
+}
+
+func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation func(currentSettings models.BookSettings) (models.BookSettings, error)) error {
+	bookIdLocal, err := models.CastToBookId(bookId)
+	if err != nil {
+		return err
+	}
+
+	updateTargetBook, err := s.dbReader.ReadBook(libraryId, bookIdLocal)
+	if err != nil {
+		return err
+	}
+
+	nextSettings, err := mutation(updateTargetBook.BookSettings)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.dbWriter.UpdateBook(libraryId, bookIdLocal, nextSettings)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *LibraryService) UpsertBookmark(libraryId string, bookId string, input models.BookmarkCreateInput) (string, error) {
+	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
+		nextSettings := currentSettings
+		nextBookmarks := currentSettings.Bookmarks
+		isUpdate := false
+		for i, bm := range nextBookmarks {
+			if bm.Page == input.Page {
+				nextBookmarks[i] = models.Bookmark{
+					Page: input.Page,
+					Name: input.Name,
+				}
+				isUpdate = true
+				break
+			}
+		}
+		if !isUpdate {
+			nextBookmarks = append(nextBookmarks, models.Bookmark{
+				Page: input.Page,
+				Name: input.Name,
+			})
+		}
+		nextSettings.Bookmarks = nextBookmarks
+		return nextSettings, nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return input.Page, nil
+}
+
+func (s *LibraryService) DeleteBookmark(libraryId string, bookId string, page string) (string, error) {
+	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
+		nextSettings := currentSettings
+		nextBookmarks := []models.Bookmark{}
+		for _, bm := range currentSettings.Bookmarks {
+			if bm.Page != page {
+				nextBookmarks = append(nextBookmarks, bm)
+			}
+		}
+		nextSettings.Bookmarks = nextBookmarks
+		return nextSettings, nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return page, nil
 }

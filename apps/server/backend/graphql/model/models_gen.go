@@ -14,6 +14,7 @@ type Book struct {
 	Dir        string           `json:"dir"`
 	Pages      []string         `json:"pages"`
 	Attributes []*BookAttribute `json:"attributes"`
+	Bookmarks  []*BookBookmark  `json:"bookmarks"`
 	IsRead     bool             `json:"isRead"`
 }
 
@@ -45,6 +46,15 @@ type BookAttributeSettingUpdateInput struct {
 	ID          string                      `json:"id"`
 	DisplayName *string                     `json:"displayName"`
 	ValueType   *BookAttributeValueTypeEnum `json:"valueType"`
+}
+
+type BookBookmark struct {
+	Page string `json:"page"`
+	Name string `json:"name"`
+}
+
+type BookBookmarkInput struct {
+	Name *string `json:"name"`
 }
 
 type BookFilterAttributeParams struct {

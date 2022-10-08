@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [SolidPlugin()],
   server: {
     proxy: {
-      '^/api/.*': 'http://localhost:1323/',
+      '^/api/.*': 'http://localhost:9001/',
     },
   },
 });

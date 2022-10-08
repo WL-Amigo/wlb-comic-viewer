@@ -56,26 +56,61 @@ export class BookService implements IBookService, IBookMutationService {
     params: BookUpdateParams
   ): Promise<string> {
     const result = await this.gqlClient.updateBook({
-      libraryId, bookId, 
+      libraryId,
+      bookId,
       bookInput: {
-        name: params.name
+        name: params.name,
       },
-      attributesInput: params.attributes?.map(p => ({
+      attributesInput: params.attributes?.map((p) => ({
         id: p.id,
-        value: p.value
-      }))
-    })
+        value: p.value,
+      })),
+    });
 
-    return result.updateBook
+    return result.updateBook;
   }
 
   async updateKnownPages(libraryId: string, bookId: string): Promise<string[]> {
-    const result = await this.gqlClient.updateBookKnownPages({libraryId, bookId});
+    const result = await this.gqlClient.updateBookKnownPages({
+      libraryId,
+      bookId,
+    });
     return result.bookUpdateKnownPages;
   }
 
-  async markAsReadPage(libraryId: string, bookId: string, page: string): Promise<string> {
-    const result = await this.gqlClient.markAsReadPage({libraryId, bookId, page});
+  async markAsReadPage(
+    libraryId: string,
+    bookId: string,
+    page: string
+  ): Promise<string> {
+    const result = await this.gqlClient.markAsReadPage({
+      libraryId,
+      bookId,
+      page,
+    });
     return result.bookPageMarkAsRead;
+  }
+
+  async bookmarkPage(
+    libraryId: string,
+    bookId: string,
+    page: string,
+    isBookmark: boolean
+  ): Promise<string> {
+    if (isBookmark) {
+      const result = await this.gqlClient.bookmarkPage({
+        libraryId,
+        bookId,
+        page,
+      });
+      return result.bookPageCreateBookmark;
+    } else {
+      const result = await this.gqlClient.deleteBookmark({
+        libraryId,
+        bookId,
+        page,
+      });
+      return result.bookPageDeleteBookmark;
+    }
   }
 }

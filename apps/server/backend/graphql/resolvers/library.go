@@ -15,7 +15,7 @@ import (
 )
 
 // Books is the resolver for the books field.
-func (r *libraryResolver) Books(ctx context.Context, lib *model.Library, filter *model.BookFilterParams) ([]*model.BookMin, error) {
+func (r *libraryResolver) Books(ctx context.Context, obj *model.Library, filter *model.BookFilterParams) ([]*model.BookMin, error) {
 	booksFilter := library.BooksFilter{}
 	if filter != nil {
 		booksFilter.IsRead = filter.IsRead
@@ -26,7 +26,7 @@ func (r *libraryResolver) Books(ctx context.Context, lib *model.Library, filter 
 			})
 		}
 	}
-	books, err := r.library.QueryBooksInLibrary(lib.ID, booksFilter)
+	books, err := r.library.QueryBooksInLibrary(obj.ID, booksFilter)
 	if err != nil {
 		return nil, err
 	}

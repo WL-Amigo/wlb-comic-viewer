@@ -7,6 +7,7 @@ import { AllPagesTabContent } from './components/AllPagesTabContent';
 import { BookmarksTabContent } from './components/BookmarksTabContent';
 import { BookViewer } from './components/BookViewer';
 import { BookDescriptionTabContent } from './components/DescriptionTabContent';
+import { useBookmarkHandler } from './compositions/Bookmark';
 import { useBookDataContext } from './Context';
 
 type TabKeys = 'bookmarks' | 'pages' | 'descriptions';
@@ -37,6 +38,8 @@ export const BookMainPage: Component = () => {
     }
   };
   const closeViewer = () => setIsViewerOpen(false);
+
+  const handleBookmark = useBookmarkHandler();
 
   return (
     <div class="container mx-auto w-full h-full overflow-hidden flex flex-col">
@@ -80,7 +83,12 @@ export const BookMainPage: Component = () => {
           </Match>
         </Switch>
       </div>
-      <BookViewer open={isViewerOpen()} initPageIndex={firstOpenPageIndex()} onClose={closeViewer} />
+      <BookViewer
+        open={isViewerOpen()}
+        initPageIndex={firstOpenPageIndex()}
+        onClose={closeViewer}
+        onToggleBookmark={handleBookmark}
+      />
     </div>
   );
 };

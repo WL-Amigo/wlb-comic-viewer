@@ -1,0 +1,8 @@
+type BookBookmark {
+  page: String!
+  name: String!
+}
+
+input BookBookmarkInput {
+  name: String
+}

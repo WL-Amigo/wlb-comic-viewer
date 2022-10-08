@@ -10,6 +10,7 @@ type EnvironmentSettings struct {
 	EnableLogging          bool
 	RootDir                string
 	WorkingDir             string
+	Port                   string
 }
 
 func LoadEnvironment() EnvironmentSettings {
@@ -25,11 +26,16 @@ func LoadEnvironment() EnvironmentSettings {
 	if err != nil {
 		panic(err)
 	}
+	port := os.Getenv("PG_API_PORT")
+	if port == "" {
+		port = "9001"
+	}
 
 	return EnvironmentSettings{
 		AllowCrossOriginAccess: true,
 		EnableLogging:          true,
 		RootDir:                rootDir,
 		WorkingDir:             workingDir,
+		Port:                   port,
 	}
 }

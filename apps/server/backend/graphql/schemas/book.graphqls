@@ -10,6 +10,7 @@ type Book {
   dir: String!
   pages: [String!]!
   attributes: [BookAttribute!]!
+  bookmarks: [BookBookmark!]!
   isRead: Boolean!
 }
 
@@ -31,4 +32,6 @@ extend type Mutation {
   deleteBook(libraryId: ID!, bookId: ID!): ID!
   bookUpdateKnownPages(libraryId: ID!, bookId: ID!): [String!]!
   bookPageMarkAsRead(libraryId: ID!, bookId: ID!, page: String!): String!
+  bookPageCreateBookmark(libraryId: ID!, bookId: ID!, page: String!, option: BookBookmarkInput): String!
+  bookPageDeleteBookmark(libraryId: ID!, bookId: ID!, page: String!): String!
 }

@@ -7,10 +7,16 @@ export interface BookMin {
   readonly isRead: boolean;
 }
 
+export interface Bookmark {
+  readonly page: string;
+  readonly name: string;
+}
+
 export interface Book {
   readonly id: string;
   readonly name: string;
   readonly pages: readonly string[];
+  readonly bookmarks: readonly Bookmark[];
   readonly isRead: boolean;
   readonly attributes: readonly BookAttribute[];
 }
@@ -43,4 +49,5 @@ export interface IBookMutationService {
   createBook(libraryId: LibraryId, params: BookCreateParams): Promise<BookId>;
   updateBook(libraryId: LibraryId, bookId: BookId, params: BookUpdateParams): Promise<BookId>;
   markAsReadPage(libraryId: LibraryId, bookId: BookId, page: string): Promise<string>;
+  bookmarkPage(libraryId: LibraryId, bookId: BookId, page: string, isBookmark: boolean): Promise<string>;
 }

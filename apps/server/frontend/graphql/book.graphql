@@ -3,6 +3,10 @@ query getBook($libraryId: ID!, $bookId: ID!) {
     id
     name
     pages
+    bookmarks {
+      page
+      name
+    }
     isRead
     attributes {
       id
@@ -46,5 +50,13 @@ mutation updateBookKnownPages($libraryId: ID!, $bookId: ID!) {
 }
 
 mutation markAsReadPage($libraryId: ID!, $bookId: ID!, $page: String!) {
-	bookPageMarkAsRead(libraryId: $libraryId, bookId: $bookId, page: $page)
+  bookPageMarkAsRead(libraryId: $libraryId, bookId: $bookId, page: $page)
+}
+
+mutation bookmarkPage($libraryId: ID!, $bookId: ID!, $page: String!) {
+  bookPageCreateBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
+}
+
+mutation deleteBookmark($libraryId: ID!, $bookId: ID!, $page: String!) {
+  bookPageDeleteBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
 }

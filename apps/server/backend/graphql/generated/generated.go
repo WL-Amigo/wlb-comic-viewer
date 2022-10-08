@@ -47,6 +47,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Book struct {
 		Attributes func(childComplexity int) int
+		Bookmarks  func(childComplexity int) int
 		Dir        func(childComplexity int) int
 		ID         func(childComplexity int) int
 		IsRead     func(childComplexity int) int
@@ -65,6 +66,11 @@ type ComplexityRoot struct {
 		DisplayName func(childComplexity int) int
 		ID          func(childComplexity int) int
 		ValueType   func(childComplexity int) int
+	}
+
+	BookBookmark struct {
+		Name func(childComplexity int) int
+		Page func(childComplexity int) int
 	}
 
 	BookMin struct {
@@ -87,6 +93,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		BookPageCreateBookmark      func(childComplexity int, libraryID string, bookID string, page string, option *model.BookBookmarkInput) int
+		BookPageDeleteBookmark      func(childComplexity int, libraryID string, bookID string, page string) int
 		BookPageMarkAsRead          func(childComplexity int, libraryID string, bookID string, page string) int
 		BookUpdateKnownPages        func(childComplexity int, libraryID string, bookID string) int
 		CreateBook                  func(childComplexity int, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) int
@@ -115,6 +123,8 @@ type MutationResolver interface {
 	DeleteBook(ctx context.Context, libraryID string, bookID string) (string, error)
 	BookUpdateKnownPages(ctx context.Context, libraryID string, bookID string) ([]string, error)
 	BookPageMarkAsRead(ctx context.Context, libraryID string, bookID string, page string) (string, error)
+	BookPageCreateBookmark(ctx context.Context, libraryID string, bookID string, page string, option *model.BookBookmarkInput) (string, error)
+	BookPageDeleteBookmark(ctx context.Context, libraryID string, bookID string, page string) (string, error)
 	CreateLibrary(ctx context.Context, input model.LibraryCreateInput, attributesInput []*model.BookAttributeSettingCreateInput) (string, error)
 	UpdateLibrary(ctx context.Context, id string, input model.LibraryUpdateInput) (string, error)
 	CreateBookAttributeSettings(ctx context.Context, libraryID string, input []*model.BookAttributeSettingCreateInput) ([]string, error)
@@ -148,6 +158,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Book.Attributes(childComplexity), true
+
+	case "Book.bookmarks":
+		if e.complexity.Book.Bookmarks == nil {
+			break
+		}
+
+		return e.complexity.Book.Bookmarks(childComplexity), true
 
 	case "Book.dir":
 		if e.complexity.Book.Dir == nil {
@@ -233,6 +250,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BookAttributeSetting.ValueType(childComplexity), true
 
+	case "BookBookmark.name":
+		if e.complexity.BookBookmark.Name == nil {
+			break
+		}
+
+		return e.complexity.BookBookmark.Name(childComplexity), true
+
+	case "BookBookmark.page":
+		if e.complexity.BookBookmark.Page == nil {
+			break
+		}
+
+		return e.complexity.BookBookmark.Page(childComplexity), true
+
 	case "BookMin.id":
 		if e.complexity.BookMin.ID == nil {
 			break
@@ -307,6 +338,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LibraryMin.Name(childComplexity), true
+
+	case "Mutation.bookPageCreateBookmark":
+		if e.complexity.Mutation.BookPageCreateBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_bookPageCreateBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BookPageCreateBookmark(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["page"].(string), args["option"].(*model.BookBookmarkInput)), true
+
+	case "Mutation.bookPageDeleteBookmark":
+		if e.complexity.Mutation.BookPageDeleteBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_bookPageDeleteBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BookPageDeleteBookmark(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["page"].(string)), true
 
 	case "Mutation.bookPageMarkAsRead":
 		if e.complexity.Mutation.BookPageMarkAsRead == nil {
@@ -470,6 +525,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBookAttributeInput,
 		ec.unmarshalInputBookAttributeSettingCreateInput,
 		ec.unmarshalInputBookAttributeSettingUpdateInput,
+		ec.unmarshalInputBookBookmarkInput,
 		ec.unmarshalInputBookFilterAttributeParams,
 		ec.unmarshalInputBookFilterParams,
 		ec.unmarshalInputBookInitInput,
@@ -548,6 +604,7 @@ type Book {
   dir: String!
   pages: [String!]!
   attributes: [BookAttribute!]!
+  bookmarks: [BookBookmark!]!
   isRead: Boolean!
 }
 
@@ -569,6 +626,8 @@ extend type Mutation {
   deleteBook(libraryId: ID!, bookId: ID!): ID!
   bookUpdateKnownPages(libraryId: ID!, bookId: ID!): [String!]!
   bookPageMarkAsRead(libraryId: ID!, bookId: ID!, page: String!): String!
+  bookPageCreateBookmark(libraryId: ID!, bookId: ID!, page: String!, option: BookBookmarkInput): String!
+  bookPageDeleteBookmark(libraryId: ID!, bookId: ID!, page: String!): String!
 }`, BuiltIn: false},
 	{Name: "../schemas/book_attribute.graphqls", Input: `enum BookAttributeValueTypeEnum {
   STRING
@@ -603,6 +662,14 @@ type BookAttribute {
 input BookAttributeInput {
   id: ID!
   value: String!
+}`, BuiltIn: false},
+	{Name: "../schemas/book_bookmark.graphqls", Input: `type BookBookmark {
+  page: String!
+  name: String!
+}
+
+input BookBookmarkInput {
+  name: String
 }`, BuiltIn: false},
 	{Name: "../schemas/dirs.graphqls", Input: `extend type Query {
   dirs(root: String!, includeHidden: Boolean): [String!]!
@@ -670,6 +737,81 @@ func (ec *executionContext) field_Library_books_args(ctx context.Context, rawArg
 		}
 	}
 	args["filter"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_bookPageCreateBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["libraryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["libraryId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["bookId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bookId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bookId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["page"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["page"] = arg2
+	var arg3 *model.BookBookmarkInput
+	if tmp, ok := rawArgs["option"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("option"))
+		arg3, err = ec.unmarshalOBookBookmarkInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmarkInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["option"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_bookPageDeleteBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["libraryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["libraryId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["bookId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bookId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bookId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["page"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["page"] = arg2
 	return args, nil
 }
 
@@ -1280,6 +1422,56 @@ func (ec *executionContext) fieldContext_Book_attributes(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Book_bookmarks(ctx context.Context, field graphql.CollectedField, obj *model.Book) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Book_bookmarks(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bookmarks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.BookBookmark)
+	fc.Result = res
+	return ec.marshalNBookBookmark2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmarkᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Book_bookmarks(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "page":
+				return ec.fieldContext_BookBookmark_page(ctx, field)
+			case "name":
+				return ec.fieldContext_BookBookmark_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BookBookmark", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Book_isRead(ctx context.Context, field graphql.CollectedField, obj *model.Book) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Book_isRead(ctx, field)
 	if err != nil {
@@ -1627,6 +1819,94 @@ func (ec *executionContext) fieldContext_BookAttributeSetting_valueType(ctx cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type BookAttributeValueTypeEnum does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookBookmark_page(ctx context.Context, field graphql.CollectedField, obj *model.BookBookmark) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookBookmark_page(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Page, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookBookmark_page(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookBookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookBookmark_name(ctx context.Context, field graphql.CollectedField, obj *model.BookBookmark) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookBookmark_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookBookmark_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookBookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2374,6 +2654,116 @@ func (ec *executionContext) fieldContext_Mutation_bookPageMarkAsRead(ctx context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_bookPageCreateBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_bookPageCreateBookmark(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().BookPageCreateBookmark(rctx, fc.Args["libraryId"].(string), fc.Args["bookId"].(string), fc.Args["page"].(string), fc.Args["option"].(*model.BookBookmarkInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_bookPageCreateBookmark(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_bookPageCreateBookmark_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_bookPageDeleteBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_bookPageDeleteBookmark(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().BookPageDeleteBookmark(rctx, fc.Args["libraryId"].(string), fc.Args["bookId"].(string), fc.Args["page"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_bookPageDeleteBookmark(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_bookPageDeleteBookmark_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createLibrary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createLibrary(ctx, field)
 	if err != nil {
@@ -2643,6 +3033,8 @@ func (ec *executionContext) fieldContext_Query_book(ctx context.Context, field g
 				return ec.fieldContext_Book_pages(ctx, field)
 			case "attributes":
 				return ec.fieldContext_Book_attributes(ctx, field)
+			case "bookmarks":
+				return ec.fieldContext_Book_bookmarks(ctx, field)
 			case "isRead":
 				return ec.fieldContext_Book_isRead(ctx, field)
 			}
@@ -4861,6 +5253,34 @@ func (ec *executionContext) unmarshalInputBookAttributeSettingUpdateInput(ctx co
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBookBookmarkInput(ctx context.Context, obj interface{}) (model.BookBookmarkInput, error) {
+	var it model.BookBookmarkInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookFilterAttributeParams(ctx context.Context, obj interface{}) (model.BookFilterAttributeParams, error) {
 	var it model.BookFilterAttributeParams
 	asMap := map[string]interface{}{}
@@ -5106,6 +5526,13 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "bookmarks":
+
+			out.Values[i] = ec._Book_bookmarks(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "isRead":
 
 			out.Values[i] = ec._Book_isRead(ctx, field, obj)
@@ -5200,6 +5627,41 @@ func (ec *executionContext) _BookAttributeSetting(ctx context.Context, sel ast.S
 		case "valueType":
 
 			out.Values[i] = ec._BookAttributeSetting_valueType(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var bookBookmarkImplementors = []string{"BookBookmark"}
+
+func (ec *executionContext) _BookBookmark(ctx context.Context, sel ast.SelectionSet, obj *model.BookBookmark) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookBookmarkImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BookBookmark")
+		case "page":
+
+			out.Values[i] = ec._BookBookmark_page(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._BookBookmark_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -5420,6 +5882,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_bookPageMarkAsRead(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bookPageCreateBookmark":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_bookPageCreateBookmark(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bookPageDeleteBookmark":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_bookPageDeleteBookmark(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -6071,6 +6551,60 @@ func (ec *executionContext) marshalNBookAttributeValueTypeEnum2githubᚗcomᚋpr
 	return v
 }
 
+func (ec *executionContext) marshalNBookBookmark2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmarkᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BookBookmark) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBookBookmark2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmark(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNBookBookmark2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmark(ctx context.Context, sel ast.SelectionSet, v *model.BookBookmark) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._BookBookmark(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNBookFilterAttributeParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParams(ctx context.Context, v interface{}) (*model.BookFilterAttributeParams, error) {
 	res, err := ec.unmarshalInputBookFilterAttributeParams(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
@@ -6654,6 +7188,14 @@ func (ec *executionContext) marshalOBookAttributeValueTypeEnum2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOBookBookmarkInput2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBookmarkInput(ctx context.Context, v interface{}) (*model.BookBookmarkInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputBookBookmarkInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBookFilterAttributeParams2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParamsᚄ(ctx context.Context, v interface{}) ([]*model.BookFilterAttributeParams, error) {

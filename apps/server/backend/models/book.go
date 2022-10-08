@@ -10,6 +10,7 @@ type BookSettings struct {
 	Attributes []BookAttribute
 	KnownPages []string
 	ReadPages  []string
+	Bookmarks  []Bookmark
 }
 
 type BookSettingsUpdateInput struct {

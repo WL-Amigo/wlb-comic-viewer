@@ -18,6 +18,7 @@ export type Scalars = {
 export type Book = {
   __typename?: 'Book';
   attributes: Array<BookAttribute>;
+  bookmarks: Array<BookBookmark>;
   dir: Scalars['String'];
   id: Scalars['ID'];
   isRead: Scalars['Boolean'];
@@ -61,6 +62,16 @@ export enum BookAttributeValueTypeEnum {
   Int = 'INT',
   String = 'STRING'
 }
+
+export type BookBookmark = {
+  __typename?: 'BookBookmark';
+  name: Scalars['String'];
+  page: Scalars['String'];
+};
+
+export type BookBookmarkInput = {
+  name?: InputMaybe<Scalars['String']>;
+};
 
 export type BookFilterAttributeParams = {
   id: Scalars['ID'];
@@ -118,6 +129,8 @@ export type LibraryUpdateInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  bookPageCreateBookmark: Scalars['String'];
+  bookPageDeleteBookmark: Scalars['String'];
   bookPageMarkAsRead: Scalars['String'];
   bookUpdateKnownPages: Array<Scalars['String']>;
   createBook: Scalars['ID'];
@@ -127,6 +140,21 @@ export type Mutation = {
   updateBook: Scalars['ID'];
   updateBookAttributeSettings: Array<Scalars['ID']>;
   updateLibrary: Scalars['ID'];
+};
+
+
+export type MutationBookPageCreateBookmarkArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
+  option?: InputMaybe<BookBookmarkInput>;
+  page: Scalars['String'];
+};
+
+
+export type MutationBookPageDeleteBookmarkArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
+  page: Scalars['String'];
 };
 
 
@@ -219,7 +247,7 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -257,6 +285,24 @@ export type MarkAsReadPageMutationVariables = Exact<{
 
 
 export type MarkAsReadPageMutation = { __typename?: 'Mutation', bookPageMarkAsRead: string };
+
+export type BookmarkPageMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  page: Scalars['String'];
+}>;
+
+
+export type BookmarkPageMutation = { __typename?: 'Mutation', bookPageCreateBookmark: string };
+
+export type DeleteBookmarkMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  page: Scalars['String'];
+}>;
+
+
+export type DeleteBookmarkMutation = { __typename?: 'Mutation', bookPageDeleteBookmark: string };
 
 export type GetDirsQueryVariables = Exact<{
   root: Scalars['String'];
@@ -315,6 +361,10 @@ export const GetBookDocument = gql`
     id
     name
     pages
+    bookmarks {
+      page
+      name
+    }
     isRead
     attributes {
       id
@@ -353,6 +403,16 @@ export const UpdateBookKnownPagesDocument = gql`
 export const MarkAsReadPageDocument = gql`
     mutation markAsReadPage($libraryId: ID!, $bookId: ID!, $page: String!) {
   bookPageMarkAsRead(libraryId: $libraryId, bookId: $bookId, page: $page)
+}
+    `;
+export const BookmarkPageDocument = gql`
+    mutation bookmarkPage($libraryId: ID!, $bookId: ID!, $page: String!) {
+  bookPageCreateBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
+}
+    `;
+export const DeleteBookmarkDocument = gql`
+    mutation deleteBookmark($libraryId: ID!, $bookId: ID!, $page: String!) {
+  bookPageDeleteBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
 }
     `;
 export const GetDirsDocument = gql`
@@ -437,6 +497,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     markAsReadPage(variables: MarkAsReadPageMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<MarkAsReadPageMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<MarkAsReadPageMutation>(MarkAsReadPageDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'markAsReadPage', 'mutation');
+    },
+    bookmarkPage(variables: BookmarkPageMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<BookmarkPageMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<BookmarkPageMutation>(BookmarkPageDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'bookmarkPage', 'mutation');
+    },
+    deleteBookmark(variables: DeleteBookmarkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteBookmarkMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DeleteBookmarkMutation>(DeleteBookmarkDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'deleteBookmark', 'mutation');
     },
     getDirs(variables: GetDirsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDirsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDirsQuery>(GetDirsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getDirs', 'query');
