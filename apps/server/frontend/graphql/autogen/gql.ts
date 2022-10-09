@@ -290,6 +290,7 @@ export type BookmarkPageMutationVariables = Exact<{
   libraryId: Scalars['ID'];
   bookId: Scalars['ID'];
   page: Scalars['String'];
+  params?: InputMaybe<BookBookmarkInput>;
 }>;
 
 
@@ -406,8 +407,13 @@ export const MarkAsReadPageDocument = gql`
 }
     `;
 export const BookmarkPageDocument = gql`
-    mutation bookmarkPage($libraryId: ID!, $bookId: ID!, $page: String!) {
-  bookPageCreateBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
+    mutation bookmarkPage($libraryId: ID!, $bookId: ID!, $page: String!, $params: BookBookmarkInput) {
+  bookPageCreateBookmark(
+    libraryId: $libraryId
+    bookId: $bookId
+    page: $page
+    option: $params
+  )
 }
     `;
 export const DeleteBookmarkDocument = gql`

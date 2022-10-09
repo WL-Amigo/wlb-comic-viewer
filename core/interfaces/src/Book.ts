@@ -38,6 +38,10 @@ export interface BookUpdateParams {
   attributes?: readonly BookAttributeUpdateParams[];
 }
 
+export interface BookmarkUpdateParams {
+  name?: string;
+}
+
 export interface IBookService {
   loadBook(libraryId: LibraryId, bookId: BookId): Promise<Book>;
   loadBookSettings(libraryId: LibraryId, bookId: BookId): Promise<BookSettings>;
@@ -50,4 +54,5 @@ export interface IBookMutationService {
   updateBook(libraryId: LibraryId, bookId: BookId, params: BookUpdateParams): Promise<BookId>;
   markAsReadPage(libraryId: LibraryId, bookId: BookId, page: string): Promise<string>;
   bookmarkPage(libraryId: LibraryId, bookId: BookId, page: string, isBookmark: boolean): Promise<string>;
+  updateBookmark(libraryId: LibraryId, bookId: BookId, page: string, params: BookmarkUpdateParams): Promise<string>;
 }

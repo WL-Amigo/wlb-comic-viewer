@@ -53,8 +53,18 @@ mutation markAsReadPage($libraryId: ID!, $bookId: ID!, $page: String!) {
   bookPageMarkAsRead(libraryId: $libraryId, bookId: $bookId, page: $page)
 }
 
-mutation bookmarkPage($libraryId: ID!, $bookId: ID!, $page: String!) {
-  bookPageCreateBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
+mutation bookmarkPage(
+  $libraryId: ID!
+  $bookId: ID!
+  $page: String!
+  $params: BookBookmarkInput
+) {
+  bookPageCreateBookmark(
+    libraryId: $libraryId
+    bookId: $bookId
+    page: $page
+    option: $params
+  )
 }
 
 mutation deleteBookmark($libraryId: ID!, $bookId: ID!, $page: String!) {

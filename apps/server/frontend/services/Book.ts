@@ -6,6 +6,7 @@ import {
   IBookMutationService,
   IBookService,
 } from "@local-core/interfaces";
+import { BookmarkUpdateParams } from "@local-core/interfaces/src/Book";
 import { Sdk } from "../graphql/autogen/gql";
 
 export class BookService implements IBookService, IBookMutationService {
@@ -112,5 +113,22 @@ export class BookService implements IBookService, IBookMutationService {
       });
       return result.bookPageDeleteBookmark;
     }
+  }
+
+  async updateBookmark(
+    libraryId: string,
+    bookId: string,
+    page: string,
+    params: BookmarkUpdateParams
+  ): Promise<string> {
+    const result = await this.gqlClient.bookmarkPage({
+      libraryId,
+      bookId,
+      page,
+      params: {
+        name: params.name,
+      },
+    });
+    return result.bookPageCreateBookmark;
   }
 }

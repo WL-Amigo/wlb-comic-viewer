@@ -1,6 +1,6 @@
 import { Component, For, Show } from 'solid-js';
-import { isNotNullOrEmptyString } from '../../../../../../../utils/emptiness';
 import { useBookDataContext } from '../../Context';
+import { BookmarkButton } from './components/BookmarkButton';
 
 interface Props {
   onPageOpenRequested: (pageName: string) => void;
@@ -18,11 +18,7 @@ export const BookmarksTabContent: Component<Props> = (props) => {
         )}
       </Show>
       <For each={bookCtx.book().bookmarks}>
-        {(bookmark) => (
-          <button class="rounded border p-2 text-left" onClick={() => props.onPageOpenRequested(bookmark.page)}>
-            {isNotNullOrEmptyString(bookmark.name) ? bookmark.name : bookmark.page}
-          </button>
-        )}
+        {(bookmark) => <BookmarkButton bookmark={bookmark} onPageOpenRequested={props.onPageOpenRequested} />}
       </For>
     </div>
   );

@@ -3,6 +3,7 @@ export type { ILibraryService, ILibraryMutationService, LibraryMin, LibraryForVi
 export type {
   BookMin,
   Book,
+  Bookmark,
   BookSettings,
   BookCreateParams,
   BookUpdateParams,

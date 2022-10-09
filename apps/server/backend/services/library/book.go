@@ -282,6 +282,8 @@ func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation fu
 		return err
 	}
 
+	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
+
 	return nil
 }
 
