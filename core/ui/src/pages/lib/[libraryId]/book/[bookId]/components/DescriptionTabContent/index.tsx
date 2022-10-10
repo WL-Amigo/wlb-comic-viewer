@@ -3,6 +3,7 @@ import { SquareLoader } from '../../../../../../../component/Spinners/SquareLoad
 import { useService } from '../../../../../../../compositions/Dependency';
 import { useLibraryDataContext } from '../../../../Context';
 import { useBookDataContext } from '../../Context';
+import { UpdateKnownPagesButton } from './components/UpdateKnownPagesButton';
 import { BookAttributeViewAndEditor } from './components/ViewAndEditor';
 
 export const BookDescriptionTabContent: Component = () => {
@@ -38,6 +39,10 @@ const BookAttributeSection: Component = () => {
         <For each={bookCtx.book().attributes}>
           {(item) => <BookAttributeViewAndEditor attribute={item} onDetermine={onChangeAttr} />}
         </For>
+      </div>
+      <h2 class="text-lg pb-2 pt-6">操作</h2>
+      <div>
+        <UpdateKnownPagesButton />
       </div>
       <SquareLoader isLoading={isSaving()} />
     </div>
