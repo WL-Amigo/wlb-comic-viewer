@@ -29,13 +29,13 @@ export const BookAttributeEditor: Component<Props> = (props) => {
 
   return (
     <div class="flex flex-row gap-x-2">
-      <Button onClick={onDeterminedLocal}>
-        <CheckIcon />
-      </Button>
+      <TextInput class="flex-1 max-w-screen-md" value={value()} onChange={onInput} />
       <Button onClick={props.onCancel}>
         <XIcon />
       </Button>
-      <TextInput class="flex-1 max-w-screen-md" value={value()} onChange={onInput} />
+      <Button color="primary" onClick={onDeterminedLocal}>
+        <CheckIcon />
+      </Button>
     </div>
   );
 };

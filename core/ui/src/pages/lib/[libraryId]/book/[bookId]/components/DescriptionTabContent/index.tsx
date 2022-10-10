@@ -4,7 +4,8 @@ import { useService } from '../../../../../../../compositions/Dependency';
 import { useLibraryDataContext } from '../../../../Context';
 import { useBookDataContext } from '../../Context';
 import { UpdateKnownPagesButton } from './components/UpdateKnownPagesButton';
-import { BookAttributeViewAndEditor } from './components/ViewAndEditor';
+import { BookAttributeViewAndEditor } from './components/AttributeViewAndEditor';
+import { BookNameViewAndEditor } from './components/NameViewAndEditor';
 
 export const BookDescriptionTabContent: Component = () => {
   return (
@@ -33,17 +34,25 @@ const BookAttributeSection: Component = () => {
   };
 
   return (
-    <div class="w-full relative">
-      <h2 class="text-lg pb-2">属性</h2>
-      <div class="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-x-2 gap-y-1 items-center">
-        <For each={bookCtx.book().attributes}>
-          {(item) => <BookAttributeViewAndEditor attribute={item} onDetermine={onChangeAttr} />}
-        </For>
-      </div>
-      <h2 class="text-lg pb-2 pt-6">操作</h2>
-      <div>
-        <UpdateKnownPagesButton />
-      </div>
+    <div class="w-full relative flex flex-col gap-y-6">
+      <section>
+        <h2 class="text-lg pb-2">基本情報</h2>
+        <BookNameViewAndEditor />
+      </section>
+      <section>
+        <h2 class="text-lg pb-2">属性</h2>
+        <div class="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-x-2 gap-y-1 items-center">
+          <For each={bookCtx.book().attributes}>
+            {(item) => <BookAttributeViewAndEditor attribute={item} onDetermine={onChangeAttr} />}
+          </For>
+        </div>
+      </section>
+      <section>
+        <h2 class="text-lg pb-2">操作</h2>
+        <div>
+          <UpdateKnownPagesButton />
+        </div>
+      </section>
       <SquareLoader isLoading={isSaving()} />
     </div>
   );
