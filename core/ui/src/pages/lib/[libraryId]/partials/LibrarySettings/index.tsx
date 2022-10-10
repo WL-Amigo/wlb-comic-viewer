@@ -9,6 +9,7 @@ import { useLibrarySettingsLoader, useLibrarySettingsUpdater } from './viewModel
 import { LibrarySettingsBasicPage } from './components/Basic';
 import { LibrarySettingsBookAttributesPage } from './components/BookAttributes';
 import { SelectInput } from '../../../../../component/Form/Inputs/Select';
+import { CheckIcon, XIcon } from '../../../../../component/Icons';
 
 const PagesSchema = z.enum(['basic', 'book-attributes']);
 type Pages = z.infer<typeof PagesSchema>;
@@ -82,9 +83,13 @@ const DialogBody: Component<BodyProps> = (props) => {
         </div>
       </div>
       <div class="flex flex-row justify-end gap-x-2 p-2 border-t border-gray-200">
-        <Button onClick={props.onClose}>キャンセル</Button>
-        <Button color="primary" onClick={onDetermine}>
-          設定を適用
+        <Button class="gap-x-1" onClick={props.onClose}>
+          <XIcon />
+          <span>キャンセル</span>
+        </Button>
+        <Button class="gap-x-1" color="primary" onClick={onDetermine}>
+          <CheckIcon />
+          <span>設定を適用</span>
         </Button>
       </div>
       <Show when={isSaving()}>

@@ -1,6 +1,7 @@
 import { Component, createMemo, createSignal } from 'solid-js';
 import { Button } from '../../../component/Button';
 import { DirectorySelector } from '../../../component/DirectorySelector';
+import { PlusIcon } from '../../../component/Icons';
 import { ModalBase } from '../../../component/ModalBase';
 import { useService } from '../../../compositions/Dependency';
 
@@ -21,6 +22,7 @@ export const AddLibraryButton: Component<AddLibraryButtonProps> = (props) => {
       .createLibrary({
         name: values.name,
         rootDir: values.dirPath,
+        attributes: [],
       })
       .then(() => {
         closeDialog();
@@ -31,10 +33,11 @@ export const AddLibraryButton: Component<AddLibraryButtonProps> = (props) => {
   return (
     <>
       <button
-        class="text-left border rounded p-2 text-lg no-underline text-black bg-blue-50 hover:bg-blue-100"
+        class="text-left border rounded p-2 text-lg text-black bg-blue-50 hover:bg-blue-100 flex flex-row items-center gap-x-1"
         onClick={() => setIsDialogOpen(true)}
       >
-        ライブラリを追加する
+        <PlusIcon />
+        <span>ライブラリを追加する</span>
       </button>
       <AddLibraryDialog isOpen={isDialogOpen()} onDetermined={addLibrary} onCancel={closeDialog} />
     </>

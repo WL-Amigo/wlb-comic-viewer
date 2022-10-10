@@ -1,5 +1,6 @@
 import { Link } from 'solid-app-router';
 import { Component, createSignal, For } from 'solid-js';
+import { BookIcon, CheckCircleIcon, CogIcon, UndoIcon } from '../../../component/Icons';
 import { useLibraryDataContext } from './Context';
 import { AddBookButton } from './partials/AddBook';
 import { LibraryBooksFilterConditions } from './partials/FilterConditions';
@@ -11,8 +12,12 @@ export const BookListPage: Component = () => {
   return (
     <div class="container mx-auto w-full h-full overflow-hidden flex flex-col">
       <div class="flex-shrink-0 p-2 flex flex-row items-center gap-x-2 w-full">
-        <Link class="no-underline text-black " href="../">
-          ＜ライブラリ選択へ戻る
+        <Link
+          class="no-underline text-black flex flex-row items-center gap-x-1 bg-gray-50 hover:bg-gray-100 p-1"
+          href="../"
+        >
+          <UndoIcon />
+          <span class="hidden md:block">ライブラリ選択へ戻る</span>
         </Link>
         <span class="text-xl">{libCtx.library.name}</span>
         <div class="flex-1" />
@@ -24,13 +29,16 @@ export const BookListPage: Component = () => {
           <For each={libCtx.library.books}>
             {(book) => (
               <Link
-                class="no-underline text-black p-2 rounded-lg border flex flex-row"
+                class="no-underline text-black p-2 rounded-lg border flex flex-row hover:bg-gray-100"
                 href={`book/${encodeURIComponent(book.id)}/`}
               >
-                <span class="flex-1">{book.name}</span>
+                <div class="flex-1 flex flex-row items-center gap-x-1">
+                  <BookIcon />
+                  <span>{book.name}</span>
+                </div>
                 {book.isRead && (
-                  <div class="flex flex-row items-center">
-                    <span>✅</span>
+                  <div class="flex flex-row items-center gap-x-1">
+                    <CheckCircleIcon class="w-6 h-6 text-green-600" />
                     <span>読了</span>
                   </div>
                 )}
@@ -54,7 +62,9 @@ const SettingsButton: Component<SettingsButtonProps> = (props) => {
 
   return (
     <>
-      <button onClick={toggleIsOpen}>⚙</button>
+      <button class="w-8 h-8 p-1 bg-gray-50 hover:bg-gray-100" onClick={toggleIsOpen}>
+        <CogIcon class="w-full h-full" />
+      </button>
       <LibrarySettingsDialog
         libraryId={props.libraryId}
         open={open()}

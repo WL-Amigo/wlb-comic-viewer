@@ -8,7 +8,7 @@ interface Props {
 }
 export const ModalBase: ParentComponent<Props> = (props) => {
   return (
-    <Portal mount={document.getElementById('app')!}>
+    <Portal mount={document.getElementById('dialog')!}>
       <Transition enterClass="opacity-0" enterToClass="opacity-100" exitClass="opacity-100" exitToClass="opacity-0">
         {props.open && (
           <div

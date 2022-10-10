@@ -8,11 +8,12 @@ interface Props {
   color?: 'default' | 'primary';
   disabled?: boolean;
   onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>;
+  class?: string;
 }
 export const Button: ParentComponent<Props> = (props) => {
   const colorClasses = createMemo(() => {
     return match(props.color ?? 'default')
-      .with('default', () => windi`bg-white`)
+      .with('default', () => windi`bg-white hover:bg-gray-100 border-gray-400`)
       .with(
         'primary',
         () =>
@@ -23,7 +24,11 @@ export const Button: ParentComponent<Props> = (props) => {
 
   return (
     <button
-      class={clsx(windi`border rounded px-4 py-1 disabled:opacity-50 disabled:cursor-not-allowed`, colorClasses())}
+      class={clsx(
+        windi`border rounded px-4 py-1 disabled:opacity-50 disabled:cursor-not-allowed flex flex-row items-center justify-center`,
+        colorClasses(),
+        props.class,
+      )}
       disabled={props.disabled}
       onClick={props.onClick}
     >

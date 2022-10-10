@@ -1,4 +1,5 @@
 import { Component, For, Show } from 'solid-js';
+import { BookOpenIcon } from '../../../../../../../component/Icons';
 import { useBookDataContext } from '../../Context';
 import { BookmarkButton } from './components/BookmarkButton';
 
@@ -9,11 +10,15 @@ export const BookmarksTabContent: Component<Props> = (props) => {
   const bookCtx = useBookDataContext();
 
   return (
-    <div class="w-full h-full overflow-y-auto p-2 flex flex-col gap-y-2">
+    <div class="w-full h-full overflow-y-auto px-2 py-1 flex flex-col gap-y-2">
       <Show when={bookCtx.book().pages.at(0)}>
         {(firstPage) => (
-          <button class="rounded border p-2 text-left" onClick={() => props.onPageOpenRequested(firstPage)}>
-            最初のページを開く
+          <button
+            class="rounded border p-2 flex flex-row items-center gap-x-1 hover:bg-gray-100"
+            onClick={() => props.onPageOpenRequested(firstPage)}
+          >
+            <BookOpenIcon />
+            <span>最初のページを開く</span>
           </button>
         )}
       </Show>

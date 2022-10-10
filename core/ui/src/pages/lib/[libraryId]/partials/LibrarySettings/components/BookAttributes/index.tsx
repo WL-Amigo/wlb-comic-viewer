@@ -1,6 +1,7 @@
 import { Component, For, Index } from 'solid-js';
 import { Button } from '../../../../../../../component/Button';
 import { FormTopGroupLabel } from '../../../../../../../component/Form/Group';
+import { PlusIcon } from '../../../../../../../component/Icons';
 import { BookAttributeSettingsFormValues, createNewBookAttributeSettingsValues } from '../../viewModels';
 import { BookAttributeSettingsViewAndEditor } from './AttributeSettingsEditor';
 
@@ -27,8 +28,9 @@ export const LibrarySettingsBookAttributesPage: Component<Props> = (props) => {
             <BookAttributeSettingsViewAndEditor attribute={item} onChange={(attr) => change(index(), attr)} />
           )}
         </For>
-        <Button color="primary" onClick={add}>
-          追加 ➕
+        <Button class="gap-x-1" color="primary" onClick={add}>
+          <PlusIcon />
+          <span>追加</span>
         </Button>
       </div>
     </div>

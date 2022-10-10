@@ -1,7 +1,8 @@
 import { BookAttributeSettings } from '@local-core/interfaces';
-import { Component, createSignal, Index, Show } from 'solid-js';
+import { Component, createMemo, createSignal, Index, Show } from 'solid-js';
 import { Button } from '../../../../../component/Button';
-import { isNotNullOrUndefined } from '../../../../../utils/emptiness';
+import { CaretDownIcon, CaretRightIcon, FilterIcon, FilterSolidIcon } from '../../../../../component/Icons';
+import { areAllValuesEmpty, isNotNullOrUndefined } from '../../../../../utils/emptiness';
 import {
   LibraryBooksAttributeSearchParams,
   LibraryBooksSearchParams,
@@ -39,22 +40,31 @@ export const LibraryBooksFilterConditions: Component = () => {
       .filter(isNotNullOrUndefined)
       .join('、');
   };
+  const isConditionEmpty = createMemo(() => areAllValuesEmpty([currentParams().isRead, currentParams().attributes]));
 
   return (
-    <div class="flex flex-col gap-y-1 px-2">
-      <div class="flex flex-row gap-x-2 cursor-pointer" onClick={() => setIsOpen((prev) => !prev)}>
-        <span>{open() ? '▼' : '▶'}</span>
-        <span>フィルタ</span>
-        <span>{currentParamsStringified()}</span>
+    <div class="px-2">
+      <div class="flex flex-col gap-y-1 border border-gray-400 rounded">
+        <div
+          class="flex flex-row items-center gap-x-2 cursor-pointer hover:bg-gray-100 p-1"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {open() ? <CaretDownIcon /> : <CaretRightIcon />}
+          {isConditionEmpty() ? <FilterIcon /> : <FilterSolidIcon />}
+          <span>フィルタ</span>
+          <span>{currentParamsStringified()}</span>
+        </div>
+        <Show when={open()}>
+          <div class="px-2 pb-1">
+            <ConditionsSetter
+              initParams={currentParams()}
+              bookAttributeSettings={libCtx.library.attributes}
+              onDetermined={onDeterminedParams}
+              onCancel={() => setIsOpen(false)}
+            />
+          </div>
+        </Show>
       </div>
-      <Show when={open()}>
-        <ConditionsSetter
-          initParams={currentParams()}
-          bookAttributeSettings={libCtx.library.attributes}
-          onDetermined={onDeterminedParams}
-          onCancel={() => setIsOpen(false)}
-        />
-      </Show>
     </div>
   );
 };

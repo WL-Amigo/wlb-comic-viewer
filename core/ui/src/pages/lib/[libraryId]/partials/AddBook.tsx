@@ -1,6 +1,7 @@
 import { Component, createMemo, createResource, createSignal, Show } from 'solid-js';
 import { Button } from '../../../../component/Button';
 import { DirectorySelector } from '../../../../component/DirectorySelector';
+import { PlusIcon } from '../../../../component/Icons';
 import { ModalBase } from '../../../../component/ModalBase';
 import { useService } from '../../../../compositions/Dependency';
 import { useLibraryDataContext } from '../Context';
@@ -33,10 +34,11 @@ export const AddBookButton: Component<AddBookButtonProps> = (props) => {
   return (
     <>
       <button
-        class="text-left border rounded p-2 text-lg no-underline text-black bg-blue-50 hover:bg-blue-100"
+        class="flex flex-row items-center gap-x-1 border rounded p-2 text-lg no-underline text-black bg-blue-50 hover:bg-blue-100"
         onClick={() => setIsDialogOpen(true)}
       >
-        ブックを追加する
+        <PlusIcon />
+        <span>ブックを追加する</span>
       </button>
       <AddBookDialog isOpen={isDialogOpen()} onDetermined={addBook} onCancel={closeDialog} />
     </>

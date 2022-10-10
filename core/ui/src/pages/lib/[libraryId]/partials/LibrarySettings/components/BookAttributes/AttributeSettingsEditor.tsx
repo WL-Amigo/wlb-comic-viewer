@@ -3,6 +3,7 @@ import { Component, createSignal } from 'solid-js';
 import { Button } from '../../../../../../../component/Button';
 import { TextInput } from '../../../../../../../component/Form/Inputs';
 import { SelectInput, SelectOption } from '../../../../../../../component/Form/Inputs/Select';
+import { CheckIcon, EditIcon, XIcon } from '../../../../../../../component/Icons';
 import { BookAttributeSettingsFormValues } from '../../viewModels';
 
 interface Props {
@@ -41,7 +42,9 @@ const Viewer: Component<ViewerProps> = (props) => {
       <div class="flex flex-row justify-between">
         <div class="text-lg font-medium">{props.attribute.displayName}</div>
         <div class="flex flex-row gap-x-2">
-          <Button onClick={props.onEnterEditMode}>📝</Button>
+          <Button onClick={props.onEnterEditMode}>
+            <EditIcon />
+          </Button>
         </div>
       </div>
       <div class="text-gray-500 grid gap-2 grid-cols-1 md:grid-cols-2">
@@ -91,9 +94,11 @@ const Editor: Component<EditorProps> = (props) => {
         <div>{values().id}</div>
       )}
       <div class="col-span-full flex flex-row justify-end gap-x-2">
-        <Button onClick={props.onCancel}>❌</Button>
+        <Button onClick={props.onCancel}>
+          <XIcon />
+        </Button>
         <Button onClick={() => props.onFinishEdit(values())} disabled={hasValidationError()} color="primary">
-          ✅
+          <CheckIcon />
         </Button>
       </div>
     </div>

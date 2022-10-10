@@ -1,14 +1,43 @@
 import clsx from 'clsx';
-import { createSignal, ParentComponent, VoidComponent } from 'solid-js';
+import { Component, createMemo, createSignal, VoidComponent } from 'solid-js';
+import {
+  BookmarkIcon,
+  BookmarkSolidIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExitFullscreenIcon,
+  FullscreenIcon,
+  IconComponent,
+  LeftArrowIcon,
+  RightArrowIcon,
+  XIcon,
+} from '../../../../../../../../../component/Icons';
 import { createDebouncedFn } from '../../../../../../../../../utils/debounce';
 import { windi } from '../../../../../../../../../utils/windi';
 import { useDrawInputEvents } from './compositions/Draw';
 
-const ViewerButton: ParentComponent<{ onClick: () => void; class?: string }> = (props) => (
-  <button class={clsx(windi`bg-black/75 absolute p-2 text-white`, props.class)} onClick={props.onClick}>
-    {props.children}
-  </button>
-);
+interface ViewerButtonProps {
+  onClick: () => void;
+  Icon: IconComponent;
+  label: string;
+  iconSide?: 'left' | 'right';
+  class?: string;
+}
+const ViewerButton: Component<ViewerButtonProps> = (props) => {
+  const iconEl = createMemo(() => <props.Icon class="w-10 h-10 md:h-6 md:w-6" />);
+  const iconSide = createMemo(() => props.iconSide ?? 'left');
+
+  return (
+    <button
+      class={clsx(windi`bg-black/75 absolute p-2 text-white flex flex-row gap-x-1 items-center`, props.class)}
+      onClick={props.onClick}
+    >
+      {iconSide() === 'left' && iconEl()}
+      <span class="hidden md:block">{props.label}</span>
+      {iconSide() === 'right' && iconEl()}
+    </button>
+  );
+};
 
 interface Props {
   onNext: () => void;
@@ -34,8 +63,18 @@ export const BookViewerOperator: VoidComponent<Props> = (props) => {
   return (
     <div class="absolute inset-0 w-full h-full">
       <div class="pointer-events-none absolute bottom-0 w-full pb-8 text-white flex flex-row justify-center">
-        {drawingDirection() === 'left' && <span>次へ</span>}
-        {drawingDirection() === 'right' && <span>前へ</span>}
+        {drawingDirection() === 'left' && (
+          <div class="flex flex-col items-center">
+            <RightArrowIcon class="w-12 h-12" />
+            <span>次へ</span>
+          </div>
+        )}
+        {drawingDirection() === 'right' && (
+          <div class="flex flex-col items-center">
+            <LeftArrowIcon class="w-12 h-12" />
+            <span>前へ</span>
+          </div>
+        )}
       </div>
 
       <div
@@ -46,23 +85,29 @@ export const BookViewerOperator: VoidComponent<Props> = (props) => {
         onClick={showControls}
         {...handlers}
       >
-        <ViewerButton class="left-0 top-0" onClick={props.onClose}>
-          閉じる
-        </ViewerButton>
+        <ViewerButton class="left-0 top-0" onClick={props.onClose} Icon={XIcon} label="閉じる" />
         <div class="absolute top-0 right-0 flex flex-row w-auto">
-          <ViewerButton class="relative" onClick={props.toggleBookmark}>
-            {props.isBookmarked ? 'ブックマーク解除' : 'ブックマークする'}
-          </ViewerButton>
-          <ViewerButton class="relative" onClick={props.onToggleFullScreen}>
-            {props.isFullScreen ? '全画面を終了' : '全画面にする'}
-          </ViewerButton>
+          <ViewerButton
+            class="relative"
+            onClick={props.toggleBookmark}
+            Icon={props.isBookmarked ? BookmarkSolidIcon : BookmarkIcon}
+            label={props.isBookmarked ? 'ブックマーク解除' : 'ブックマークする'}
+          />
+          <ViewerButton
+            class="relative"
+            onClick={props.onToggleFullScreen}
+            Icon={props.isFullScreen ? ExitFullscreenIcon : FullscreenIcon}
+            label={props.isFullScreen ? '全画面を終了' : '全画面にする'}
+          />
         </div>
-        <ViewerButton class="left-0 bottom-0" onClick={props.onPrev}>
-          前へ
-        </ViewerButton>
-        <ViewerButton class="right-0 bottom-0" onClick={props.onNext}>
-          次へ
-        </ViewerButton>
+        <ViewerButton class="left-0 bottom-0" onClick={props.onPrev} Icon={ChevronLeftIcon} label="前へ" />
+        <ViewerButton
+          class="right-0 bottom-0"
+          onClick={props.onNext}
+          Icon={ChevronRightIcon}
+          iconSide="right"
+          label="次へ"
+        />
       </div>
     </div>
   );

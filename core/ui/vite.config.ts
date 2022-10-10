@@ -2,9 +2,10 @@ import { defineConfig } from 'vite';
 import { resolve as pathResolve } from 'node:path';
 import solidPlugin from 'vite-plugin-solid';
 import windiCSS from 'vite-plugin-windicss';
+import iconsPlugin from 'unplugin-icons/vite';
 
 export default defineConfig({
-  plugins: [solidPlugin(), windiCSS()],
+  plugins: [solidPlugin(), windiCSS(), iconsPlugin({ compiler: 'solid', defaultClass: 'w-6 h-6' })],
   server: {
     port: 3000,
   },

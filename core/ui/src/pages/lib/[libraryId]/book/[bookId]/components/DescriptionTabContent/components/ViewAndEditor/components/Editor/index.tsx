@@ -4,6 +4,7 @@ import { Component, createSignal } from 'solid-js';
 import { match } from 'ts-pattern';
 import { Button } from '../../../../../../../../../../../component/Button';
 import { TextInput } from '../../../../../../../../../../../component/Form/Inputs';
+import { CheckIcon, XIcon } from '../../../../../../../../../../../component/Icons';
 
 const filterOnlyIntRegexp = /(\d+)/;
 
@@ -28,8 +29,12 @@ export const BookAttributeEditor: Component<Props> = (props) => {
 
   return (
     <div class="flex flex-row gap-x-2">
-      <Button onClick={onDeterminedLocal}>✅</Button>
-      <Button onClick={props.onCancel}>✖️</Button>
+      <Button onClick={onDeterminedLocal}>
+        <CheckIcon />
+      </Button>
+      <Button onClick={props.onCancel}>
+        <XIcon />
+      </Button>
       <TextInput class="flex-1 max-w-screen-md" value={value()} onChange={onInput} />
     </div>
   );

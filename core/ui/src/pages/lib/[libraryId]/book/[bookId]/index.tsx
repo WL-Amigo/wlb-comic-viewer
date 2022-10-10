@@ -1,12 +1,14 @@
 import clsx from 'clsx';
 import { Link } from 'solid-app-router';
 import { Component, createSignal, Match, ParentComponent, Switch } from 'solid-js';
+import { CheckCircleIcon, UndoIcon } from '../../../../../component/Icons';
 import { windi } from '../../../../../utils/windi';
 import { useLibraryDataContext } from '../../Context';
 import { AllPagesTabContent } from './components/AllPagesTabContent';
 import { BookmarksTabContent } from './components/BookmarksTabContent';
 import { BookViewer } from './components/BookViewer';
 import { BookDescriptionTabContent } from './components/DescriptionTabContent';
+import { IsReadMark } from './components/PageParts';
 import { useBookmarkHandler } from './compositions/Bookmark';
 import { useBookDataContext } from './Context';
 
@@ -44,20 +46,20 @@ export const BookMainPage: Component = () => {
   return (
     <div class="container mx-auto w-full h-full overflow-hidden flex flex-col">
       <div class="flex-shrink-0 p-2 flex flex-row items-center gap-x-2">
-        <Link class="px-2 py-1 hover:bg-gray-100 no-underline text-black" href="../..">
-          ＜ライブラリへ戻る
+        <Link
+          class="no-underline text-black flex flex-row items-center gap-x-1 bg-gray-50 hover:bg-gray-100 p-1"
+          href="../.."
+        >
+          <UndoIcon />
+          <span class="hidden md:block">ライブラリへ戻る</span>
         </Link>
         <span class="text-xl">
           {libCtx.library.name}/{bookCtx.book().name}
         </span>
-        <div class="pl-8 flex flex-row gap-x-2">
-          {bookCtx.book().isRead && (
-            <div class="flex flex-row gap-x-1">
-              <span>✅</span>
-              <span>読了</span>
-            </div>
-          )}
-        </div>
+        <IsReadMark class="hidden md:flex ml-8" isRead={bookCtx.book().isRead} />
+      </div>
+      <div class="md:hidden flex flex-row px-4 pb-2">
+        <IsReadMark isRead={bookCtx.book().isRead} />
       </div>
       <div class="flex-shrink-0 py-1 px-2 flex flex-row gap-x-2">
         <TabButton isActive={tab() === 'bookmarks'} onClick={() => setTab('bookmarks')}>
