@@ -2,6 +2,7 @@ import { Accessor, Component, createEffect, createMemo, createSignal, Show } fro
 import { ModalBase } from '../../../../../../../component/ModalBase';
 import { useService } from '../../../../../../../compositions/Dependency';
 import { createDocumentFullScreenSignal } from '../../../../../../../compositions/FullScreenState';
+import { preloadImage } from '../../../../../../../utils/preloadImage';
 import { useLibraryDataContext } from '../../../../Context';
 import { useBookDataContext } from '../../Context';
 import { BookViewerOperator } from './components/Operator';
@@ -71,6 +72,14 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
       props.onToggleBookmark(currentPage);
     }
   };
+
+  createEffect(() => {
+    const nextPage = bookCtx.book().pages.at(currentImageIndex() + 1);
+    if (nextPage === undefined) {
+      return;
+    }
+    preloadImage(bookService.getBookPageUrl(libCtx.library.id, bookCtx.book().id, nextPage));
+  });
 
   return (
     <div class="w-full h-full relative" onClick={(ev) => ev.stopPropagation()}>
