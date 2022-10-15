@@ -16,6 +16,7 @@ import (
 	"github.com/private-gallery-server/env"
 	"github.com/private-gallery-server/graphql/generated"
 	"github.com/private-gallery-server/graphql/resolvers"
+	"github.com/private-gallery-server/services/cache_layer_database"
 	"github.com/private-gallery-server/services/directory"
 	"github.com/private-gallery-server/services/json_file_database"
 	"github.com/private-gallery-server/services/library"
@@ -38,7 +39,11 @@ func main() {
 	// construct services
 	directoryServiceInst := directory.CreateDirectoryService(env)
 	databaseInst := json_file_database.CreateJsonFileDatabase(env)
-	libraryServiceInst := library.CreateLibraryService(env, databaseInst, databaseInst)
+	cacheLayerDatabaseInst := cache_layer_database.CreateCacheLayerDatabase(
+		databaseInst,
+		databaseInst,
+	)
+	libraryServiceInst := library.CreateLibraryService(env, cacheLayerDatabaseInst, cacheLayerDatabaseInst)
 
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(

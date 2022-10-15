@@ -7,6 +7,7 @@ import (
 
 	"github.com/private-gallery-server/models"
 	"github.com/private-gallery-server/utils"
+	"golang.org/x/exp/slices"
 )
 
 type BooksFilter struct {
@@ -30,17 +31,14 @@ func filterBooks(books []models.BookModelBase, pred func(b models.BookModelBase)
 }
 
 func (s *LibraryService) GetAllBooksInLibrary(libraryId string) ([]models.BookModelBase, error) {
-	cacheBooks, ok := s.booksCacheMap[libraryId]
-	if ok {
-		return cacheBooks, nil
-	}
-
 	books, err := s.dbReader.ReadBooks(libraryId)
 	if err != nil {
 		return nil, err
 	}
-	s.booksCacheMap[libraryId] = books
 
+	slices.SortFunc(books, func(a, b models.BookModelBase) bool {
+		return a.Name < b.Name
+	})
 	return books, nil
 }
 
@@ -86,18 +84,7 @@ func getAllPagesInBook(dirFullPath string) ([]string, error) {
 }
 
 func (s *LibraryService) ReadBookBase(libraryId string, bookId models.BookId) (models.BookModelBase, error) {
-	cacheBook, ok := s.bookCacheMap[getBookBaseCacheKey(libraryId, bookId)]
-	if ok {
-		return cacheBook, nil
-	}
-
-	bookBase, err := s.dbReader.ReadBook(libraryId, bookId)
-	if err != nil {
-		return models.BookModelBase{}, err
-	}
-	s.bookCacheMap[getBookBaseCacheKey(libraryId, bookId)] = bookBase
-
-	return bookBase, nil
+	return s.dbReader.ReadBook(libraryId, bookId)
 }
 
 func (s *LibraryService) ReadBook(libraryId string, bookId models.BookId) (models.BookModelDetail, error) {
@@ -152,7 +139,6 @@ func (s *LibraryService) CreateBook(libraryId string, bookDir string, settings m
 	if err != nil {
 		return "", err
 	}
-	delete(s.booksCacheMap, libraryId)
 	return id, nil
 }
 
@@ -192,8 +178,6 @@ func (s *LibraryService) UpdateBook(libraryId string, bookId string, input model
 		return "", err
 	}
 
-	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
-
 	return bookIdLocal, nil
 }
 
@@ -219,8 +203,6 @@ func (s *LibraryService) UpdateKnownPagesInBook(libraryId string, bookId string)
 	if err != nil {
 		return nil, err
 	}
-
-	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
 
 	return imageFilePaths, nil
 }
@@ -256,8 +238,6 @@ func (s *LibraryService) MarkAsReadPage(libraryId string, bookId string, pages [
 		return nil, err
 	}
 
-	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
-
 	return pages, nil
 }
 
@@ -281,8 +261,6 @@ func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation fu
 	if err != nil {
 		return err
 	}
-
-	delete(s.bookCacheMap, getBookBaseCacheKey(libraryId, bookIdLocal))
 
 	return nil
 }
