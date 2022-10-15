@@ -57,15 +57,16 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
 
   useMarkAsReadEffect(() => bookCtx.book().pages[currentImageIndex()]);
 
+  const getCurrentPage = () => bookCtx.book().pages.at(currentImageIndex());
   const isCurrentPageBookmarked = createMemo(() => {
-    const currentPage = bookCtx.book().pages.at(currentImageIndex());
+    const currentPage = getCurrentPage();
     if (currentPage === undefined) {
       return false;
     }
     return bookCtx.book().bookmarks.find((bm) => bm.page === currentPage) !== undefined;
   });
   const toggleBookmarkLocal = () => {
-    const currentPage = bookCtx.book().pages.at(currentImageIndex());
+    const currentPage = getCurrentPage();
     if (currentPage !== undefined) {
       props.onToggleBookmark(currentPage);
     }
@@ -89,6 +90,7 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
         isFullScreen={isFullScreen()}
         isBookmarked={isCurrentPageBookmarked()}
         toggleBookmark={toggleBookmarkLocal}
+        pageName={getCurrentPage() ?? ''}
       />
     </div>
   );

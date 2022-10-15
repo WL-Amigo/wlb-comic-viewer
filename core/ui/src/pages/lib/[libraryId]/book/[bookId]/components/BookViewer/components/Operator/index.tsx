@@ -47,6 +47,7 @@ interface Props {
   isBookmarked: boolean;
   toggleBookmark: () => void;
   isFullScreen: boolean;
+  pageName: string;
 }
 export const BookViewerOperator: VoidComponent<Props> = (props) => {
   const [isControlsVisible, setIsControlsVisible] = createSignal(false);
@@ -99,6 +100,9 @@ export const BookViewerOperator: VoidComponent<Props> = (props) => {
             Icon={props.isFullScreen ? ExitFullscreenIcon : FullscreenIcon}
             label={props.isFullScreen ? '全画面を終了' : '全画面にする'}
           />
+        </div>
+        <div class="absolute w-full px-16 bottom-8 flex flex-col items-center">
+          <div class="bg-black/25 text-white p-1">{props.pageName}</div>
         </div>
         <ViewerButton class="left-0 bottom-0" onClick={props.onPrev} Icon={ChevronLeftIcon} label="前へ" />
         <ViewerButton

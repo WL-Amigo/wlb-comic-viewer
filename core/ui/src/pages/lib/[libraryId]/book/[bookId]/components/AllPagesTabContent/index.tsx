@@ -54,7 +54,7 @@ const PageButton: Component<ButtonProps> = (props) => {
         onClick={() => props.onPageOpenRequested(props.pageName)}
       >
         <BookOpenIcon />
-        <span>{props.pageName}</span>
+        <span class="truncate">{props.pageName}</span>
       </button>
     </div>
   );
