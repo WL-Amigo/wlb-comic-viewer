@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { Link } from 'solid-app-router';
 import { Component, createSignal, Match, ParentComponent, Switch } from 'solid-js';
-import { CheckCircleIcon, UndoIcon } from '../../../../../component/Icons';
+import { UndoIcon } from '../../../../../component/Icons';
 import { windi } from '../../../../../utils/windi';
 import { useLibraryDataContext } from '../../Context';
 import { AllPagesTabContent } from './components/AllPagesTabContent';
@@ -10,6 +10,7 @@ import { BookViewer } from './components/BookViewer';
 import { BookDescriptionTabContent } from './components/DescriptionTabContent';
 import { IsReadMark } from './components/PageParts';
 import { useBookmarkHandler } from './compositions/Bookmark';
+import { useBookViewerOpenState } from './compositions/BookViewerOpenState';
 import { useBookDataContext } from './Context';
 
 type TabKeys = 'bookmarks' | 'pages' | 'descriptions';
@@ -30,7 +31,7 @@ export const BookMainPage: Component = () => {
   const libCtx = useLibraryDataContext();
   const bookCtx = useBookDataContext();
   const [tab, setTab] = createSignal<TabKeys>('bookmarks');
-  const [isViewerOpen, setIsViewerOpen] = createSignal(false);
+  const [isViewerOpen, setIsViewerOpen] = useBookViewerOpenState();
   const [firstOpenPageIndex, setFirstOpenPageIndex] = createSignal(0);
   const onPageOpenRequested = (pageName: string) => {
     const idx = bookCtx.book().pages.indexOf(pageName);
