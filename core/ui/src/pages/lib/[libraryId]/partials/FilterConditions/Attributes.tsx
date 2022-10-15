@@ -2,6 +2,7 @@ import { Component, createMemo } from 'solid-js';
 import { Button } from '../../../../../component/Button';
 import { TextInput } from '../../../../../component/Form/Inputs';
 import { SelectInput, SelectOption } from '../../../../../component/Form/Inputs/Select';
+import { TrashIcon } from '../../../../../component/Icons';
 
 export interface BooksFilterAttributeOptionViewModel {
   id: string;
@@ -27,7 +28,9 @@ export const BooksFilterConditionsAttributeFilterSetter: Component<Props> = (pro
       <span>に</span>
       <TextInput class="w-32" value={props.currentValue} onChange={props.onChangeValue} />
       <span>を含む</span>
-      <Button onClick={props.onDelete}>🗑️</Button>
+      <Button onClick={props.onDelete}>
+        <TrashIcon />
+      </Button>
     </div>
   );
 };

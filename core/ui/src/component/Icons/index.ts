@@ -21,6 +21,9 @@ import FullscreenIcon from 'virtual:icons/bx/fullscreen';
 import ExitFullscreenIcon from 'virtual:icons/bx/exit-fullscreen';
 import LeftArrowIcon from 'virtual:icons/bx/left-arrow-alt';
 import RightArrowIcon from 'virtual:icons/bx/right-arrow-alt';
+import TrashIcon from 'virtual:icons/bxs/trash';
+import FolderIcon from 'virtual:icons/bx/folder';
+import FolderOpenIcon from 'virtual:icons/bx/folder-open';
 import type { ComponentProps } from 'solid-js';
 import type { JSX } from 'solid-js/jsx-runtime';
 
@@ -50,4 +53,7 @@ export {
   ExitFullscreenIcon,
   LeftArrowIcon,
   RightArrowIcon,
+  TrashIcon,
+  FolderIcon,
+  FolderOpenIcon,
 };

@@ -1,7 +1,7 @@
 import { BookAttributeSettings } from '@local-core/interfaces';
 import { Component, createMemo, createSignal, Index, Show } from 'solid-js';
 import { Button } from '../../../../../component/Button';
-import { CaretDownIcon, CaretRightIcon, FilterIcon, FilterSolidIcon } from '../../../../../component/Icons';
+import { CaretDownIcon, CaretRightIcon, FilterIcon, FilterSolidIcon, PlusIcon } from '../../../../../component/Icons';
 import { areAllValuesEmpty, isNotNullOrUndefined } from '../../../../../utils/emptiness';
 import {
   LibraryBooksAttributeSearchParams,
@@ -144,7 +144,10 @@ const ConditionsSetter: Component<SetterProps> = (props) => {
               />
             )}
           </Index>
-          <Button onClick={onAddAttribute}>➕ 追加</Button>
+          <Button onClick={onAddAttribute}>
+            <PlusIcon />
+            <span>追加</span>
+          </Button>
         </div>
       </div>
       <div class="col-span-full flex flex-row justify-end gap-x-2">

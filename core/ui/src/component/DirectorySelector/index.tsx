@@ -3,6 +3,7 @@ import { Component, createMemo, createResource, createSignal, For, Show } from '
 import { useService } from '../../compositions/Dependency';
 import { windi } from '../../utils/windi';
 import { Button } from '../Button';
+import { FolderIcon, FolderOpenIcon } from '../Icons';
 import { ModalBase } from '../ModalBase';
 
 interface Props {
@@ -87,11 +88,11 @@ const DirEntry: Component<DirEntryProps> = (props) => {
 
   return (
     <div class="flex flex-col">
-      <div class={clsx(windi`flex flex-row gap-x-2`, isSelected() && windi`bg-blue-100`)}>
-        <button class="text-left" onClick={() => setIsOpen((prev) => !prev)}>
-          {isOpen() ? '-' : '+'}
+      <div class={clsx(windi`flex flex-row gap-x-2 items-center`, isSelected() && windi`bg-blue-100`)}>
+        <button class="flex" onClick={() => setIsOpen((prev) => !prev)}>
+          {isOpen() ? <FolderOpenIcon /> : <FolderIcon />}
         </button>
-        <button class="text-left" onClick={() => props.onSelect(props.self)}>
+        <button class="flex flex-row justify-start" onClick={() => props.onSelect(props.self)}>
           {selfName()}
         </button>
       </div>
