@@ -32,6 +32,7 @@ extend type Mutation {
   deleteBook(libraryId: ID!, bookId: ID!): ID!
   bookUpdateKnownPages(libraryId: ID!, bookId: ID!): [String!]!
   bookPageMarkAsRead(libraryId: ID!, bookId: ID!, page: String!): String!
+  bookUpdateAttribute(libraryId: ID!, bookId: ID!, input: [BookAttributeInput!]!): ID!
   bookPageCreateBookmark(libraryId: ID!, bookId: ID!, page: String!, option: BookBookmarkInput): String!
   bookPageDeleteBookmark(libraryId: ID!, bookId: ID!, page: String!): String!
 }

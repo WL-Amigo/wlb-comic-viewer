@@ -1,27 +1,31 @@
 package adapters
 
 import (
-	"github.com/private-gallery-server/graphql/model"
+	gqlmodel "github.com/private-gallery-server/graphql/model"
 	"github.com/private-gallery-server/models"
 )
 
-func CastGqlBookAttributeValueTypeEnum(gqlVt model.BookAttributeValueTypeEnum) models.BookAttributeValueTypeEnum {
+func CastGqlBookAttributeValueTypeEnum(gqlVt gqlmodel.BookAttributeValueTypeEnum) models.BookAttributeValueTypeEnum {
 	switch gqlVt {
-	case model.BookAttributeValueTypeEnumString:
+	case gqlmodel.BookAttributeValueTypeEnumString:
 		return models.BookAttributeValueTypeString
-	case model.BookAttributeValueTypeEnumInt:
+	case gqlmodel.BookAttributeValueTypeEnumInt:
 		return models.BookAttributeValueTypeInt
+	case gqlmodel.BookAttributeValueTypeEnumTag:
+		return models.BookAttributeValueTypeTag
 	default:
 		panic("invalid enum")
 	}
 }
 
-func CastModelBookAttributeValueTypeEnum(modelVt models.BookAttributeValueTypeEnum) model.BookAttributeValueTypeEnum {
+func CastModelBookAttributeValueTypeEnum(modelVt models.BookAttributeValueTypeEnum) gqlmodel.BookAttributeValueTypeEnum {
 	switch modelVt {
 	case models.BookAttributeValueTypeString:
-		return model.BookAttributeValueTypeEnumString
+		return gqlmodel.BookAttributeValueTypeEnumString
 	case models.BookAttributeValueTypeInt:
-		return model.BookAttributeValueTypeEnumInt
+		return gqlmodel.BookAttributeValueTypeEnumInt
+	case models.BookAttributeValueTypeTag:
+		return gqlmodel.BookAttributeValueTypeEnumTag
 	default:
 		panic("invalid enum")
 	}

@@ -27,6 +27,7 @@ importers:
       graphql-request: ^4.3.0
       graphql-tag: ^2.12.6
       solid-js: ^1.4.7
+      ts-pattern: ^4.0.5
       tsx: ^3.10.1
       typescript: ^4.7.4
       vite: ^3.0.0
@@ -37,6 +38,7 @@ importers:
       '@local-core/ui': link:../../core/ui
       graphql-request: 4.3.0_graphql@16.5.0
       solid-js: 1.4.7
+      ts-pattern: 4.0.5
       zod: 3.19.1
     devDependencies:
       '@graphql-codegen/cli': 2.9.1_yxdwfmx2tmyjmuq6nuicg4r45i

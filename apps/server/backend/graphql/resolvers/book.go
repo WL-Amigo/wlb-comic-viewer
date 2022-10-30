@@ -70,6 +70,24 @@ func (r *mutationResolver) BookPageMarkAsRead(ctx context.Context, libraryID str
 	return result[0], nil
 }
 
+// BookUpdateAttribute is the resolver for the bookUpdateAttribute field.
+func (r *mutationResolver) BookUpdateAttribute(ctx context.Context, libraryID string, bookID string, input []*model.BookAttributeInput) (string, error) {
+	attrInput := []models.BookAttribute{}
+	for _, attr := range input {
+		attrInput = append(attrInput, models.BookAttribute{
+			Id:    models.BookAttributeId(attr.ID),
+			Value: attr.Value,
+		})
+	}
+
+	_, err := r.library.UpdateBookAttribute(libraryID, bookID, attrInput)
+	if err != nil {
+		return "", err
+	}
+
+	return bookID, nil
+}
+
 // BookPageCreateBookmark is the resolver for the bookPageCreateBookmark field.
 func (r *mutationResolver) BookPageCreateBookmark(ctx context.Context, libraryID string, bookID string, page string, option *model.BookBookmarkInput) (string, error) {
 	input := models.BookmarkCreateInput{

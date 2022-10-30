@@ -1,5 +1,6 @@
 import {
   Book,
+  BookAttributeCreateParams,
   BookCreateParams,
   BookSettings,
   BookUpdateParams,
@@ -62,10 +63,6 @@ export class BookService implements IBookService, IBookMutationService {
       bookInput: {
         name: params.name,
       },
-      attributesInput: params.attributes?.map((p) => ({
-        id: p.id,
-        value: p.value,
-      })),
     });
 
     return result.updateBook;
@@ -130,5 +127,34 @@ export class BookService implements IBookService, IBookMutationService {
       },
     });
     return result.bookPageCreateBookmark;
+  }
+
+  public async deleteBookmark(
+    libraryId: string,
+    bookId: string,
+    page: string
+  ): Promise<string> {
+    const result = await this.gqlClient.deleteBookmark({
+      libraryId,
+      bookId,
+      page,
+    });
+    return result.bookPageDeleteBookmark;
+  }
+
+  public async updateAttributes(
+    libraryId: string,
+    bookId: string,
+    params: readonly BookAttributeCreateParams[]
+  ): Promise<string> {
+    const result = await this.gqlClient.updateBookAttribute({
+      libraryId,
+      bookId,
+      attributesInput: params.map((attr) => ({
+        id: attr.id,
+        value: attr.value,
+      })),
+    });
+    return result.bookUpdateAttribute;
   }
 }

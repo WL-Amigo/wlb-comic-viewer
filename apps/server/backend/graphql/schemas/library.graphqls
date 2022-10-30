@@ -18,7 +18,7 @@ type Library {
   name: String!
   rootDir: String!
   books(filter: BookFilterParams): [BookMin!]!
-  attributes: [BookAttributeSetting!]!
+  attributes: [BookAttributeSettingUnion!]!
 }
 
 extend type Query {
@@ -40,5 +40,7 @@ extend type Mutation {
   updateLibrary(id: ID!, input: LibraryUpdateInput!): ID!
   createBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingCreateInput!]): [ID!]!
   updateBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingUpdateInput!]): [ID!]!
+  createBookAttributeTag(libraryId: ID!, attributeId: ID!, tag: String!): String!
+  deleteBookAttributeTag(libraryId: ID!, attributeId: ID!, tag: String!): String!
   #deleteLibrary
 }

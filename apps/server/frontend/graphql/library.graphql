@@ -15,9 +15,14 @@ query loadLibrary($libraryId: ID!, $booksFilter: BookFilterParams) {
       isRead
     }
     attributes {
-      id
-      displayName
-      valueType
+      ... on IBookAttributeSetting {
+        id
+        displayName
+        valueType
+      }
+      ... on BookAttributeSettingTag {
+        tags
+      }
     }
   }
 }
@@ -28,9 +33,14 @@ query loadLibrarySettings($libraryId: ID!) {
     name
     rootDir
     attributes {
-      id
-      displayName
-      valueType
+      ... on IBookAttributeSetting {
+        id
+        displayName
+        valueType
+      }
+      ... on BookAttributeSettingTag {
+        tags
+      }
     }
   }
 }
@@ -51,4 +61,28 @@ mutation updateBookAttributeSettings(
   $input: [BookAttributeSettingUpdateInput!]
 ) {
   updateBookAttributeSettings(libraryId: $libraryId, input: $input)
+}
+
+mutation createBookAttributeTag(
+  $libraryId: ID!
+  $attributeId: ID!
+  $tag: String!
+) {
+  createBookAttributeTag(
+    libraryId: $libraryId
+    attributeId: $attributeId
+    tag: $tag
+  )
+}
+
+mutation deleteBookAttributeTag(
+  $libraryId: ID!
+  $attributeId: ID!
+  $tag: String!
+) {
+  deleteBookAttributeTag(
+    libraryId: $libraryId
+    attributeId: $attributeId
+    tag: $tag
+  )
 }

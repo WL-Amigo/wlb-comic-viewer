@@ -8,6 +8,14 @@ import (
 	"strconv"
 )
 
+type BookAttributeSettingUnion interface {
+	IsBookAttributeSettingUnion()
+}
+
+type IBookAttributeSetting interface {
+	IsIBookAttributeSetting()
+}
+
 type Book struct {
 	ID         string           `json:"id"`
 	Name       string           `json:"name"`
@@ -30,17 +38,30 @@ type BookAttributeInput struct {
 	Value string `json:"value"`
 }
 
-type BookAttributeSetting struct {
+type BookAttributeSettingBasic struct {
 	ID          string                     `json:"id"`
 	DisplayName string                     `json:"displayName"`
 	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
 }
+
+func (BookAttributeSettingBasic) IsIBookAttributeSetting()     {}
+func (BookAttributeSettingBasic) IsBookAttributeSettingUnion() {}
 
 type BookAttributeSettingCreateInput struct {
 	ID          *string                    `json:"id"`
 	DisplayName string                     `json:"displayName"`
 	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
 }
+
+type BookAttributeSettingTag struct {
+	ID          string                     `json:"id"`
+	DisplayName string                     `json:"displayName"`
+	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
+	Tags        []string                   `json:"tags"`
+}
+
+func (BookAttributeSettingTag) IsIBookAttributeSetting()     {}
+func (BookAttributeSettingTag) IsBookAttributeSettingUnion() {}
 
 type BookAttributeSettingUpdateInput struct {
 	ID          string                      `json:"id"`
@@ -82,11 +103,11 @@ type BookMin struct {
 }
 
 type Library struct {
-	ID         string                  `json:"id"`
-	Name       string                  `json:"name"`
-	RootDir    string                  `json:"rootDir"`
-	Books      []*BookMin              `json:"books"`
-	Attributes []*BookAttributeSetting `json:"attributes"`
+	ID         string                      `json:"id"`
+	Name       string                      `json:"name"`
+	RootDir    string                      `json:"rootDir"`
+	Books      []*BookMin                  `json:"books"`
+	Attributes []BookAttributeSettingUnion `json:"attributes"`
 }
 
 type LibraryCreateInput struct {
@@ -108,16 +129,18 @@ type BookAttributeValueTypeEnum string
 const (
 	BookAttributeValueTypeEnumString BookAttributeValueTypeEnum = "STRING"
 	BookAttributeValueTypeEnumInt    BookAttributeValueTypeEnum = "INT"
+	BookAttributeValueTypeEnumTag    BookAttributeValueTypeEnum = "TAG"
 )
 
 var AllBookAttributeValueTypeEnum = []BookAttributeValueTypeEnum{
 	BookAttributeValueTypeEnumString,
 	BookAttributeValueTypeEnumInt,
+	BookAttributeValueTypeEnumTag,
 }
 
 func (e BookAttributeValueTypeEnum) IsValid() bool {
 	switch e {
-	case BookAttributeValueTypeEnumString, BookAttributeValueTypeEnumInt:
+	case BookAttributeValueTypeEnumString, BookAttributeValueTypeEnumInt, BookAttributeValueTypeEnumTag:
 		return true
 	}
 	return false

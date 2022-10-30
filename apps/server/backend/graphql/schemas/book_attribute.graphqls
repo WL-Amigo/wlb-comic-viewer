@@ -1,13 +1,31 @@
 enum BookAttributeValueTypeEnum {
   STRING
   INT
+  TAG
 }
 
-type BookAttributeSetting {
+interface IBookAttributeSetting {
   id: ID!
   displayName: String!
   valueType: BookAttributeValueTypeEnum!
 }
+
+type BookAttributeSettingBasic implements IBookAttributeSetting {
+  id: ID!
+  displayName: String!
+  valueType: BookAttributeValueTypeEnum!
+}
+
+type BookAttributeSettingTag implements IBookAttributeSetting {
+  id: ID!
+  displayName: String!
+  valueType: BookAttributeValueTypeEnum!
+  tags: [String!]!
+}
+
+union BookAttributeSettingUnion =
+    BookAttributeSettingBasic
+  | BookAttributeSettingTag
 
 input BookAttributeSettingCreateInput {
   id: ID

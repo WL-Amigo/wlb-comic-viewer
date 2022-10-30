@@ -5,7 +5,7 @@ import { windi } from '../utils/windi';
 import type { JSX } from 'solid-js/jsx-runtime';
 
 interface Props {
-  color?: 'default' | 'primary';
+  color?: 'default' | 'primary' | 'danger';
   disabled?: boolean;
   onClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>;
   class?: string;
@@ -18,6 +18,11 @@ export const Button: ParentComponent<Props> = (props) => {
         'primary',
         () =>
           windi`border-blue-700 bg-blue-700 text-white hover:bg-blue-500 hover:border-blue-500 disabled:hover:bg-blue-700 disabled:hover:border-blue-700`,
+      )
+      .with(
+        'danger',
+        () =>
+          windi`border-red-700 bg-red-700 text-white hover:bg-red-500 hover:border-red-500 disabled:hover:bg-red-700 disabled:hover:border-red-700`,
       )
       .exhaustive();
   });

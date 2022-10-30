@@ -12,23 +12,9 @@ import (
 )
 
 func createLibraryModelFromJsonStruct(lib serializable.LibrarySettingsJson, rootDirPath string) models.LibraryModel {
-	attributes := []models.BookAttributeSettings{}
-	for _, attrJson := range lib.Attributes {
-		model, err := attrJson.ToModel()
-		if err != nil {
-			// TODO: log
-			continue
-		}
-		attributes = append(attributes, model)
-	}
-
 	return models.LibraryModel{
-		Id: lib.Id,
-		LibrarySettings: models.LibrarySettings{
-			Name:       lib.Name,
-			RootDir:    filepath.Clean(lib.RootDir) + "/",
-			Attributes: attributes,
-		},
+		Id:              lib.Id,
+		LibrarySettings: lib.ToSettingsModel(),
 		RootDirFullPath: filepath.Join(rootDirPath, lib.RootDir),
 	}
 }

@@ -1,6 +1,8 @@
 import {
+  BookAttributeSettings,
   BookAttributeSettingsCreateParams,
   BookAttributeSettingsUpdateParams,
+  IBookAttributeSettings,
   ILibraryMutationService,
   ILibraryService,
   LibraryForView,
@@ -8,8 +10,14 @@ import {
   LibrarySettings,
 } from "@local-core/interfaces";
 import { BooksFilterParams } from "@local-core/interfaces/src/Library";
+import { match } from "ts-pattern";
 import { BookAttributeValueTypeOps } from "../enum/BookAttributeValueType";
-import { Sdk } from "../graphql/autogen/gql";
+import {
+  BookAttributeValueTypeEnum,
+  Sdk,
+  BookAttributeSettingBasic as GqlBookAttributeSettingBasic,
+  BookAttributeSettingTag as GqlBookAttributeSettingTag,
+} from "../graphql/autogen/gql";
 
 export class LibraryService
   implements ILibraryService, ILibraryMutationService
@@ -21,17 +29,67 @@ export class LibraryService
     return result.libraries;
   }
 
-  async loadLibrary(libraryId: string, filter?: BooksFilterParams): Promise<LibraryForView> {
-    const result = await this.gqlClient.loadLibrary({ libraryId, booksFilter: {
-      isRead: filter?.isRead,
-      attributes: filter?.attributes
-    } });
-    return result.library;
+  private getAttributeSettings(
+    attr: GqlBookAttributeSettingBasic | GqlBookAttributeSettingTag
+  ): BookAttributeSettings {
+    const base: Omit<IBookAttributeSettings, "valueType"> = {
+      id: attr.id,
+      displayName: attr.displayName,
+    };
+    return match<BookAttributeValueTypeEnum, BookAttributeSettings>(
+      attr.valueType
+    )
+      .with(BookAttributeValueTypeEnum.Int, () => ({
+        valueType: "INT",
+        ...base,
+      }))
+      .with(BookAttributeValueTypeEnum.String, () => ({
+        valueType: "STRING",
+        ...base,
+      }))
+      .with(BookAttributeValueTypeEnum.Tag, () => {
+        if (!("tags" in attr)) {
+          throw new Error("invalid attribute value settings");
+        }
+        return {
+          valueType: "TAG",
+          ...base,
+          tags: attr.tags,
+        };
+      })
+      .exhaustive();
+  }
+
+  async loadLibrary(
+    libraryId: string,
+    filter?: BooksFilterParams
+  ): Promise<LibraryForView> {
+    const { library } = await this.gqlClient.loadLibrary({
+      libraryId,
+      booksFilter: {
+        isRead: filter?.isRead,
+        attributes: filter?.attributes,
+      },
+    });
+    return {
+      id: library.id,
+      name: library.name,
+      books: library.books,
+      attributes: library.attributes.map((attr) =>
+        this.getAttributeSettings(attr)
+      ),
+    };
   }
 
   async loadLibrarySettings(libraryId: string): Promise<LibrarySettings> {
-    const result = await this.gqlClient.loadLibrarySettings({ libraryId });
-    return result.library;
+    const { library } = await this.gqlClient.loadLibrarySettings({ libraryId });
+    return {
+      name: library.name,
+      rootDir: library.rootDir,
+      attributes: library.attributes.map((attr) =>
+        this.getAttributeSettings(attr)
+      ),
+    };
   }
 
   async createLibrary(settings: LibrarySettings): Promise<string> {

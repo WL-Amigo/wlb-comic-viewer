@@ -48,6 +48,7 @@ type BookAttributeValueTypeEnum string
 const (
 	BookAttributeValueTypeString = BookAttributeValueTypeEnum("STRING")
 	BookAttributeValueTypeInt    = BookAttributeValueTypeEnum("INT")
+	BookAttributeValueTypeTag    = BookAttributeValueTypeEnum("TAG")
 )
 
 func CastToBookAttributeValueTypeEnum(str string) (BookAttributeValueTypeEnum, error) {
@@ -56,6 +57,9 @@ func CastToBookAttributeValueTypeEnum(str string) (BookAttributeValueTypeEnum, e
 	}
 	if str == string(BookAttributeValueTypeInt) {
 		return BookAttributeValueTypeInt, nil
+	}
+	if str == string(BookAttributeValueTypeTag) {
+		return BookAttributeValueTypeTag, nil
 	}
 	return "", BookAttributeValueTypeInvalidError
 }

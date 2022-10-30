@@ -31,18 +31,8 @@ mutation createBook(
   )
 }
 
-mutation updateBook(
-  $libraryId: ID!
-  $bookId: ID!
-  $bookInput: BookInput!
-  $attributesInput: [BookAttributeInput!]
-) {
-  updateBook(
-    libraryId: $libraryId
-    bookId: $bookId
-    input: $bookInput
-    attributesInput: $attributesInput
-  )
+mutation updateBook($libraryId: ID!, $bookId: ID!, $bookInput: BookInput!) {
+  updateBook(libraryId: $libraryId, bookId: $bookId, input: $bookInput)
 }
 
 mutation updateBookKnownPages($libraryId: ID!, $bookId: ID!) {
@@ -69,4 +59,16 @@ mutation bookmarkPage(
 
 mutation deleteBookmark($libraryId: ID!, $bookId: ID!, $page: String!) {
   bookPageDeleteBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
+}
+
+mutation updateBookAttribute(
+  $libraryId: ID!
+  $bookId: ID!
+  $attributesInput: [BookAttributeInput!]!
+) {
+  bookUpdateAttribute(
+    libraryId: $libraryId
+    bookId: $bookId
+    input: $attributesInput
+  )
 }

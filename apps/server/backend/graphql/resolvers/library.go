@@ -119,6 +119,24 @@ func (r *mutationResolver) UpdateBookAttributeSettings(ctx context.Context, libr
 	return idStrs, nil
 }
 
+// CreateBookAttributeTag is the resolver for the createBookAttributeTag field.
+func (r *mutationResolver) CreateBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error) {
+	err := r.library.CreateBookAttributeTag(libraryID, models.BookAttributeId(attributeID), tag)
+	if err != nil {
+		return "", err
+	}
+	return tag, nil
+}
+
+// DeleteBookAttributeTag is the resolver for the deleteBookAttributeTag field.
+func (r *mutationResolver) DeleteBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error) {
+	err := r.library.DeleteBookAttributeTag(libraryID, models.BookAttributeId(attributeID), tag)
+	if err != nil {
+		return "", err
+	}
+	return tag, nil
+}
+
 // Libraries is the resolver for the libraries field.
 func (r *queryResolver) Libraries(ctx context.Context) ([]*model.LibraryMin, error) {
 	libraries, err := r.library.GetAllLibraries()
@@ -144,13 +162,23 @@ func (r *queryResolver) Library(ctx context.Context, id string) (*model.Library,
 		return nil, err
 	}
 
-	resultAttrs := []*model.BookAttributeSetting{}
+	resultAttrs := []model.BookAttributeSettingUnion{}
 	for _, attr := range lib.Attributes {
-		resultAttrs = append(resultAttrs, &model.BookAttributeSetting{
-			ID:          string(attr.Id),
-			DisplayName: attr.DisplayName,
-			ValueType:   adapters.CastModelBookAttributeValueTypeEnum(attr.ValueType),
-		})
+		if attr.ValueType == models.BookAttributeValueTypeTag {
+			tags, _ := lib.TagAttributeValues[attr.Id]
+			resultAttrs = append(resultAttrs, &model.BookAttributeSettingTag{
+				ID:          string(attr.Id),
+				DisplayName: attr.DisplayName,
+				ValueType:   adapters.CastModelBookAttributeValueTypeEnum(attr.ValueType),
+				Tags:        tags,
+			})
+		} else {
+			resultAttrs = append(resultAttrs, &model.BookAttributeSettingBasic{
+				ID:          string(attr.Id),
+				DisplayName: attr.DisplayName,
+				ValueType:   adapters.CastModelBookAttributeValueTypeEnum(attr.ValueType),
+			})
+		}
 	}
 
 	return &model.Library{

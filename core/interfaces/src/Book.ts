@@ -55,4 +55,6 @@ export interface IBookMutationService {
   markAsReadPage(libraryId: LibraryId, bookId: BookId, page: string): Promise<string>;
   bookmarkPage(libraryId: LibraryId, bookId: BookId, page: string, isBookmark: boolean): Promise<string>;
   updateBookmark(libraryId: LibraryId, bookId: BookId, page: string, params: BookmarkUpdateParams): Promise<string>;
+  deleteBookmark(libraryId: LibraryId, bookId: BookId, page: string): Promise<string>;
+  updateAttributes(libraryId: LibraryId, bookId: BookId, params: readonly BookAttributeUpdateParams[]): Promise<BookId>;
 }

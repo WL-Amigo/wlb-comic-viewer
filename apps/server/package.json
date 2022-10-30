@@ -16,6 +16,7 @@
     "@local-core/ui": "workspace:*",
     "graphql-request": "^4.3.0",
     "solid-js": "^1.4.7",
+    "ts-pattern": "^4.0.5",
     "zod": "^3.19.1"
   },
   "devDependencies": {
@@ -30,8 +31,8 @@
     "fs-extra": "^10.1.0",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
-    "typescript": "^4.7.4",
     "tsx": "^3.10.1",
+    "typescript": "^4.7.4",
     "vite": "^3.0.0",
     "vite-plugin-solid": "^2.3.0"
   },

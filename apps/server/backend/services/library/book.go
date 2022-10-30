@@ -312,3 +312,32 @@ func (s *LibraryService) DeleteBookmark(libraryId string, bookId string, page st
 	}
 	return page, nil
 }
+
+func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, attrs []models.BookAttribute) ([]models.BookAttribute, error) {
+	latestAttrs := []models.BookAttribute{}
+	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
+		updateAttrMap := map[models.BookAttributeId]models.BookAttribute{}
+		for _, attr := range attrs {
+			updateAttrMap[attr.Id] = attr
+		}
+
+		nextSettings := currentSettings
+		nextAttrs := []models.BookAttribute{}
+		for _, attr := range currentSettings.Attributes {
+			updateAttr, ok := updateAttrMap[attr.Id]
+			if ok {
+				nextAttrs = append(nextAttrs, updateAttr)
+			} else {
+				nextAttrs = append(nextAttrs, attr)
+			}
+		}
+		nextSettings.Attributes = nextAttrs
+		latestAttrs = nextAttrs
+
+		return nextSettings, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return latestAttrs, nil
+}

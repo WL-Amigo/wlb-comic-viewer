@@ -3,6 +3,7 @@ package library
 import (
 	"errors"
 	"path/filepath"
+	"sort"
 
 	"github.com/private-gallery-server/models"
 	"github.com/private-gallery-server/utils"
@@ -125,4 +126,73 @@ func (s *LibraryService) UpdateBookAttributeSettings(id string, input []models.B
 	}
 
 	return updatedAttrIds, nil
+}
+
+func (s *LibraryService) mutateLibrarySettings(id string, mutation func(current models.LibrarySettings) (models.LibrarySettings, error)) error {
+	lib, err := s.GetLibrary(id)
+	if err != nil {
+		return err
+	}
+	settings := lib.LibrarySettings
+
+	settings, err = mutation(settings)
+	if err != nil {
+		return err
+	}
+
+	if _, err := s.dbWriter.UpdateLibrary(id, settings); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *LibraryService) CreateBookAttributeTag(libraryId string, attrId models.BookAttributeId, tag string) error {
+	err := s.mutateLibrarySettings(libraryId, func(current models.LibrarySettings) (models.LibrarySettings, error) {
+		currentTags, _ := current.TagAttributeValues[attrId]
+		nextTagMap := map[string]string{}
+		for _, t := range currentTags {
+			nextTagMap[t] = t
+		}
+
+		nextTagMap[tag] = tag
+
+		nextTags := []string{}
+		for _, t := range nextTagMap {
+			nextTags = append(nextTags, t)
+		}
+		sort.Strings(nextTags)
+		current.TagAttributeValues[attrId] = nextTags
+
+		return current, nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *LibraryService) DeleteBookAttributeTag(libraryId string, attrId models.BookAttributeId, tag string) error {
+	err := s.mutateLibrarySettings(libraryId, func(current models.LibrarySettings) (models.LibrarySettings, error) {
+		currentTags, _ := current.TagAttributeValues[attrId]
+		nextTagMap := map[string]string{}
+		for _, t := range currentTags {
+			nextTagMap[t] = t
+		}
+
+		delete(nextTagMap, tag)
+
+		nextTags := []string{}
+		for _, t := range nextTagMap {
+			nextTags = append(nextTags, t)
+		}
+		sort.Strings(nextTags)
+		current.TagAttributeValues[attrId] = nextTags
+
+		return current, nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

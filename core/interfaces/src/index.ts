@@ -14,7 +14,10 @@ export type { IDirectoryService } from './Directory';
 export { BookAttributeValueTypeEnum } from './BookAttribute';
 export type {
   BookAttributeValueType,
+  IBookAttributeSettings,
   BookAttributeSettings,
+  BookAttributeSettingsBasic,
+  BookAttributeSettingsTag,
   BookAttributeSettingsCreateParams,
   BookAttributeSettingsUpdateParams,
   BookAttribute,

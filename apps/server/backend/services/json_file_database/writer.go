@@ -28,16 +28,7 @@ func (db *JsonFileDatabase) CreateLibrary(model models.LibrarySettings) (string,
 		break
 	}
 
-	attrs := []serializable.BookAttributeSettingJson{}
-	for _, attrModel := range model.Attributes {
-		attrs = append(attrs, serializable.CreateBookAttributeSettingJsonFromModel(attrModel))
-	}
-	libraryRoot.Libraries = append(libraryRoot.Libraries, serializable.LibrarySettingsJson{
-		Id:         id,
-		Name:       model.Name,
-		RootDir:    model.RootDir,
-		Attributes: attrs,
-	})
+	libraryRoot.Libraries = append(libraryRoot.Libraries, serializable.CreateLibrarySettingsJsonFromModel(id, model))
 
 	if err = db.writeLibraryJson(libraryRoot); err != nil {
 		return "", err
@@ -62,16 +53,7 @@ func (db *JsonFileDatabase) UpdateLibrary(id string, model models.LibrarySetting
 
 		isExist = true
 
-		attrs := []serializable.BookAttributeSettingJson{}
-		for _, attrModel := range model.Attributes {
-			attrs = append(attrs, serializable.CreateBookAttributeSettingJsonFromModel(attrModel))
-		}
-		nextLibs = append(nextLibs, serializable.LibrarySettingsJson{
-			Id:         id,
-			Name:       model.Name,
-			RootDir:    model.RootDir,
-			Attributes: attrs,
-		})
+		nextLibs = append(nextLibs, serializable.CreateLibrarySettingsJsonFromModel(id, model))
 	}
 
 	if !isExist {

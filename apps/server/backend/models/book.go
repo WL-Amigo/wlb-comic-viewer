@@ -34,6 +34,7 @@ type BookModelDetail struct {
 
 func CreateBookId(bookDirPath string) BookId {
 	bookDirPath = strings.TrimPrefix(bookDirPath, "/")
+	bookDirPath = strings.TrimSuffix(bookDirPath, "/")
 	b64EncodedDirPath := base64.URLEncoding.EncodeToString([]byte(bookDirPath))
 	return BookId(b64EncodedDirPath)
 }
