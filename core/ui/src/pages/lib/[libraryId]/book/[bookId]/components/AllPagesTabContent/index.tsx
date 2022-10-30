@@ -1,7 +1,9 @@
 import { createVirtualizer, VirtualItem } from '@tanstack/solid-virtual';
-import { Component, createEffect, createSignal, For } from 'solid-js';
-import { BookOpenIcon } from '../../../../../../../component/Icons';
+import { Component, createMemo, createSignal, For } from 'solid-js';
+import { BookOpenIcon, SearchIcon } from '../../../../../../../component/Icons';
 import { useBookDataContext } from '../../Context';
+import { matchSorter } from 'match-sorter';
+import { TextInput } from '../../../../../../../component/Form/Inputs';
 
 interface Props {
   onPageOpenRequested: (pageName: string) => void;
@@ -9,26 +11,42 @@ interface Props {
 export const AllPagesTabContent: Component<Props> = (props) => {
   const bookCtx = useBookDataContext();
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement | null>(null);
+
+  const [keyword, setKeyword] = createSignal('');
+  const filteredPages = createMemo(() => {
+    if (keyword() === '') {
+      return bookCtx.book().pages;
+    }
+
+    return matchSorter(bookCtx.book().pages, keyword());
+  });
+
   const rowVirtualizer = createVirtualizer({
     get count() {
-      return bookCtx.book().pages.length;
+      return filteredPages().length;
     },
     getScrollElement: containerRef,
     estimateSize: () => 42,
   });
 
   return (
-    <div ref={setContainerRef} class="w-full h-full overflow-y-auto px-2">
-      <div class="flex flex-col relative w-full" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
-        <For each={rowVirtualizer.getVirtualItems()}>
-          {(vi) => (
-            <PageButton
-              virtualItem={vi}
-              pageName={bookCtx.book().pages[vi.index]}
-              onPageOpenRequested={props.onPageOpenRequested}
-            />
-          )}
-        </For>
+    <div class="flex flex-col gap-y-2 px-2 pb-2 w-full h-full">
+      <div class="flex flex-row justify-end items-center gap-x-1">
+        <SearchIcon class="w-6 h-6 flex-shrink-0" />
+        <TextInput class="md:w-80" value={keyword()} onChange={setKeyword} />
+      </div>
+      <div ref={setContainerRef} class="w-full flex-1 overflow-y-auto">
+        <div class="flex flex-col relative w-full" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+          <For each={rowVirtualizer.getVirtualItems()}>
+            {(vi) => (
+              <PageButton
+                virtualItem={vi}
+                pageName={filteredPages()[vi.index]}
+                onPageOpenRequested={props.onPageOpenRequested}
+              />
+            )}
+          </For>
+        </div>
       </div>
     </div>
   );

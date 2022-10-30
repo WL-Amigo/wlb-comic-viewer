@@ -24,6 +24,7 @@ import RightArrowIcon from 'virtual:icons/bx/right-arrow-alt';
 import TrashIcon from 'virtual:icons/bxs/trash';
 import FolderIcon from 'virtual:icons/bx/folder';
 import FolderOpenIcon from 'virtual:icons/bx/folder-open';
+import SearchIcon from 'virtual:icons/bx/search';
 import type { ComponentProps } from 'solid-js';
 import type { JSX } from 'solid-js/jsx-runtime';
 
@@ -56,4 +57,5 @@ export {
   TrashIcon,
   FolderIcon,
   FolderOpenIcon,
+  SearchIcon,
 };
