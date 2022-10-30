@@ -13,7 +13,10 @@ export const ModalBase: ParentComponent<Props> = (props) => {
         {props.open && (
           <div
             class="bg-black bg-opacity-75 fixed top-0 left-0 w-full h-full max-h-screen flex items-center justify-center transition-opacity duration-200"
-            onClick={props.onClickAway}
+            onClick={(ev) => {
+              ev.stopPropagation();
+              props.onClickAway?.();
+            }}
           >
             {props.children}
           </div>
