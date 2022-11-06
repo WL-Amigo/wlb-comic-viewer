@@ -29,6 +29,8 @@ export const AllPagesTabContent: Component<Props> = (props) => {
     estimateSize: () => 42,
   });
 
+  const disableVirtualize = () => filteredPages().length <= 50;
+
   return (
     <div class="flex flex-col gap-y-2 px-2 pb-2 w-full h-full">
       <div class="flex flex-row justify-end items-center gap-x-1">
@@ -36,17 +38,23 @@ export const AllPagesTabContent: Component<Props> = (props) => {
         <TextInput class="md:w-80" value={keyword()} onChange={setKeyword} />
       </div>
       <div ref={setContainerRef} class="w-full flex-1 overflow-y-auto">
-        <div class="flex flex-col relative w-full" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
-          <For each={rowVirtualizer.getVirtualItems()}>
-            {(vi) => (
-              <PageButton
-                virtualItem={vi}
-                pageName={filteredPages()[vi.index]}
-                onPageOpenRequested={props.onPageOpenRequested}
-              />
-            )}
+        {disableVirtualize() ? (
+          <For each={filteredPages()}>
+            {(page) => <PageButtonNormal pageName={page} onPageOpenRequested={props.onPageOpenRequested} />}
           </For>
-        </div>
+        ) : (
+          <div class="flex flex-col relative w-full" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
+            <For each={rowVirtualizer.getVirtualItems()}>
+              {(vi) => (
+                <PageButtonVirtualizable
+                  virtualItem={vi}
+                  pageName={filteredPages()[vi.index]}
+                  onPageOpenRequested={props.onPageOpenRequested}
+                />
+              )}
+            </For>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -55,9 +63,26 @@ export const AllPagesTabContent: Component<Props> = (props) => {
 interface ButtonProps {
   pageName: string;
   onPageOpenRequested: (pageName: string) => void;
+}
+const PageButtonNormal: Component<ButtonProps> = (props) => {
+  return (
+    <div class="w-full py-1">
+      <button
+        type="button"
+        class="rounded border px-2 py-1 flex flex-row gap-x-1 items-center hover:bg-gray-100 w-full"
+        onClick={() => props.onPageOpenRequested(props.pageName)}
+      >
+        <BookOpenIcon />
+        <span class="truncate">{props.pageName}</span>
+      </button>
+    </div>
+  );
+};
+
+interface VirtualizableButtonProps extends ButtonProps {
   virtualItem: VirtualItem<unknown>;
 }
-const PageButton: Component<ButtonProps> = (props) => {
+const PageButtonVirtualizable: Component<VirtualizableButtonProps> = (props) => {
   return (
     <div
       class="absolute top-0 left-0 w-full py-1"
