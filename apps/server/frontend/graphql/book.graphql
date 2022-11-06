@@ -61,6 +61,21 @@ mutation deleteBookmark($libraryId: ID!, $bookId: ID!, $page: String!) {
   bookPageDeleteBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
 }
 
+mutation reorderBookmark(
+  $libraryId: ID!
+  $bookId: ID!
+  $orderedPages: [String!]!
+) {
+  bookPageReorderBookmark(
+    libraryId: $libraryId
+    bookId: $bookId
+    orderedPages: $orderedPages
+  ) {
+    page
+    name
+  }
+}
+
 mutation updateBookAttribute(
   $libraryId: ID!
   $bookId: ID!

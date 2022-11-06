@@ -313,6 +313,46 @@ func (s *LibraryService) DeleteBookmark(libraryId string, bookId string, page st
 	return page, nil
 }
 
+func (s *LibraryService) ReorderBookmark(libraryId string, bookId string, orderedPages []string) ([]models.Bookmark, error) {
+	var resultBookmarks []models.Bookmark
+	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
+		nextSettings := currentSettings
+		nextBookmarks := []models.Bookmark{}
+
+		bookmarkPoolMap := map[string]models.Bookmark{}
+		for _, bm := range currentSettings.Bookmarks {
+			bookmarkPoolMap[bm.Page] = bm
+		}
+
+		for _, op := range orderedPages {
+			bm, ok := bookmarkPoolMap[op]
+			if ok {
+				nextBookmarks = append(nextBookmarks, bm)
+				delete(bookmarkPoolMap, op)
+			}
+		}
+
+		// append rest bookmarks to prevent to lost bookmark
+		if len(bookmarkPoolMap) > 0 {
+			for _, cbm := range currentSettings.Bookmarks {
+				bm, ok := bookmarkPoolMap[cbm.Page]
+				if ok {
+					nextBookmarks = append(nextBookmarks, bm)
+					delete(bookmarkPoolMap, bm.Page)
+				}
+			}
+		}
+
+		nextSettings.Bookmarks = nextBookmarks
+		resultBookmarks = nextBookmarks
+		return nextSettings, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resultBookmarks, nil
+}
+
 func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, attrs []models.BookAttribute) ([]models.BookAttribute, error) {
 	latestAttrs := []models.BookAttribute{}
 	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {

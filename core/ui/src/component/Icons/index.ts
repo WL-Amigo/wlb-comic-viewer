@@ -17,6 +17,9 @@ import BookmarkIcon from 'virtual:icons/bx/bookmark';
 import BookmarkSolidIcon from 'virtual:icons/bxs/bookmark';
 import ChevronLeftIcon from 'virtual:icons/bx/chevron-left';
 import ChevronRightIcon from 'virtual:icons/bx/chevron-right';
+import DoubleChevronsUpIcon from 'virtual:icons/bx/chevrons-up';
+import DoubleChevronsDownIcon from 'virtual:icons/bx/chevrons-down';
+import SortIcon from 'virtual:icons/bx/sort';
 import FullscreenIcon from 'virtual:icons/bx/fullscreen';
 import ExitFullscreenIcon from 'virtual:icons/bx/exit-fullscreen';
 import LeftArrowIcon from 'virtual:icons/bx/left-arrow-alt';
@@ -50,6 +53,9 @@ export {
   BookmarkSolidIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  DoubleChevronsUpIcon,
+  DoubleChevronsDownIcon,
+  SortIcon,
   FullscreenIcon,
   ExitFullscreenIcon,
   LeftArrowIcon,

@@ -35,4 +35,5 @@ extend type Mutation {
   bookUpdateAttribute(libraryId: ID!, bookId: ID!, input: [BookAttributeInput!]!): ID!
   bookPageCreateBookmark(libraryId: ID!, bookId: ID!, page: String!, option: BookBookmarkInput): String!
   bookPageDeleteBookmark(libraryId: ID!, bookId: ID!, page: String!): String!
+  bookPageReorderBookmark(libraryId: ID!, bookId: ID!, orderedPages: [String!]!): [BookBookmark!]!
 }

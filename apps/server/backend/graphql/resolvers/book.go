@@ -107,6 +107,24 @@ func (r *mutationResolver) BookPageDeleteBookmark(ctx context.Context, libraryID
 	return r.library.DeleteBookmark(libraryID, bookID, page)
 }
 
+// BookPageReorderBookmark is the resolver for the bookPageReorderBookmark field.
+func (r *mutationResolver) BookPageReorderBookmark(ctx context.Context, libraryID string, bookID string, orderedPages []string) ([]*model.BookBookmark, error) {
+	internalResults, err := r.library.ReorderBookmark(libraryID, bookID, orderedPages)
+	if err != nil {
+		return nil, err
+	}
+
+	results := []*model.BookBookmark{}
+	for _, bm := range internalResults {
+		results = append(results, &model.BookBookmark{
+			Name: bm.Name,
+			Page: bm.Page,
+		})
+	}
+
+	return results, nil
+}
+
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
 	attrSettingsMap, err := r.library.GetAttributeSettings(libraryID)

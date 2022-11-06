@@ -149,6 +149,7 @@ export type Mutation = {
   bookPageCreateBookmark: Scalars['String'];
   bookPageDeleteBookmark: Scalars['String'];
   bookPageMarkAsRead: Scalars['String'];
+  bookPageReorderBookmark: Array<BookBookmark>;
   bookUpdateAttribute: Scalars['ID'];
   bookUpdateKnownPages: Array<Scalars['String']>;
   createBook: Scalars['ID'];
@@ -182,6 +183,13 @@ export type MutationBookPageMarkAsReadArgs = {
   bookId: Scalars['ID'];
   libraryId: Scalars['ID'];
   page: Scalars['String'];
+};
+
+
+export type MutationBookPageReorderBookmarkArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
+  orderedPages: Array<Scalars['String']>;
 };
 
 
@@ -345,6 +353,15 @@ export type DeleteBookmarkMutationVariables = Exact<{
 
 export type DeleteBookmarkMutation = { __typename?: 'Mutation', bookPageDeleteBookmark: string };
 
+export type ReorderBookmarkMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  orderedPages: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type ReorderBookmarkMutation = { __typename?: 'Mutation', bookPageReorderBookmark: Array<{ __typename?: 'BookBookmark', page: string, name: string }> };
+
 export type UpdateBookAttributeMutationVariables = Exact<{
   libraryId: Scalars['ID'];
   bookId: Scalars['ID'];
@@ -483,6 +500,18 @@ export const DeleteBookmarkDocument = gql`
   bookPageDeleteBookmark(libraryId: $libraryId, bookId: $bookId, page: $page)
 }
     `;
+export const ReorderBookmarkDocument = gql`
+    mutation reorderBookmark($libraryId: ID!, $bookId: ID!, $orderedPages: [String!]!) {
+  bookPageReorderBookmark(
+    libraryId: $libraryId
+    bookId: $bookId
+    orderedPages: $orderedPages
+  ) {
+    page
+    name
+  }
+}
+    `;
 export const UpdateBookAttributeDocument = gql`
     mutation updateBookAttribute($libraryId: ID!, $bookId: ID!, $attributesInput: [BookAttributeInput!]!) {
   bookUpdateAttribute(
@@ -608,6 +637,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     deleteBookmark(variables: DeleteBookmarkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteBookmarkMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DeleteBookmarkMutation>(DeleteBookmarkDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'deleteBookmark', 'mutation');
+    },
+    reorderBookmark(variables: ReorderBookmarkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ReorderBookmarkMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ReorderBookmarkMutation>(ReorderBookmarkDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reorderBookmark', 'mutation');
     },
     updateBookAttribute(variables: UpdateBookAttributeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookAttributeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookAttributeMutation>(UpdateBookAttributeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookAttribute', 'mutation');

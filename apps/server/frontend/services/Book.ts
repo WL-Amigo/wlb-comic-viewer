@@ -7,7 +7,10 @@ import {
   IBookMutationService,
   IBookService,
 } from "@local-core/interfaces";
-import { BookmarkUpdateParams } from "@local-core/interfaces/src/Book";
+import {
+  Bookmark,
+  BookmarkUpdateParams,
+} from "@local-core/interfaces/src/Book";
 import { Sdk } from "../graphql/autogen/gql";
 
 export class BookService implements IBookService, IBookMutationService {
@@ -140,6 +143,22 @@ export class BookService implements IBookService, IBookMutationService {
       page,
     });
     return result.bookPageDeleteBookmark;
+  }
+
+  public async reorderBookmark(
+    libraryId: string,
+    bookId: string,
+    orderedPages: readonly string[]
+  ): Promise<readonly Bookmark[]> {
+    const result = await this.gqlClient.reorderBookmark({
+      libraryId,
+      bookId,
+      orderedPages: [...orderedPages],
+    });
+    return result.bookPageReorderBookmark.map((bm) => ({
+      name: bm.name,
+      page: bm.page,
+    }));
   }
 
   public async updateAttributes(
