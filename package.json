@@ -2,11 +2,14 @@
   "name": "private-gallery",
   "version": "0.0.1",
   "description": "Gallery app especially for personal use",
-  "scripts": {},
+  "scripts": {
+    "build": "pnpm -r run build"
+  },
   "keywords": [],
   "author": "Amigo (WhiteLuckBringers)",
   "devDependencies": {
     "eslint": "^8.20.0",
+    "pnpm": "^7.14.2",
     "prettier": "^2.7.1"
   }
 }

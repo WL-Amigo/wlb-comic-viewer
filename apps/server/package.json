@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "gen:frontend:graphql": "graphql-codegen -c ./frontend/graphql/codegen.yml",
-    "build": "pnpm build:frontend && pnpm build:linux-amd64 && pnpm build:linux-armv7",
+    "build": "pnpm run build:frontend && pnpm run build:linux-amd64 && pnpm run build:linux-armv7",
     "build:frontend": "vite build",
     "build:linux-amd64": "cross-env GOOS=linux GOARCH=amd64 tsx ./scripts/build.ts",
     "build:linux-armv7": "cross-env GOOS=linux GOARCH=arm GOARM=7 tsx ./scripts/build.ts"

@@ -5,9 +5,11 @@ importers:
   .:
     specifiers:
       eslint: ^8.20.0
+      pnpm: ^7.14.2
       prettier: ^2.7.1
     devDependencies:
       eslint: 8.20.0
+      pnpm: 7.14.2
       prettier: 2.7.1
 
   apps/server:
@@ -3963,6 +3965,12 @@ packages:
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+    dev: true
+
+  /pnpm/7.14.2:
+    resolution: {integrity: sha512-NSxrIaRW07jFQQ1fPFFOA8eMfuogsMeygOKd3zaFgyJBdo1oh61jl2JjWc+w0XNzWIMG7/v9HK7nP8RTL5NO3g==}
+    engines: {node: '>=14.6'}
+    hasBin: true
     dev: true
 
   /postcss/8.4.14:
