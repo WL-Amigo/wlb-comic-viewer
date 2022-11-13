@@ -1,8 +1,15 @@
 import { Bookmark } from '@local-core/interfaces';
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, Match, Show, Switch } from 'solid-js';
 import { Button } from '../../../../../../../../component/Button';
 import { TextInput } from '../../../../../../../../component/Form/Inputs';
-import { BookmarkIcon, CheckIcon, EditIcon, TrashIcon, XIcon } from '../../../../../../../../component/Icons';
+import {
+  BookmarkIcon,
+  CheckIcon,
+  EditIcon,
+  ErrorIcon,
+  TrashIcon,
+  XIcon,
+} from '../../../../../../../../component/Icons';
 import { useConfirmDialog } from '../../../../../../../../compositions/ConfirmDialog';
 import { useService } from '../../../../../../../../compositions/Dependency';
 import { isNotNullOrEmptyString } from '../../../../../../../../utils/emptiness';
@@ -29,7 +36,7 @@ export const BookmarkButton: Component<Props> = (props) => {
           }}
         >
           <div class="flex flex-row gap-x-1 items-center">
-            <BookmarkIcon />
+            <BookmarkIconPresenter bookmark={props.bookmark} />
             <span>{isNotNullOrEmptyString(props.bookmark.name) ? props.bookmark.name : props.bookmark.page}</span>
           </div>
           <div class="opacity-100 md:opacity-0 group-hover:opacity-100 flex flex-row gap-x-2">
@@ -46,6 +53,19 @@ export const BookmarkButton: Component<Props> = (props) => {
         </div>
       </Show>
     </>
+  );
+};
+
+interface BookmarkIconPresenterProps {
+  bookmark: Bookmark;
+}
+const BookmarkIconPresenter: Component<BookmarkIconPresenterProps> = (props) => {
+  return (
+    <Switch fallback={<BookmarkIcon />}>
+      <Match when={props.bookmark.error === 'MISSING_PAGE_FILE'}>
+        <ErrorIcon />
+      </Match>
+    </Switch>
   );
 };
 

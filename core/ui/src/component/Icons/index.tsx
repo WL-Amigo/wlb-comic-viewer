@@ -28,8 +28,11 @@ import TrashIcon from 'virtual:icons/bxs/trash';
 import FolderIcon from 'virtual:icons/bx/folder';
 import FolderOpenIcon from 'virtual:icons/bx/folder-open';
 import SearchIcon from 'virtual:icons/bx/search';
+import ErrorIconRaw from 'virtual:icons/bxs/error';
 import type { ComponentProps } from 'solid-js';
 import type { JSX } from 'solid-js/jsx-runtime';
+import clsx from 'clsx';
+import { windi } from '../../utils/windi';
 
 export type IconComponent = (props: ComponentProps<'svg'>) => JSX.Element;
 
@@ -64,4 +67,8 @@ export {
   FolderIcon,
   FolderOpenIcon,
   SearchIcon,
+};
+
+export const ErrorIcon: IconComponent = (props) => {
+  return <ErrorIconRaw {...props} class={clsx(windi`w-6 h-6 text-yellow-500 fill-current`, props.class)} />;
 };

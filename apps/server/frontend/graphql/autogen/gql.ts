@@ -76,6 +76,7 @@ export enum BookAttributeValueTypeEnum {
 
 export type BookBookmark = {
   __typename?: 'BookBookmark';
+  error?: Maybe<BookmarkErrorTypeEnum>;
   name: Scalars['String'];
   page: Scalars['String'];
 };
@@ -108,6 +109,10 @@ export type BookMin = {
   isRead: Scalars['Boolean'];
   name: Scalars['String'];
 };
+
+export enum BookmarkErrorTypeEnum {
+  MissingPageFile = 'MISSING_PAGE_FILE'
+}
 
 export type IBookAttributeSetting = {
   displayName: Scalars['String'];
@@ -296,7 +301,7 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -360,7 +365,7 @@ export type ReorderBookmarkMutationVariables = Exact<{
 }>;
 
 
-export type ReorderBookmarkMutation = { __typename?: 'Mutation', bookPageReorderBookmark: Array<{ __typename?: 'BookBookmark', page: string, name: string }> };
+export type ReorderBookmarkMutation = { __typename?: 'Mutation', bookPageReorderBookmark: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }> };
 
 export type UpdateBookAttributeMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -449,6 +454,7 @@ export const GetBookDocument = gql`
     bookmarks {
       page
       name
+      error
     }
     isRead
     attributes {
@@ -509,6 +515,7 @@ export const ReorderBookmarkDocument = gql`
   ) {
     page
     name
+    error
   }
 }
     `;

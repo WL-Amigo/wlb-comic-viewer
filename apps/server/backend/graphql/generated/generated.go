@@ -76,8 +76,9 @@ type ComplexityRoot struct {
 	}
 
 	BookBookmark struct {
-		Name func(childComplexity int) int
-		Page func(childComplexity int) int
+		Error func(childComplexity int) int
+		Name  func(childComplexity int) int
+		Page  func(childComplexity int) int
 	}
 
 	BookMin struct {
@@ -292,6 +293,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BookAttributeSettingTag.ValueType(childComplexity), true
+
+	case "BookBookmark.error":
+		if e.complexity.BookBookmark.Error == nil {
+			break
+		}
+
+		return e.complexity.BookBookmark.Error(childComplexity), true
 
 	case "BookBookmark.name":
 		if e.complexity.BookBookmark.Name == nil {
@@ -775,9 +783,14 @@ input BookAttributeInput {
   value: String!
 }
 `, BuiltIn: false},
-	{Name: "../schemas/book_bookmark.graphqls", Input: `type BookBookmark {
+	{Name: "../schemas/book_bookmark.graphqls", Input: `enum BookmarkErrorTypeEnum {
+  MISSING_PAGE_FILE
+}
+
+type BookBookmark {
   page: String!
   name: String!
+  error: BookmarkErrorTypeEnum
 }
 
 input BookBookmarkInput {
@@ -1711,6 +1724,8 @@ func (ec *executionContext) fieldContext_Book_bookmarks(ctx context.Context, fie
 				return ec.fieldContext_BookBookmark_page(ctx, field)
 			case "name":
 				return ec.fieldContext_BookBookmark_name(ctx, field)
+			case "error":
+				return ec.fieldContext_BookBookmark_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type BookBookmark", field.Name)
 		},
@@ -2329,6 +2344,47 @@ func (ec *executionContext) fieldContext_BookBookmark_name(ctx context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookBookmark_error(ctx context.Context, field graphql.CollectedField, obj *model.BookBookmark) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookBookmark_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.BookmarkErrorTypeEnum)
+	fc.Result = res
+	return ec.marshalOBookmarkErrorTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookmarkErrorTypeEnum(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookBookmark_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookBookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BookmarkErrorTypeEnum does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3276,6 +3332,8 @@ func (ec *executionContext) fieldContext_Mutation_bookPageReorderBookmark(ctx co
 				return ec.fieldContext_BookBookmark_page(ctx, field)
 			case "name":
 				return ec.fieldContext_BookBookmark_name(ctx, field)
+			case "error":
+				return ec.fieldContext_BookBookmark_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type BookBookmark", field.Name)
 		},
@@ -6401,6 +6459,10 @@ func (ec *executionContext) _BookBookmark(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "error":
+
+			out.Values[i] = ec._BookBookmark_error(ctx, field, obj)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8012,6 +8074,22 @@ func (ec *executionContext) unmarshalOBookFilterParams2ᚖgithubᚗcomᚋprivate
 	}
 	res, err := ec.unmarshalInputBookFilterParams(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOBookmarkErrorTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookmarkErrorTypeEnum(ctx context.Context, v interface{}) (*model.BookmarkErrorTypeEnum, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.BookmarkErrorTypeEnum)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOBookmarkErrorTypeEnum2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookmarkErrorTypeEnum(ctx context.Context, sel ast.SelectionSet, v *model.BookmarkErrorTypeEnum) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

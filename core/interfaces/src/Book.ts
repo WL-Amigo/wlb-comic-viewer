@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { BookAttribute, BookAttributeCreateParams, BookAttributeUpdateParams } from './BookAttribute';
 import { BookId, LibraryId } from './Id';
 
@@ -7,9 +8,12 @@ export interface BookMin {
   readonly isRead: boolean;
 }
 
+const BookmarkErrorTypeEnumSchema = z.enum(['MISSING_PAGE_FILE']);
+export type BookmarkErrorType = z.infer<typeof BookmarkErrorTypeEnumSchema>;
 export interface Bookmark {
   readonly page: string;
   readonly name: string;
+  readonly error?: BookmarkErrorType;
 }
 
 export interface Book {

@@ -1,17 +1,36 @@
 import {
   Book,
+  Bookmark,
   BookAttributeCreateParams,
   BookCreateParams,
   BookSettings,
   BookUpdateParams,
   IBookMutationService,
   IBookService,
-} from "@local-core/interfaces";
-import {
-  Bookmark,
   BookmarkUpdateParams,
-} from "@local-core/interfaces/src/Book";
-import { Sdk } from "../graphql/autogen/gql";
+  BookmarkErrorType,
+} from "@local-core/interfaces";
+import { match, P } from "ts-pattern";
+import {
+  BookmarkErrorTypeEnum as GqlBookmarkErrorTypeEnum,
+  Sdk,
+} from "../graphql/autogen/gql";
+
+const convertGqlBookmark = (gqlBookmark: {
+  page: string;
+  name: string;
+  error?: GqlBookmarkErrorTypeEnum | null;
+}): Bookmark => ({
+  page: gqlBookmark.page,
+  name: gqlBookmark.name,
+  error: match<
+    GqlBookmarkErrorTypeEnum | null | undefined,
+    BookmarkErrorType | undefined
+  >(gqlBookmark.error)
+    .with(P.nullish, () => undefined)
+    .with(GqlBookmarkErrorTypeEnum.MissingPageFile, () => "MISSING_PAGE_FILE")
+    .exhaustive(),
+});
 
 export class BookService implements IBookService, IBookMutationService {
   public constructor(
@@ -21,7 +40,10 @@ export class BookService implements IBookService, IBookMutationService {
 
   async loadBook(libraryId: string, bookId: string): Promise<Book> {
     const result = await this.gqlClient.getBook({ libraryId, bookId });
-    return result.book;
+    return {
+      ...result.book,
+      bookmarks: result.book.bookmarks.map(convertGqlBookmark),
+    };
   }
 
   loadBookSettings(libraryId: string, bookId: string): Promise<BookSettings> {

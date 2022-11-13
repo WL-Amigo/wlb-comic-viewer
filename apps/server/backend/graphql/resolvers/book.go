@@ -169,9 +169,15 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 
 	bookmarks := []*model.BookBookmark{}
 	for _, bookmarkModel := range bookDetail.Bookmarks {
+		var bookmarkError *model.BookmarkErrorTypeEnum
+		if bookmarkModel.IsMissing() {
+			e := model.BookmarkErrorTypeEnumMissingPageFile
+			bookmarkError = &e
+		}
 		bookmarks = append(bookmarks, &model.BookBookmark{
-			Page: bookmarkModel.Page,
-			Name: bookmarkModel.Name,
+			Page:  bookmarkModel.Page,
+			Name:  bookmarkModel.Name,
+			Error: bookmarkError,
 		})
 	}
 

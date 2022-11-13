@@ -4,9 +4,11 @@ export type {
   BookMin,
   Book,
   Bookmark,
+  BookmarkErrorType,
   BookSettings,
   BookCreateParams,
   BookUpdateParams,
+  BookmarkUpdateParams,
   IBookService,
   IBookMutationService,
 } from './Book';

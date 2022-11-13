@@ -1,6 +1,11 @@
+enum BookmarkErrorTypeEnum {
+  MISSING_PAGE_FILE
+}
+
 type BookBookmark {
   page: String!
   name: String!
+  error: BookmarkErrorTypeEnum
 }
 
 input BookBookmarkInput {

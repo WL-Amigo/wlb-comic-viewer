@@ -70,8 +70,9 @@ type BookAttributeSettingUpdateInput struct {
 }
 
 type BookBookmark struct {
-	Page string `json:"page"`
-	Name string `json:"name"`
+	Page  string                 `json:"page"`
+	Name  string                 `json:"name"`
+	Error *BookmarkErrorTypeEnum `json:"error"`
 }
 
 type BookBookmarkInput struct {
@@ -164,5 +165,44 @@ func (e *BookAttributeValueTypeEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e BookAttributeValueTypeEnum) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type BookmarkErrorTypeEnum string
+
+const (
+	BookmarkErrorTypeEnumMissingPageFile BookmarkErrorTypeEnum = "MISSING_PAGE_FILE"
+)
+
+var AllBookmarkErrorTypeEnum = []BookmarkErrorTypeEnum{
+	BookmarkErrorTypeEnumMissingPageFile,
+}
+
+func (e BookmarkErrorTypeEnum) IsValid() bool {
+	switch e {
+	case BookmarkErrorTypeEnumMissingPageFile:
+		return true
+	}
+	return false
+}
+
+func (e BookmarkErrorTypeEnum) String() string {
+	return string(e)
+}
+
+func (e *BookmarkErrorTypeEnum) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BookmarkErrorTypeEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BookmarkErrorTypeEnum", str)
+	}
+	return nil
+}
+
+func (e BookmarkErrorTypeEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
