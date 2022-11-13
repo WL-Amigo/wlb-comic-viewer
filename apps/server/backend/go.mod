@@ -8,12 +8,15 @@ require (
 	github.com/vektah/gqlparser/v2 v2.4.6
 )
 
+require github.com/twmb/murmur3 v1.1.5 // indirect
+
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/kalafut/imohash v1.0.2
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mattn/go-colorable v0.1.12 // indirect

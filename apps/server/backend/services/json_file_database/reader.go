@@ -54,9 +54,14 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 		attributes = append(attributes, attrJson.ToModel())
 	}
 
+	dirFullPath := filepath.Join(basePath, dirPath)
 	bookmarks := []models.Bookmark{}
 	for _, bookmarkJson := range jsonStruct.Bookmarks {
-		bookmarks = append(bookmarks, bookmarkJson.ToModel())
+		bm, err := bookmarkJson.ToModel(dirFullPath)
+		if err != nil {
+			continue
+		}
+		bookmarks = append(bookmarks, bm)
 	}
 
 	return models.BookModelBase{

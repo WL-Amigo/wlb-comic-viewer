@@ -241,7 +241,7 @@ func (s *LibraryService) MarkAsReadPage(libraryId string, bookId string, pages [
 	return pages, nil
 }
 
-func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation func(currentSettings models.BookSettings) (models.BookSettings, error)) error {
+func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation func(book models.BookModelBase) (models.BookSettings, error)) error {
 	bookIdLocal, err := models.CastToBookId(bookId)
 	if err != nil {
 		return err
@@ -252,7 +252,7 @@ func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation fu
 		return err
 	}
 
-	nextSettings, err := mutation(updateTargetBook.BookSettings)
+	nextSettings, err := mutation(updateTargetBook)
 	if err != nil {
 		return err
 	}
@@ -266,25 +266,27 @@ func (s *LibraryService) mutateBook(libraryId string, bookId string, mutation fu
 }
 
 func (s *LibraryService) UpsertBookmark(libraryId string, bookId string, input models.BookmarkCreateInput) (string, error) {
-	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
-		nextSettings := currentSettings
-		nextBookmarks := currentSettings.Bookmarks
+	err := s.mutateBook(libraryId, bookId, func(book models.BookModelBase) (models.BookSettings, error) {
+		nextSettings := book.BookSettings
+		nextBookmarks := book.Bookmarks
 		isUpdate := false
+
+		nextBookmark, err := models.CreateBookmarkModel(book.DirFullPath, input.Page, models.CreateBookmarkModelOptions{
+			BookmarkName: input.Name,
+		})
+		if err != nil {
+			return models.BookSettings{}, err
+		}
+
 		for i, bm := range nextBookmarks {
 			if bm.Page == input.Page {
-				nextBookmarks[i] = models.Bookmark{
-					Page: input.Page,
-					Name: input.Name,
-				}
+				nextBookmarks[i] = nextBookmark
 				isUpdate = true
 				break
 			}
 		}
 		if !isUpdate {
-			nextBookmarks = append(nextBookmarks, models.Bookmark{
-				Page: input.Page,
-				Name: input.Name,
-			})
+			nextBookmarks = append(nextBookmarks, nextBookmark)
 		}
 		nextSettings.Bookmarks = nextBookmarks
 		return nextSettings, nil
@@ -296,10 +298,10 @@ func (s *LibraryService) UpsertBookmark(libraryId string, bookId string, input m
 }
 
 func (s *LibraryService) DeleteBookmark(libraryId string, bookId string, page string) (string, error) {
-	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
-		nextSettings := currentSettings
+	err := s.mutateBook(libraryId, bookId, func(book models.BookModelBase) (models.BookSettings, error) {
+		nextSettings := book.BookSettings
 		nextBookmarks := []models.Bookmark{}
-		for _, bm := range currentSettings.Bookmarks {
+		for _, bm := range book.Bookmarks {
 			if bm.Page != page {
 				nextBookmarks = append(nextBookmarks, bm)
 			}
@@ -315,12 +317,12 @@ func (s *LibraryService) DeleteBookmark(libraryId string, bookId string, page st
 
 func (s *LibraryService) ReorderBookmark(libraryId string, bookId string, orderedPages []string) ([]models.Bookmark, error) {
 	var resultBookmarks []models.Bookmark
-	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
-		nextSettings := currentSettings
+	err := s.mutateBook(libraryId, bookId, func(book models.BookModelBase) (models.BookSettings, error) {
+		nextSettings := book.BookSettings
 		nextBookmarks := []models.Bookmark{}
 
 		bookmarkPoolMap := map[string]models.Bookmark{}
-		for _, bm := range currentSettings.Bookmarks {
+		for _, bm := range book.Bookmarks {
 			bookmarkPoolMap[bm.Page] = bm
 		}
 
@@ -334,7 +336,7 @@ func (s *LibraryService) ReorderBookmark(libraryId string, bookId string, ordere
 
 		// append rest bookmarks to prevent to lost bookmark
 		if len(bookmarkPoolMap) > 0 {
-			for _, cbm := range currentSettings.Bookmarks {
+			for _, cbm := range book.Bookmarks {
 				bm, ok := bookmarkPoolMap[cbm.Page]
 				if ok {
 					nextBookmarks = append(nextBookmarks, bm)
@@ -355,15 +357,15 @@ func (s *LibraryService) ReorderBookmark(libraryId string, bookId string, ordere
 
 func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, attrs []models.BookAttribute) ([]models.BookAttribute, error) {
 	latestAttrs := []models.BookAttribute{}
-	err := s.mutateBook(libraryId, bookId, func(currentSettings models.BookSettings) (models.BookSettings, error) {
+	err := s.mutateBook(libraryId, bookId, func(book models.BookModelBase) (models.BookSettings, error) {
 		updateAttrMap := map[models.BookAttributeId]models.BookAttribute{}
 		for _, attr := range attrs {
 			updateAttrMap[attr.Id] = attr
 		}
 
-		nextSettings := currentSettings
+		nextSettings := book.BookSettings
 		nextAttrs := []models.BookAttribute{}
-		for _, attr := range currentSettings.Attributes {
+		for _, attr := range book.Attributes {
 			updateAttr, ok := updateAttrMap[attr.Id]
 			if ok {
 				nextAttrs = append(nextAttrs, updateAttr)
