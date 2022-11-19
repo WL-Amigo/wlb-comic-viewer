@@ -11,6 +11,7 @@ import {
 } from '../../compositions/Filter';
 import { useLibraryDataContext } from '../../Context';
 import { BooksFilterConditionsAttributeFilterSetter } from './Attributes';
+import { BooksFilterAttributeOptionViewModel } from './Types';
 
 export const LibraryBooksFilterConditions: Component = () => {
   const libCtx = useLibraryDataContext();
@@ -106,6 +107,17 @@ const ConditionsSetter: Component<SetterProps> = (props) => {
     });
   };
 
+  const attrOptions = createMemo(() =>
+    props.bookAttributeSettings.map(
+      (attr): BooksFilterAttributeOptionViewModel => ({
+        id: attr.id,
+        displayName: attr.displayName,
+        valueType: attr.valueType,
+        tags: attr.valueType === 'TAG' ? attr.tags : [],
+      }),
+    ),
+  );
+
   return (
     <div class="grid grid-cols-1 md:grid-cols-2 gap-y-1">
       <div class="flex flex-row gap-x-1 items-center">
@@ -135,7 +147,7 @@ const ConditionsSetter: Component<SetterProps> = (props) => {
           <Index each={params().attributes}>
             {(item, index) => (
               <BooksFilterConditionsAttributeFilterSetter
-                selectableAttrOptions={props.bookAttributeSettings}
+                selectableAttrOptions={attrOptions()}
                 currentId={item().id}
                 currentValue={item().value}
                 onChangeId={(id) => onChangeAttributeFilter(index, (prev) => ({ ...prev, id }))}

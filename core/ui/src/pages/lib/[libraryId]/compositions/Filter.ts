@@ -1,5 +1,6 @@
 import { useSearchParams } from 'solid-app-router';
 import { Accessor, createMemo } from 'solid-js';
+import { z } from 'zod';
 
 interface LibraryBooksSearchParamsRaw {
   isRead: string;
@@ -16,17 +17,21 @@ export interface LibraryBooksSearchParams {
 }
 
 const serializeAttributes = (attributes: readonly LibraryBooksAttributeSearchParams[]): string => {
-  return attributes.map((a) => [a.id, a.value].join(' ')).join(',');
+  return JSON.stringify(attributes.map((a) => [a.id, a.value]));
 };
+const AttributesQueryParamSchema = z.array(z.tuple([z.string(), z.string()]));
 const parseAttributes = (attributesRaw: string): LibraryBooksAttributeSearchParams[] => {
-  const attributesRawList = attributesRaw.split(',');
-  const attributesRawTupleList = attributesRawList.map((r) => r.split(' '));
-  return attributesRawTupleList
-    .map((rt) => ({
-      id: rt[0] ?? '',
-      value: rt[1] ?? '',
-    }))
-    .filter((p) => p.id !== '' && p.value !== '');
+  try {
+    const attributesRawList = AttributesQueryParamSchema.parse(JSON.parse(attributesRaw));
+    return attributesRawList
+      .map((rt) => ({
+        id: rt[0] ?? '',
+        value: rt[1] ?? '',
+      }))
+      .filter((p) => p.id !== '' && p.value !== '');
+  } catch (_) {
+    return [];
+  }
 };
 
 export const useLibraryBooksSearchParams = (): Accessor<LibraryBooksSearchParams> => {
