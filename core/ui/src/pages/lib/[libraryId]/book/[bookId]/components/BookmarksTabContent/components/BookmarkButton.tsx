@@ -30,14 +30,16 @@ export const BookmarkButton: Component<Props> = (props) => {
       </Show>
       <Show when={!isEditMode()}>
         <div
-          class="rounded border px-2 py-1 cursor-pointer flex flex-row justify-between items-center group hover:bg-gray-100"
+          class="w-full rounded border px-2 py-1 cursor-pointer flex flex-row items-center group hover:bg-gray-100"
           onClick={() => {
             props.onPageOpenRequested(props.bookmark.page);
           }}
         >
-          <div class="flex flex-row gap-x-1 items-center">
+          <div class="flex-1 flex flex-row gap-x-1 items-center overflow-x-hidden">
             <BookmarkIconPresenter bookmark={props.bookmark} />
-            <span>{isNotNullOrEmptyString(props.bookmark.name) ? props.bookmark.name : props.bookmark.page}</span>
+            <span class="flex-1 truncate">
+              {isNotNullOrEmptyString(props.bookmark.name) ? props.bookmark.name : props.bookmark.page}
+            </span>
           </div>
           <div class="opacity-100 md:opacity-0 group-hover:opacity-100 flex flex-row gap-x-2">
             <BookmarkDeleteButton bookmark={props.bookmark} />

@@ -7,6 +7,7 @@ import {
   DragEventHandler,
   DragOverlay,
   SortableProvider,
+  transformStyle,
 } from '@thisbeyond/solid-dnd';
 import clsx from 'clsx';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
@@ -30,7 +31,7 @@ declare module 'solid-js' {
   }
 }
 
-const BookmarkButtonBaseClasses = windi`rounded border px-2 py-1 flex flex-row gap-x-1 items-center hover:bg-gray-100`;
+const BookmarkButtonBaseClasses = windi`rounded border flex flex-row gap-x-1 items-center hover:bg-gray-100`;
 
 interface SortableBookmarkProps {
   bookmark: Bookmark;
@@ -41,19 +42,20 @@ const SortableBookmark: Component<SortableBookmarkProps> = (props) => {
   const sortable = createSortable(props.bookmark.page);
   return (
     <div
-      use:sortable
-      class={clsx(
-        BookmarkButtonBaseClasses,
-        'group',
-        windi`cursor-move justify-between touch-none`,
-        sortable.isActiveDraggable && windi`opacity-25`,
-      )}
+      ref={sortable.ref}
+      style={transformStyle(sortable.transform)}
+      class={clsx(BookmarkButtonBaseClasses, 'group', sortable.isActiveDraggable && windi`opacity-25`)}
     >
-      <div class="flex flex-row gap-x-1">
+      <div
+        class="w-10 flex-shrink-0 self-stretch flex flex-row items-center justify-center cursor-move border-r touch-none bg-blue-50"
+        {...sortable.dragActivators}
+      >
         <BookmarkIcon />
-        <span>{isNotNullOrEmptyString(props.bookmark.name) ? props.bookmark.name : props.bookmark.page}</span>
       </div>
-      <div class="flex flex-row gap-x-2 md:opacity-0 md:group-hover:opacity-100">
+      <span class="pl-1 flex-1 truncate">
+        {isNotNullOrEmptyString(props.bookmark.name) ? props.bookmark.name : props.bookmark.page}
+      </span>
+      <div class="flex flex-row gap-x-2 px-2 py-1 md:opacity-0 md:group-hover:opacity-100">
         <Button onClick={props.onMoveToBottom}>
           <DoubleChevronsDownIcon />
         </Button>
@@ -69,7 +71,7 @@ const BookmarkView: Component<{ bookmark: Bookmark | null; class?: string }> = (
   return (
     <Show when={props.bookmark} keyed>
       {(bookmark) => (
-        <div class={clsx(BookmarkButtonBaseClasses, props.class)}>
+        <div class={clsx(BookmarkButtonBaseClasses, windi`px-2 py-1`, props.class)}>
           <BookmarkIcon />
           <span>{isNotNullOrEmptyString(bookmark.name) ? bookmark.name : bookmark.page}</span>
         </div>
