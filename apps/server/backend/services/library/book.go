@@ -365,13 +365,15 @@ func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, at
 
 		nextSettings := book.BookSettings
 		nextAttrs := []models.BookAttribute{}
+		nextAttrsMap := map[models.BookAttributeId]models.BookAttribute{}
 		for _, attr := range book.Attributes {
-			updateAttr, ok := updateAttrMap[attr.Id]
-			if ok {
-				nextAttrs = append(nextAttrs, updateAttr)
-			} else {
-				nextAttrs = append(nextAttrs, attr)
-			}
+			nextAttrsMap[attr.Id] = attr
+		}
+		for _, updateAttr := range updateAttrMap {
+			nextAttrsMap[updateAttr.Id] = updateAttr
+		}
+		for _, nextAttr := range nextAttrsMap {
+			nextAttrs = append(nextAttrs, nextAttr)
 		}
 		nextSettings.Attributes = nextAttrs
 		latestAttrs = nextAttrs
@@ -380,6 +382,13 @@ func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, at
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	for _, attr := range attrs {
+		err = s.CreateBookAttributeTag(libraryId, attr.Id, attr.Value)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return latestAttrs, nil
 }

@@ -29,6 +29,7 @@ export type Book = {
 export type BookAttribute = {
   __typename?: 'BookAttribute';
   displayName: Scalars['String'];
+  existingTags: Array<Scalars['String']>;
   id: Scalars['ID'];
   value: Scalars['String'];
   valueType: BookAttributeValueTypeEnum;
@@ -154,12 +155,12 @@ export type Mutation = {
   bookPageCreateBookmark: Scalars['String'];
   bookPageDeleteBookmark: Scalars['String'];
   bookPageMarkAsRead: Scalars['String'];
+  bookPageRecoveryBookmark: Array<BookBookmark>;
   bookPageReorderBookmark: Array<BookBookmark>;
   bookUpdateAttribute: Scalars['ID'];
   bookUpdateKnownPages: Array<Scalars['String']>;
   createBook: Scalars['ID'];
   createBookAttributeSettings: Array<Scalars['ID']>;
-  createBookAttributeTag: Scalars['String'];
   createLibrary: Scalars['ID'];
   deleteBook: Scalars['ID'];
   deleteBookAttributeTag: Scalars['String'];
@@ -188,6 +189,12 @@ export type MutationBookPageMarkAsReadArgs = {
   bookId: Scalars['ID'];
   libraryId: Scalars['ID'];
   page: Scalars['String'];
+};
+
+
+export type MutationBookPageRecoveryBookmarkArgs = {
+  bookId: Scalars['ID'];
+  libraryId: Scalars['ID'];
 };
 
 
@@ -222,13 +229,6 @@ export type MutationCreateBookArgs = {
 export type MutationCreateBookAttributeSettingsArgs = {
   input?: InputMaybe<Array<BookAttributeSettingCreateInput>>;
   libraryId: Scalars['ID'];
-};
-
-
-export type MutationCreateBookAttributeTagArgs = {
-  attributeId: Scalars['ID'];
-  libraryId: Scalars['ID'];
-  tag: Scalars['String'];
 };
 
 
@@ -301,7 +301,7 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string }> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string, existingTags: Array<string> }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -426,15 +426,6 @@ export type UpdateBookAttributeSettingsMutationVariables = Exact<{
 
 export type UpdateBookAttributeSettingsMutation = { __typename?: 'Mutation', updateBookAttributeSettings: Array<string> };
 
-export type CreateBookAttributeTagMutationVariables = Exact<{
-  libraryId: Scalars['ID'];
-  attributeId: Scalars['ID'];
-  tag: Scalars['String'];
-}>;
-
-
-export type CreateBookAttributeTagMutation = { __typename?: 'Mutation', createBookAttributeTag: string };
-
 export type DeleteBookAttributeTagMutationVariables = Exact<{
   libraryId: Scalars['ID'];
   attributeId: Scalars['ID'];
@@ -462,6 +453,7 @@ export const GetBookDocument = gql`
       displayName
       valueType
       value
+      existingTags
     }
   }
 }
@@ -598,15 +590,6 @@ export const UpdateBookAttributeSettingsDocument = gql`
   updateBookAttributeSettings(libraryId: $libraryId, input: $input)
 }
     `;
-export const CreateBookAttributeTagDocument = gql`
-    mutation createBookAttributeTag($libraryId: ID!, $attributeId: ID!, $tag: String!) {
-  createBookAttributeTag(
-    libraryId: $libraryId
-    attributeId: $attributeId
-    tag: $tag
-  )
-}
-    `;
 export const DeleteBookAttributeTagDocument = gql`
     mutation deleteBookAttributeTag($libraryId: ID!, $attributeId: ID!, $tag: String!) {
   deleteBookAttributeTag(
@@ -671,9 +654,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     updateBookAttributeSettings(variables: UpdateBookAttributeSettingsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookAttributeSettingsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookAttributeSettingsMutation>(UpdateBookAttributeSettingsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookAttributeSettings', 'mutation');
-    },
-    createBookAttributeTag(variables: CreateBookAttributeTagMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateBookAttributeTagMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateBookAttributeTagMutation>(CreateBookAttributeTagDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createBookAttributeTag', 'mutation');
     },
     deleteBookAttributeTag(variables: DeleteBookAttributeTagMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteBookAttributeTagMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DeleteBookAttributeTagMutation>(DeleteBookAttributeTagDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'deleteBookAttributeTag', 'mutation');

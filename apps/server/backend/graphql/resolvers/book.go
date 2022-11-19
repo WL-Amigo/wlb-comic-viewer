@@ -157,6 +157,10 @@ func (r *mutationResolver) BookPageRecoveryBookmark(ctx context.Context, library
 
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID string) (*model.Book, error) {
+	lib, err := r.library.GetLibrary(libraryID)
+	if err != nil {
+		return nil, err
+	}
 	attrSettingsMap, err := r.library.GetAttributeSettings(libraryID)
 	if err != nil {
 		return nil, err
@@ -178,20 +182,26 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 	attrs := []*model.BookAttribute{}
 	for _, attrSettingsModel := range attrSettingsMap {
 		attr, ok := bookAttrMap[attrSettingsModel.Id]
+		var existingTags []string
+		if attrSettingsModel.ValueType == models.BookAttributeValueTypeTag {
+			existingTags, _ = lib.TagAttributeValues[attrSettingsModel.Id]
+		}
 		if !ok {
 			attrs = append(attrs, &model.BookAttribute{
-				ID:          string(attrSettingsModel.Id),
-				DisplayName: attrSettingsModel.DisplayName,
-				ValueType:   model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
-				Value:       "",
+				ID:           string(attrSettingsModel.Id),
+				DisplayName:  attrSettingsModel.DisplayName,
+				ValueType:    model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
+				Value:        "",
+				ExistingTags: existingTags,
 			})
 			continue
 		}
 		attrs = append(attrs, &model.BookAttribute{
-			ID:          string(attrSettingsModel.Id),
-			DisplayName: attrSettingsModel.DisplayName,
-			ValueType:   model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
-			Value:       attr.Value,
+			ID:           string(attrSettingsModel.Id),
+			DisplayName:  attrSettingsModel.DisplayName,
+			ValueType:    model.BookAttributeValueTypeEnum(attrSettingsModel.ValueType),
+			Value:        attr.Value,
+			ExistingTags: existingTags,
 		})
 	}
 	// TODO: sort by explicitly specified order

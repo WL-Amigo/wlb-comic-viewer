@@ -27,10 +27,11 @@ type Book struct {
 }
 
 type BookAttribute struct {
-	ID          string                     `json:"id"`
-	DisplayName string                     `json:"displayName"`
-	ValueType   BookAttributeValueTypeEnum `json:"valueType"`
-	Value       string                     `json:"value"`
+	ID           string                     `json:"id"`
+	DisplayName  string                     `json:"displayName"`
+	ValueType    BookAttributeValueTypeEnum `json:"valueType"`
+	Value        string                     `json:"value"`
+	ExistingTags []string                   `json:"existingTags"`
 }
 
 type BookAttributeInput struct {

@@ -1,35 +1,35 @@
-import { BookAttributeValueType } from '@local-core/interfaces';
-import { createInputMask } from '@solid-primitives/input-mask';
-import { Component, createSignal } from 'solid-js';
-import { match } from 'ts-pattern';
+import { BookAttribute } from '@local-core/interfaces';
+import { Component, createSignal, Match, Switch } from 'solid-js';
 import { Button } from '../../../../../../../../../../../component/Button';
-import { TextInput } from '../../../../../../../../../../../component/Form/Inputs';
 import { CheckIcon, XIcon } from '../../../../../../../../../../../component/Icons';
-
-const filterOnlyIntRegexp = /(\d+)/;
+import { IntAttributeValueInput } from './Int';
+import { StringAttributeValueInput } from './String';
+import { TagAttributeValueInput } from './Tag';
 
 interface Props {
   initValue: string;
-  valueType: BookAttributeValueType;
+  attribute: BookAttribute;
   onDetermined: (value: string) => void;
   onCancel: () => void;
 }
 export const BookAttributeEditor: Component<Props> = (props) => {
   const [value, setValue] = createSignal(props.initValue);
 
-  const onInput = match<BookAttributeValueType, (value: string, ev: InputEvent) => void>(props.valueType)
-    .with('STRING', () => setValue)
-    .with('INT', () => {
-      const maskHandler = createInputMask([filterOnlyIntRegexp]);
-      return (_, ev) => setValue(maskHandler(ev));
-    })
-    .exhaustive();
-
   const onDeterminedLocal = () => props.onDetermined(value());
 
   return (
-    <div class="flex flex-row gap-x-2">
-      <TextInput class="flex-1 max-w-screen-md" value={value()} onChange={onInput} />
+    <div class="flex flex-row gap-x-2 items-center">
+      <Switch>
+        <Match when={props.attribute.valueType === 'STRING'}>
+          <StringAttributeValueInput value={value()} onChange={setValue} />
+        </Match>
+        <Match when={props.attribute.valueType === 'INT'}>
+          <IntAttributeValueInput value={value()} onChange={setValue} />
+        </Match>
+        <Match when={props.attribute.valueType === 'TAG'}>
+          <TagAttributeValueInput value={value()} onChange={setValue} existingTags={props.attribute.existingTags} />
+        </Match>
+      </Switch>
       <Button onClick={props.onCancel}>
         <XIcon />
       </Button>

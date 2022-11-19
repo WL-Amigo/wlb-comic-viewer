@@ -39,6 +39,7 @@ export interface BookAttribute {
   readonly displayName: string;
   readonly valueType: BookAttributeValueType;
   readonly value: string;
+  readonly existingTags: readonly string[];
 }
 
 export interface BookAttributeCreateParams {

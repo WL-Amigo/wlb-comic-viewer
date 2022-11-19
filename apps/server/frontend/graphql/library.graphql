@@ -63,18 +63,6 @@ mutation updateBookAttributeSettings(
   updateBookAttributeSettings(libraryId: $libraryId, input: $input)
 }
 
-mutation createBookAttributeTag(
-  $libraryId: ID!
-  $attributeId: ID!
-  $tag: String!
-) {
-  createBookAttributeTag(
-    libraryId: $libraryId
-    attributeId: $attributeId
-    tag: $tag
-  )
-}
-
 mutation deleteBookAttributeTag(
   $libraryId: ID!
   $attributeId: ID!

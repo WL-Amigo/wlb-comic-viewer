@@ -24,9 +24,7 @@ const BookAttributeSection: Component = () => {
   const onChangeAttr = async (id: string, value: string) => {
     setIsSaving(true);
     try {
-      await bookService.updateBook(libCtx.library.id, bookCtx.book().id, {
-        attributes: [{ id, value }],
-      });
+      await bookService.updateAttributes(libCtx.library.id, bookCtx.book().id, [{ id, value }]);
       bookCtx.reloadBook();
     } finally {
       setIsSaving(false);

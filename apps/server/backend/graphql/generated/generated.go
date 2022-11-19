@@ -56,10 +56,11 @@ type ComplexityRoot struct {
 	}
 
 	BookAttribute struct {
-		DisplayName func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Value       func(childComplexity int) int
-		ValueType   func(childComplexity int) int
+		DisplayName  func(childComplexity int) int
+		ExistingTags func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Value        func(childComplexity int) int
+		ValueType    func(childComplexity int) int
 	}
 
 	BookAttributeSettingBasic struct {
@@ -110,7 +111,6 @@ type ComplexityRoot struct {
 		BookUpdateKnownPages        func(childComplexity int, libraryID string, bookID string) int
 		CreateBook                  func(childComplexity int, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) int
 		CreateBookAttributeSettings func(childComplexity int, libraryID string, input []*model.BookAttributeSettingCreateInput) int
-		CreateBookAttributeTag      func(childComplexity int, libraryID string, attributeID string, tag string) int
 		CreateLibrary               func(childComplexity int, input model.LibraryCreateInput, attributesInput []*model.BookAttributeSettingCreateInput) int
 		DeleteBook                  func(childComplexity int, libraryID string, bookID string) int
 		DeleteBookAttributeTag      func(childComplexity int, libraryID string, attributeID string, tag string) int
@@ -145,7 +145,6 @@ type MutationResolver interface {
 	UpdateLibrary(ctx context.Context, id string, input model.LibraryUpdateInput) (string, error)
 	CreateBookAttributeSettings(ctx context.Context, libraryID string, input []*model.BookAttributeSettingCreateInput) ([]string, error)
 	UpdateBookAttributeSettings(ctx context.Context, libraryID string, input []*model.BookAttributeSettingUpdateInput) ([]string, error)
-	CreateBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error)
 	DeleteBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error)
 }
 type QueryResolver interface {
@@ -225,6 +224,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BookAttribute.DisplayName(childComplexity), true
+
+	case "BookAttribute.existingTags":
+		if e.complexity.BookAttribute.ExistingTags == nil {
+			break
+		}
+
+		return e.complexity.BookAttribute.ExistingTags(childComplexity), true
 
 	case "BookAttribute.id":
 		if e.complexity.BookAttribute.ID == nil {
@@ -499,18 +505,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateBookAttributeSettings(childComplexity, args["libraryId"].(string), args["input"].([]*model.BookAttributeSettingCreateInput)), true
-
-	case "Mutation.createBookAttributeTag":
-		if e.complexity.Mutation.CreateBookAttributeTag == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createBookAttributeTag_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateBookAttributeTag(childComplexity, args["libraryId"].(string), args["attributeId"].(string), args["tag"].(string)), true
 
 	case "Mutation.createLibrary":
 		if e.complexity.Mutation.CreateLibrary == nil {
@@ -791,6 +785,7 @@ type BookAttribute {
   displayName: String!
   valueType: BookAttributeValueTypeEnum!
   value: String!
+  existingTags: [String!]!
 }
 
 input BookAttributeInput {
@@ -856,7 +851,6 @@ extend type Mutation {
   updateLibrary(id: ID!, input: LibraryUpdateInput!): ID!
   createBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingCreateInput!]): [ID!]!
   updateBookAttributeSettings(libraryId: ID!, input: [BookAttributeSettingUpdateInput!]): [ID!]!
-  createBookAttributeTag(libraryId: ID!, attributeId: ID!, tag: String!): String!
   deleteBookAttributeTag(libraryId: ID!, attributeId: ID!, tag: String!): String!
   #deleteLibrary
 }`, BuiltIn: false},
@@ -1125,39 +1119,6 @@ func (ec *executionContext) field_Mutation_createBookAttributeSettings_args(ctx 
 		}
 	}
 	args["input"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createBookAttributeTag_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["libraryId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["libraryId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["attributeId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attributeId"))
-		arg1, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["attributeId"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["tag"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["tag"] = arg2
 	return args, nil
 }
 
@@ -1713,6 +1674,8 @@ func (ec *executionContext) fieldContext_Book_attributes(ctx context.Context, fi
 				return ec.fieldContext_BookAttribute_valueType(ctx, field)
 			case "value":
 				return ec.fieldContext_BookAttribute_value(ctx, field)
+			case "existingTags":
+				return ec.fieldContext_BookAttribute_existingTags(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type BookAttribute", field.Name)
 		},
@@ -1980,6 +1943,50 @@ func (ec *executionContext) _BookAttribute_value(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext_BookAttribute_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BookAttribute_existingTags(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookAttribute_existingTags(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExistingTags, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookAttribute_existingTags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "BookAttribute",
 		Field:      field,
@@ -3668,61 +3675,6 @@ func (ec *executionContext) fieldContext_Mutation_updateBookAttributeSettings(ct
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateBookAttributeSettings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createBookAttributeTag(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createBookAttributeTag(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateBookAttributeTag(rctx, fc.Args["libraryId"].(string), fc.Args["attributeId"].(string), fc.Args["tag"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_createBookAttributeTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createBookAttributeTag_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -6435,6 +6387,13 @@ func (ec *executionContext) _BookAttribute(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "existingTags":
+
+			out.Values[i] = ec._BookAttribute_existingTags(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6862,15 +6821,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateBookAttributeSettings(ctx, field)
-			})
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "createBookAttributeTag":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createBookAttributeTag(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

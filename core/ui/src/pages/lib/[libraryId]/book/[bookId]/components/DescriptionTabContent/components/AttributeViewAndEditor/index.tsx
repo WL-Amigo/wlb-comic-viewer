@@ -27,7 +27,7 @@ export const BookAttributeViewAndEditor: Component<Props> = (props) => {
       ) : (
         <BookAttributeEditor
           initValue={props.attribute.value}
-          valueType={props.attribute.valueType}
+          attribute={props.attribute}
           onDetermined={onDetermineLocal}
           onCancel={exitEditMode}
         />

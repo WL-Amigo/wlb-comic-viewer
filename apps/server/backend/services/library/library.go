@@ -148,7 +148,20 @@ func (s *LibraryService) mutateLibrarySettings(id string, mutation func(current 
 }
 
 func (s *LibraryService) CreateBookAttributeTag(libraryId string, attrId models.BookAttributeId, tag string) error {
+	if tag == "" {
+		return nil
+	}
+
 	err := s.mutateLibrarySettings(libraryId, func(current models.LibrarySettings) (models.LibrarySettings, error) {
+		// if attribute value type isn't tag, skip update
+		attrSettings, err := current.FindAttributeSettings(attrId)
+		if err != nil {
+			return models.LibrarySettings{}, err
+		}
+		if attrSettings.ValueType != models.BookAttributeValueTypeTag {
+			return current, nil
+		}
+
 		currentTags, _ := current.TagAttributeValues[attrId]
 		nextTagMap := map[string]string{}
 		for _, t := range currentTags {

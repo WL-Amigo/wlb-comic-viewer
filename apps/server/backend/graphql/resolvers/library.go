@@ -119,15 +119,6 @@ func (r *mutationResolver) UpdateBookAttributeSettings(ctx context.Context, libr
 	return idStrs, nil
 }
 
-// CreateBookAttributeTag is the resolver for the createBookAttributeTag field.
-func (r *mutationResolver) CreateBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error) {
-	err := r.library.CreateBookAttributeTag(libraryID, models.BookAttributeId(attributeID), tag)
-	if err != nil {
-		return "", err
-	}
-	return tag, nil
-}
-
 // DeleteBookAttributeTag is the resolver for the deleteBookAttributeTag field.
 func (r *mutationResolver) DeleteBookAttributeTag(ctx context.Context, libraryID string, attributeID string, tag string) (string, error) {
 	err := r.library.DeleteBookAttributeTag(libraryID, models.BookAttributeId(attributeID), tag)
