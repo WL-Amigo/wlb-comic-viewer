@@ -116,9 +116,39 @@ func (r *mutationResolver) BookPageReorderBookmark(ctx context.Context, libraryI
 
 	results := []*model.BookBookmark{}
 	for _, bm := range internalResults {
+		var bookmarkError *model.BookmarkErrorTypeEnum
+		if bm.IsMissing() {
+			e := model.BookmarkErrorTypeEnumMissingPageFile
+			bookmarkError = &e
+		}
 		results = append(results, &model.BookBookmark{
-			Name: bm.Name,
-			Page: bm.Page,
+			Name:  bm.Name,
+			Page:  bm.Page,
+			Error: bookmarkError,
+		})
+	}
+
+	return results, nil
+}
+
+// BookPageRecoveryBookmark is the resolver for the bookPageRecoveryBookmark field.
+func (r *mutationResolver) BookPageRecoveryBookmark(ctx context.Context, libraryID string, bookID string) ([]*model.BookBookmark, error) {
+	internalResults, err := r.library.RecoveryBookmarkPointsToMissingFile(libraryID, bookID)
+	if err != nil {
+		return nil, err
+	}
+
+	results := []*model.BookBookmark{}
+	for _, bm := range internalResults {
+		var bookmarkError *model.BookmarkErrorTypeEnum
+		if bm.IsMissing() {
+			e := model.BookmarkErrorTypeEnumMissingPageFile
+			bookmarkError = &e
+		}
+		results = append(results, &model.BookBookmark{
+			Name:  bm.Name,
+			Page:  bm.Page,
+			Error: bookmarkError,
 		})
 	}
 
