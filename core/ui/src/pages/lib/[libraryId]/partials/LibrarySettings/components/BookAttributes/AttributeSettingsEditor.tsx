@@ -58,6 +58,7 @@ const Viewer: Component<ViewerProps> = (props) => {
 const ValueTypeSelectOptions: readonly SelectOption<BookAttributeValueType>[] = [
   { value: 'STRING', label: 'STRING' },
   { value: 'INT', label: 'INT' },
+  { value: 'TAG', label: 'TAG' },
 ];
 
 interface EditorProps {
