@@ -73,7 +73,7 @@ const PageButtonNormal: Component<ButtonProps> = (props) => {
         onClick={() => props.onPageOpenRequested(props.pageName)}
       >
         <BookOpenIcon />
-        <span class="truncate">{props.pageName}</span>
+        <span class="truncate text-left flex-1">{props.pageName}</span>
       </button>
     </div>
   );
@@ -97,7 +97,7 @@ const PageButtonVirtualizable: Component<VirtualizableButtonProps> = (props) => 
         onClick={() => props.onPageOpenRequested(props.pageName)}
       >
         <BookOpenIcon />
-        <span class="truncate">{props.pageName}</span>
+        <span class="truncate text-left flex-1">{props.pageName}</span>
       </button>
     </div>
   );

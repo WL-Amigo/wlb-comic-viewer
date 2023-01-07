@@ -3,7 +3,6 @@ import { Link } from 'solid-app-router';
 import { Component, createSignal, Match, ParentComponent, Switch } from 'solid-js';
 import { UndoIcon } from '../../../../../component/Icons';
 import { windi } from '../../../../../utils/windi';
-import { useLibraryDataContext } from '../../Context';
 import { AllPagesTabContent } from './components/AllPagesTabContent';
 import { BookmarksTabContent } from './components/BookmarksTabContent';
 import { BookViewer } from './components/BookViewer';
@@ -28,7 +27,6 @@ const TabButton: ParentComponent<{ onClick: () => void; isActive: boolean }> = (
 );
 
 export const BookMainPage: Component = () => {
-  const libCtx = useLibraryDataContext();
   const bookCtx = useBookDataContext();
   const [tab, setTab] = createSignal<TabKeys>('bookmarks');
   const [isViewerOpen, setIsViewerOpen] = useBookViewerOpenState();
@@ -54,10 +52,8 @@ export const BookMainPage: Component = () => {
           <UndoIcon />
           <span class="hidden md:block">ライブラリへ戻る</span>
         </Link>
-        <span class="text-xl">
-          {libCtx.library().name}/{bookCtx.book().name}
-        </span>
-        <IsReadMark class="hidden md:flex ml-8" isRead={bookCtx.book().isRead} />
+        <span class="text-xl flex-1 truncate">{bookCtx.book().name}</span>
+        <IsReadMark class="hidden md:flex" isRead={bookCtx.book().isRead} />
       </div>
       <div class="md:hidden flex flex-row px-4 pb-2">
         <IsReadMark isRead={bookCtx.book().isRead} />

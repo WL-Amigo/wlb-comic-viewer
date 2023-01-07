@@ -46,7 +46,7 @@ const NameViewer: Component<NameViewerProps> = (props) => {
       onClick={props.enterEditMode}
     >
       <span>{props.currentName}</span>
-      <EditIcon class="w-6 h-6 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
+      <EditIcon class="w-6 h-6 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </div>
   );
 };

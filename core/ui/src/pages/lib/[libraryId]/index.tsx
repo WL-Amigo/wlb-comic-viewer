@@ -33,12 +33,12 @@ export const BookListPage: Component = () => {
                 class="no-underline text-black p-2 rounded-lg border flex flex-row hover:bg-gray-100"
                 href={`book/${encodeURIComponent(book.id)}/`}
               >
-                <div class="flex-1 flex flex-row items-center gap-x-1">
-                  <BookIcon />
-                  <span>{book.name}</span>
+                <div class="flex-1 flex flex-row items-center gap-x-1 overflow-hidden">
+                  <BookIcon class="w-6 h-6 flex-shrink-0" />
+                  <span class="truncate">{book.name}</span>
                 </div>
                 {book.isRead && (
-                  <div class="flex flex-row items-center gap-x-1">
+                  <div class="flex flex-row items-center gap-x-1 flex-shrink-0">
                     <CheckCircleIcon class="w-6 h-6 text-green-600" />
                     <span>読了</span>
                   </div>
