@@ -36,6 +36,7 @@ export interface ILibraryService {
   loadAllLibraries(): Promise<readonly LibraryMin[]>;
   loadLibrary(libraryId: string, filter?: BooksFilterParams): Promise<LibraryForView>;
   loadLibrarySettings(libraryId: string): Promise<LibrarySettings>;
+  getRegisteredBooksDir(libraryId: string): Promise<string[]>;
 }
 
 export interface ILibraryMutationService {

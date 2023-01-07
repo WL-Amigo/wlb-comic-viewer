@@ -53,7 +53,14 @@ interface AddBookDialogProps {
 const AddBookDialog: Component<AddBookDialogProps> = (props) => {
   const { library } = useLibraryDataContext();
   const libraryService = useService('library');
-  const [libSettings] = createResource(() => libraryService.loadLibrarySettings(library().id));
+  const [booksDirData] = createResource(
+    () => props.isOpen,
+    () => libraryService.getRegisteredBooksDir(library().id),
+  );
+  const [libSettings] = createResource(
+    () => props.isOpen,
+    () => libraryService.loadLibrarySettings(library().id),
+  );
   const [nameValue, setName] = createSignal('');
   const [dirPath, setDirPath] = createSignal<string | null>(null);
   const canSave = createMemo(() => dirPath() !== null);
@@ -83,7 +90,7 @@ const AddBookDialog: Component<AddBookDialogProps> = (props) => {
             <Button onClick={() => setIsDirSelectorOpen(true)} color="primary">
               選択
             </Button>
-            <Show when={libSettings()}>
+            <Show when={libSettings() && booksDirData()}>
               <DirectorySelector
                 isOpen={isDirSelectorOpen()}
                 onSelect={(path) => {
@@ -91,6 +98,7 @@ const AddBookDialog: Component<AddBookDialogProps> = (props) => {
                   setIsDirSelectorOpen(false);
                 }}
                 onCancel={() => setIsDirSelectorOpen(false)}
+                disableDirPathList={booksDirData()}
                 baseDirPath={libSettings()?.rootDir}
               />
             </Show>

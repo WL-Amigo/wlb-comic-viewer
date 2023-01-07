@@ -104,13 +104,6 @@ export type BookInput = {
   name?: InputMaybe<Scalars['String']>;
 };
 
-export type BookMin = {
-  __typename?: 'BookMin';
-  id: Scalars['ID'];
-  isRead: Scalars['Boolean'];
-  name: Scalars['String'];
-};
-
 export enum BookmarkErrorTypeEnum {
   MissingPageFile = 'MISSING_PAGE_FILE'
 }
@@ -124,7 +117,7 @@ export type IBookAttributeSetting = {
 export type Library = {
   __typename?: 'Library';
   attributes: Array<BookAttributeSettingUnion>;
-  books: Array<BookMin>;
+  books: Array<Book>;
   id: Scalars['ID'];
   name: Scalars['String'];
   rootDir: Scalars['String'];
@@ -394,7 +387,7 @@ export type LoadLibraryQueryVariables = Exact<{
 }>;
 
 
-export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'BookMin', id: string, name: string, isRead: boolean }>, attributes: Array<{ __typename?: 'BookAttributeSettingBasic', id: string, displayName: string, valueType: BookAttributeValueTypeEnum } | { __typename?: 'BookAttributeSettingTag', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, tags: Array<string> }> } };
+export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'Book', id: string, name: string, isRead: boolean }>, attributes: Array<{ __typename?: 'BookAttributeSettingBasic', id: string, displayName: string, valueType: BookAttributeValueTypeEnum } | { __typename?: 'BookAttributeSettingTag', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, tags: Array<string> }> } };
 
 export type LoadLibrarySettingsQueryVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -402,6 +395,13 @@ export type LoadLibrarySettingsQueryVariables = Exact<{
 
 
 export type LoadLibrarySettingsQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, rootDir: string, attributes: Array<{ __typename?: 'BookAttributeSettingBasic', id: string, displayName: string, valueType: BookAttributeValueTypeEnum } | { __typename?: 'BookAttributeSettingTag', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, tags: Array<string> }> } };
+
+export type GetBooksDirQueryVariables = Exact<{
+  libraryId: Scalars['ID'];
+}>;
+
+
+export type GetBooksDirQuery = { __typename?: 'Query', library: { __typename?: 'Library', books: Array<{ __typename?: 'Book', dir: string }> } };
 
 export type CreateLibraryMutationVariables = Exact<{
   input: LibraryCreateInput;
@@ -575,6 +575,15 @@ export const LoadLibrarySettingsDocument = gql`
   }
 }
     `;
+export const GetBooksDirDocument = gql`
+    query getBooksDir($libraryId: ID!) {
+  library(id: $libraryId) {
+    books {
+      dir
+    }
+  }
+}
+    `;
 export const CreateLibraryDocument = gql`
     mutation createLibrary($input: LibraryCreateInput!) {
   createLibrary(input: $input)
@@ -645,6 +654,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     loadLibrarySettings(variables: LoadLibrarySettingsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoadLibrarySettingsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<LoadLibrarySettingsQuery>(LoadLibrarySettingsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'loadLibrarySettings', 'query');
+    },
+    getBooksDir(variables: GetBooksDirQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetBooksDirQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetBooksDirQuery>(GetBooksDirDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getBooksDir', 'query');
     },
     createLibrary(variables: CreateLibraryMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateLibraryMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateLibraryMutation>(CreateLibraryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createLibrary', 'mutation');

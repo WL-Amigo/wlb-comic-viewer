@@ -17,7 +17,7 @@ type Library {
   id: ID!
   name: String!
   rootDir: String!
-  books(filter: BookFilterParams): [BookMin!]!
+  books(filter: BookFilterParams): [Book!]!
   attributes: [BookAttributeSettingUnion!]!
 }
 

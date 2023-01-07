@@ -1,9 +1,3 @@
-type BookMin {
-  id: ID!
-  name: String!
-  isRead: Boolean!
-}
-
 type Book {
   id: ID!
   name: String!

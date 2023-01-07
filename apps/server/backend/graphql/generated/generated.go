@@ -82,12 +82,6 @@ type ComplexityRoot struct {
 		Page  func(childComplexity int) int
 	}
 
-	BookMin struct {
-		ID     func(childComplexity int) int
-		IsRead func(childComplexity int) int
-		Name   func(childComplexity int) int
-	}
-
 	Library struct {
 		Attributes func(childComplexity int) int
 		Books      func(childComplexity int, filter *model.BookFilterParams) int
@@ -128,7 +122,7 @@ type ComplexityRoot struct {
 }
 
 type LibraryResolver interface {
-	Books(ctx context.Context, obj *model.Library, filter *model.BookFilterParams) ([]*model.BookMin, error)
+	Books(ctx context.Context, obj *model.Library, filter *model.BookFilterParams) ([]*model.Book, error)
 }
 type MutationResolver interface {
 	CreateBook(ctx context.Context, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) (string, error)
@@ -322,27 +316,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BookBookmark.Page(childComplexity), true
-
-	case "BookMin.id":
-		if e.complexity.BookMin.ID == nil {
-			break
-		}
-
-		return e.complexity.BookMin.ID(childComplexity), true
-
-	case "BookMin.isRead":
-		if e.complexity.BookMin.IsRead == nil {
-			break
-		}
-
-		return e.complexity.BookMin.IsRead(childComplexity), true
-
-	case "BookMin.name":
-		if e.complexity.BookMin.Name == nil {
-			break
-		}
-
-		return e.complexity.BookMin.Name(childComplexity), true
 
 	case "Library.attributes":
 		if e.complexity.Library.Attributes == nil {
@@ -699,13 +672,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schemas/book.graphqls", Input: `type BookMin {
-  id: ID!
-  name: String!
-  isRead: Boolean!
-}
-
-type Book {
+	{Name: "../schemas/book.graphqls", Input: `type Book {
   id: ID!
   name: String!
   dir: String!
@@ -828,7 +795,7 @@ type Library {
   id: ID!
   name: String!
   rootDir: String!
-  books(filter: BookFilterParams): [BookMin!]!
+  books(filter: BookFilterParams): [Book!]!
   attributes: [BookAttributeSettingUnion!]!
 }
 
@@ -2436,138 +2403,6 @@ func (ec *executionContext) fieldContext_BookBookmark_error(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _BookMin_id(ctx context.Context, field graphql.CollectedField, obj *model.BookMin) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BookMin_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BookMin_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BookMin",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BookMin_name(ctx context.Context, field graphql.CollectedField, obj *model.BookMin) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BookMin_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BookMin_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BookMin",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BookMin_isRead(ctx context.Context, field graphql.CollectedField, obj *model.BookMin) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_BookMin_isRead(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IsRead, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_BookMin_isRead(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BookMin",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Library_id(ctx context.Context, field graphql.CollectedField, obj *model.Library) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Library_id(ctx, field)
 	if err != nil {
@@ -2726,9 +2561,9 @@ func (ec *executionContext) _Library_books(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.BookMin)
+	res := resTmp.([]*model.Book)
 	fc.Result = res
-	return ec.marshalNBookMin2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookMinᚄ(ctx, field.Selections, res)
+	return ec.marshalNBook2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Library_books(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2740,13 +2575,21 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_BookMin_id(ctx, field)
+				return ec.fieldContext_Book_id(ctx, field)
 			case "name":
-				return ec.fieldContext_BookMin_name(ctx, field)
+				return ec.fieldContext_Book_name(ctx, field)
+			case "dir":
+				return ec.fieldContext_Book_dir(ctx, field)
+			case "pages":
+				return ec.fieldContext_Book_pages(ctx, field)
+			case "attributes":
+				return ec.fieldContext_Book_attributes(ctx, field)
+			case "bookmarks":
+				return ec.fieldContext_Book_bookmarks(ctx, field)
 			case "isRead":
-				return ec.fieldContext_BookMin_isRead(ctx, field)
+				return ec.fieldContext_Book_isRead(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type BookMin", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
 		},
 	}
 	defer func() {
@@ -6535,48 +6378,6 @@ func (ec *executionContext) _BookBookmark(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var bookMinImplementors = []string{"BookMin"}
-
-func (ec *executionContext) _BookMin(ctx context.Context, sel ast.SelectionSet, obj *model.BookMin) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bookMinImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("BookMin")
-		case "id":
-
-			out.Values[i] = ec._BookMin_id(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-
-			out.Values[i] = ec._BookMin_name(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "isRead":
-
-			out.Values[i] = ec._BookMin_isRead(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var libraryImplementors = []string{"Library"}
 
 func (ec *executionContext) _Library(ctx context.Context, sel ast.SelectionSet, obj *model.Library) graphql.Marshaler {
@@ -7302,6 +7103,50 @@ func (ec *executionContext) marshalNBook2githubᚗcomᚋprivateᚑgalleryᚑserv
 	return ec._Book(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNBook2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Book) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBook2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBook(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNBook2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBook(ctx context.Context, sel ast.SelectionSet, v *model.Book) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7529,60 +7374,6 @@ func (ec *executionContext) unmarshalNBookInitInput2githubᚗcomᚋprivateᚑgal
 func (ec *executionContext) unmarshalNBookInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookInput(ctx context.Context, v interface{}) (model.BookInput, error) {
 	res, err := ec.unmarshalInputBookInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNBookMin2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookMinᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BookMin) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNBookMin2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookMin(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNBookMin2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookMin(ctx context.Context, sel ast.SelectionSet, v *model.BookMin) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._BookMin(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { Component, createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import { useService } from '../../compositions/Dependency';
+import { normalizePath } from '../../utils/path';
 import { windi } from '../../utils/windi';
 import { Button } from '../Button';
 import { FolderIcon, FolderOpenIcon } from '../Icons';
@@ -11,6 +12,7 @@ interface Props {
   onCancel: () => void;
   initOpenDirPath?: string;
   baseDirPath?: string;
+  disableDirPathList?: readonly string[];
   isOpen: boolean;
 }
 const Modal: Component<Props> = (props) => {
@@ -31,6 +33,10 @@ const Body: Component<Props> = (props) => {
     }
     props.onSelect(path);
   };
+  const disableDirPathSet = createMemo(
+    () => new Set<string>(props.disableDirPathList?.map((dp) => normalizePath((props.baseDirPath ?? '') + dp)) ?? []),
+  );
+  const getIsDisabled = (path: string) => disableDirPathSet().has(path);
 
   return (
     <div
@@ -38,7 +44,12 @@ const Body: Component<Props> = (props) => {
       onClick={(ev) => ev.stopPropagation()}
     >
       <div class="p-1 rounded border flex-1 overflow-y-auto">
-        <DirList self={props.baseDirPath ?? '/'} selected={selectedPath()} onSelect={setSelectedPath} />
+        <DirList
+          self={props.baseDirPath ?? '/'}
+          selected={selectedPath()}
+          onSelect={setSelectedPath}
+          getIsDisabled={getIsDisabled}
+        />
       </div>
       <div class="flex flex-row gap-x-2 justify-end">
         <Button onClick={props.onCancel}>キャンセル</Button>
@@ -54,6 +65,7 @@ interface DirListProps {
   self: string;
   selected: string | null;
   onSelect: (path: string) => void;
+  getIsDisabled: (path: string) => boolean;
 }
 const DirList: Component<DirListProps> = (props) => {
   const directoryService = useService('directory');
@@ -70,7 +82,14 @@ const DirList: Component<DirListProps> = (props) => {
           data.loading ? <span>loading...</span> : <span class="text-gray-500">子ディレクトリはありません</span>
         }
       >
-        {(item) => <DirEntry self={props.self + item} selected={props.selected} onSelect={props.onSelect} />}
+        {(item) => (
+          <DirEntry
+            self={props.self + item}
+            selected={props.selected}
+            onSelect={props.onSelect}
+            getIsDisabled={props.getIsDisabled}
+          />
+        )}
       </For>
     </div>
   );
@@ -80,11 +99,13 @@ interface DirEntryProps {
   self: string;
   selected: string | null;
   onSelect: (path: string) => void;
+  getIsDisabled: (path: string) => boolean;
 }
 const DirEntry: Component<DirEntryProps> = (props) => {
   const [isOpen, setIsOpen] = createSignal(props.selected?.startsWith(props.self) ?? false);
   const selfName = createMemo(() => props.self.split('/').at(-2));
   const isSelected = createMemo(() => props.self === props.selected);
+  const isDisabled = createMemo(() => props.getIsDisabled(normalizePath(props.self)));
 
   return (
     <div class="flex flex-col">
@@ -92,7 +113,11 @@ const DirEntry: Component<DirEntryProps> = (props) => {
         <button class="flex" onClick={() => setIsOpen((prev) => !prev)}>
           {isOpen() ? <FolderOpenIcon /> : <FolderIcon />}
         </button>
-        <button class="flex flex-row justify-start" onClick={() => props.onSelect(props.self)}>
+        <button
+          class="flex flex-row justify-start disabled:text-gray-400 disabled:cursor-default"
+          disabled={isDisabled()}
+          onClick={() => props.onSelect(props.self)}
+        >
           {selfName()}
         </button>
       </div>

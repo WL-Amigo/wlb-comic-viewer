@@ -98,17 +98,11 @@ type BookInput struct {
 	Name *string `json:"name"`
 }
 
-type BookMin struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	IsRead bool   `json:"isRead"`
-}
-
 type Library struct {
 	ID         string                      `json:"id"`
 	Name       string                      `json:"name"`
 	RootDir    string                      `json:"rootDir"`
-	Books      []*BookMin                  `json:"books"`
+	Books      []*Book                     `json:"books"`
 	Attributes []BookAttributeSettingUnion `json:"attributes"`
 }
 

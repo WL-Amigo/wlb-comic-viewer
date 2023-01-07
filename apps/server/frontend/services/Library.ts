@@ -92,6 +92,13 @@ export class LibraryService
     };
   }
 
+  async getRegisteredBooksDir(libraryId: string): Promise<string[]> {
+    const {
+      library: { books },
+    } = await this.gqlClient.getBooksDir({ libraryId });
+    return books.map((b) => b.dir);
+  }
+
   async createLibrary(settings: LibrarySettings): Promise<string> {
     const result = await this.gqlClient.createLibrary({ input: settings });
     return result.createLibrary;
