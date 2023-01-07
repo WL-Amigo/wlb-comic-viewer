@@ -1,4 +1,4 @@
-import { Component, createMemo, createResource, createSignal, Show } from 'solid-js';
+import { Component, createMemo, createResource, createSignal, onCleanup, Show } from 'solid-js';
 import { Button } from '../../../../component/Button';
 import { DirectorySelector } from '../../../../component/DirectorySelector';
 import { PlusIcon } from '../../../../component/Icons';
@@ -40,7 +40,7 @@ export const AddBookButton: Component<AddBookButtonProps> = (props) => {
         <PlusIcon />
         <span>ブックを追加する</span>
       </button>
-      <AddBookDialog isOpen={isDialogOpen()} onDetermined={addBook} onCancel={closeDialog} />
+      <Dialog isOpen={isDialogOpen()} onDetermined={addBook} onCancel={closeDialog} />
     </>
   );
 };
@@ -50,7 +50,15 @@ interface AddBookDialogProps {
   onDetermined: (values: FormValues) => void;
   onCancel: () => void;
 }
-const AddBookDialog: Component<AddBookDialogProps> = (props) => {
+const Dialog: Component<AddBookDialogProps> = (props) => {
+  return (
+    <ModalBase open={props.isOpen} onClickAway={props.onCancel}>
+      <AddBookDialogBody {...props} />
+    </ModalBase>
+  );
+};
+
+const AddBookDialogBody: Component<AddBookDialogProps> = (props) => {
   const { library } = useLibraryDataContext();
   const libraryService = useService('library');
   const [booksDirData] = createResource(
@@ -73,44 +81,37 @@ const AddBookDialog: Component<AddBookDialogProps> = (props) => {
   };
 
   return (
-    <ModalBase open={props.isOpen} onClickAway={props.onCancel}>
-      <div class="p-4 bg-white rounded flex flex-col gap-y-2" onClick={(ev) => ev.stopPropagation()}>
-        <h2 class="text-lg">ブックを追加</h2>
-        <div class="grid grid-cols-[auto,1fr] gap-2 items-center">
-          <span>名前:</span>
-          <input
-            type="text"
-            class="border p-1"
-            onChange={(ev) => setName(ev.currentTarget.value)}
-            value={nameValue()}
-          />
-          <span>ディレクトリ:</span>
-          <div class="flex flex-row items-center">
-            <span class="flex-1">{dirPath()}</span>
-            <Button onClick={() => setIsDirSelectorOpen(true)} color="primary">
-              選択
-            </Button>
-            <Show when={libSettings() && booksDirData()}>
-              <DirectorySelector
-                isOpen={isDirSelectorOpen()}
-                onSelect={(path) => {
-                  setDirPath(path);
-                  setIsDirSelectorOpen(false);
-                }}
-                onCancel={() => setIsDirSelectorOpen(false)}
-                disableDirPathList={booksDirData()}
-                baseDirPath={libSettings()?.rootDir}
-              />
-            </Show>
-          </div>
-        </div>
-        <div class="flex flex-row justify-end gap-x-2">
-          <Button onClick={props.onCancel}>キャンセル</Button>
-          <Button onClick={onDeterminedLocal} disabled={!canSave()} color="primary">
-            追加
+    <div class="p-4 bg-white rounded flex flex-col gap-y-2" onClick={(ev) => ev.stopPropagation()}>
+      <h2 class="text-lg">ブックを追加</h2>
+      <div class="grid grid-cols-[auto,1fr] gap-2 items-center">
+        <span>名前:</span>
+        <input type="text" class="border p-1" onChange={(ev) => setName(ev.currentTarget.value)} value={nameValue()} />
+        <span>ディレクトリ:</span>
+        <div class="flex flex-row items-center">
+          <span class="flex-1">{dirPath()}</span>
+          <Button onClick={() => setIsDirSelectorOpen(true)} color="primary">
+            選択
           </Button>
+          <Show when={libSettings() && booksDirData()}>
+            <DirectorySelector
+              isOpen={isDirSelectorOpen()}
+              onSelect={(path) => {
+                setDirPath(path);
+                setIsDirSelectorOpen(false);
+              }}
+              onCancel={() => setIsDirSelectorOpen(false)}
+              disableDirPathList={booksDirData()}
+              baseDirPath={libSettings()?.rootDir}
+            />
+          </Show>
         </div>
       </div>
-    </ModalBase>
+      <div class="flex flex-row justify-end gap-x-2">
+        <Button onClick={props.onCancel}>キャンセル</Button>
+        <Button onClick={onDeterminedLocal} disabled={!canSave()} color="primary">
+          追加
+        </Button>
+      </div>
+    </div>
   );
 };
