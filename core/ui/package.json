@@ -9,7 +9,8 @@
     "start": "vite build -w --mode=development",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "check": "tsc"
   },
   "license": "MIT",
   "peerDependencies": {

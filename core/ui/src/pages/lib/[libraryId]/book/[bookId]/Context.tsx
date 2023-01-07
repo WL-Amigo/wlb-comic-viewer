@@ -26,7 +26,7 @@ export const BookDataProvider: Component = () => {
   const params = useParams<{ bookId: string }>();
   const [data, { refetch }] = createResource(
     () => params.bookId,
-    (bookId) => bookService.loadBook(libCtx.library.id, bookId),
+    (bookId) => bookService.loadBook(libCtx.library().id, bookId),
   );
   const reloadBook = async () => {
     await refetch();

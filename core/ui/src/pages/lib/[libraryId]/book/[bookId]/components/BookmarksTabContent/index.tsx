@@ -17,7 +17,7 @@ export const BookmarksTabContent: Component<Props> = (props) => {
 
   const [isSortMode, setSortMode] = createSignal(false);
   const onDeterminedSort = async (sortedPages: readonly string[]) => {
-    await bookService.reorderBookmark(libCtx.library.id, bookCtx.book().id, sortedPages);
+    await bookService.reorderBookmark(libCtx.library().id, bookCtx.book().id, sortedPages);
     bookCtx.reloadBook();
     setSortMode(false);
   };

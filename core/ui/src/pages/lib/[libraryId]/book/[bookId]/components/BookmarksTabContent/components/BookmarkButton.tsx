@@ -81,7 +81,7 @@ const BookmarkEditor: Component<EditorProps> = (props) => {
   const bookService = useService('bookMutation');
   const [currentName, setCurrentName] = createSignal(props.currentBookmark.name);
   const onDetermined = async () => {
-    await bookService.updateBookmark(libCtx.library.id, bookCtx.book().id, props.currentBookmark.page, {
+    await bookService.updateBookmark(libCtx.library().id, bookCtx.book().id, props.currentBookmark.page, {
       name: currentName(),
     });
     bookCtx.reloadBook();
@@ -125,7 +125,7 @@ const BookmarkDeleteButton: Component<DeleteButtonProps> = (props) => {
       okText: '削除',
     });
     if (result === 'confirmed') {
-      bookService.deleteBookmark(libCtx.library.id, bookCtx.book().id, props.bookmark.page);
+      bookService.deleteBookmark(libCtx.library().id, bookCtx.book().id, props.bookmark.page);
       bookCtx.reloadBook();
     }
   };

@@ -10,7 +10,7 @@ export const UpdateKnownPagesButton: Component = () => {
   const bookCtx = useBookDataContext();
   const bookService = useService('book');
   const onUpdateKnownPages = async () => {
-    await bookService.updateKnownPages(libCtx.library.id, bookCtx.book().id);
+    await bookService.updateKnownPages(libCtx.library().id, bookCtx.book().id);
     bookCtx.reloadBook();
   };
 

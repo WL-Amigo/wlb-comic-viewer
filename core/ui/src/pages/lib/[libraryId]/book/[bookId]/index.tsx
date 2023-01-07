@@ -55,7 +55,7 @@ export const BookMainPage: Component = () => {
           <span class="hidden md:block">ライブラリへ戻る</span>
         </Link>
         <span class="text-xl">
-          {libCtx.library.name}/{bookCtx.book().name}
+          {libCtx.library().name}/{bookCtx.book().name}
         </span>
         <IsReadMark class="hidden md:flex ml-8" isRead={bookCtx.book().isRead} />
       </div>

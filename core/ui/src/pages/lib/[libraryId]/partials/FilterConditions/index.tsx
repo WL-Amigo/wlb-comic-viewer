@@ -32,7 +32,7 @@ export const LibraryBooksFilterConditions: Component = () => {
             .map(
               (a) =>
                 `${
-                  libCtx.library.attributes.find((attrSetting) => attrSetting.id === a.id)?.displayName ??
+                  libCtx.library().attributes.find((attrSetting) => attrSetting.id === a.id)?.displayName ??
                   '(不明な属性)'
                 } に ${a.value} を含む`,
             )
@@ -59,7 +59,7 @@ export const LibraryBooksFilterConditions: Component = () => {
           <div class="px-2 pb-1">
             <ConditionsSetter
               initParams={currentParams()}
-              bookAttributeSettings={libCtx.library.attributes}
+              bookAttributeSettings={libCtx.library().attributes}
               onDetermined={onDeterminedParams}
               onCancel={() => setIsOpen(false)}
             />

@@ -29,7 +29,7 @@ export const LibrarySettingsDialog: Component<Props> = (props) => {
   const initValues = useLibrarySettingsLoader(() => (props.open ? props.libraryId : undefined));
   return (
     <ModalBase open={props.open}>
-      <Show when={initValues()}>
+      <Show when={initValues()} keyed>
         {(initValues) => (
           <DialogBody
             libraryId={props.libraryId}

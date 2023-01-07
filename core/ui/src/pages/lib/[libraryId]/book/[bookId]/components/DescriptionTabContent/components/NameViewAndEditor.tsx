@@ -16,7 +16,7 @@ export const BookNameViewAndEditor: Component = () => {
   const exitEditMode = () => setIsEditMode(false);
 
   const onDetermined = async (nextName: string) => {
-    await bookService.updateBook(libCtx.library.id, bookCtx.book().id, {
+    await bookService.updateBook(libCtx.library().id, bookCtx.book().id, {
       name: nextName,
     });
     bookCtx.reloadBook();

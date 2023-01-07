@@ -8,7 +8,7 @@ export const useBookmarkHandler = (): ((page: string) => Promise<void>) => {
   const bookService = useService('bookMutation');
   return async (page) => {
     const isBookmark = bookCtx.book().bookmarks.find((bm) => bm.page === page) === undefined;
-    await bookService.bookmarkPage(libCtx.library.id, bookCtx.book().id, page, isBookmark);
+    await bookService.bookmarkPage(libCtx.library().id, bookCtx.book().id, page, isBookmark);
     bookCtx.reloadBook();
   };
 };

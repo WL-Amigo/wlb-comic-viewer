@@ -1,5 +1,5 @@
 import { Link } from 'solid-app-router';
-import { Component, createSignal, For } from 'solid-js';
+import { Component, createSignal, For, onMount } from 'solid-js';
 import { BookIcon, CheckCircleIcon, CogIcon, UndoIcon } from '../../../component/Icons';
 import { useLibraryDataContext } from './Context';
 import { AddBookButton } from './partials/AddBook';
@@ -8,6 +8,7 @@ import { LibrarySettingsDialog } from './partials/LibrarySettings';
 
 export const BookListPage: Component = () => {
   const libCtx = useLibraryDataContext();
+  onMount(() => libCtx.reloadLibrary());
 
   return (
     <div class="container mx-auto w-full h-full overflow-hidden flex flex-col">
@@ -19,14 +20,14 @@ export const BookListPage: Component = () => {
           <UndoIcon />
           <span class="hidden md:block">ライブラリ選択へ戻る</span>
         </Link>
-        <span class="text-xl">{libCtx.library.name}</span>
+        <span class="text-xl">{libCtx.library().name}</span>
         <div class="flex-1" />
-        <SettingsButton libraryId={libCtx.library.id} onRequestedReload={libCtx.reloadLibrary} />
+        <SettingsButton libraryId={libCtx.library().id} onRequestedReload={libCtx.reloadLibrary} />
       </div>
       <LibraryBooksFilterConditions />
       <div class="flex-1 overflow-y-auto">
         <div class="p-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
-          <For each={libCtx.library.books}>
+          <For each={libCtx.library().books}>
             {(book) => (
               <Link
                 class="no-underline text-black p-2 rounded-lg border flex flex-row hover:bg-gray-100"

@@ -21,7 +21,7 @@ export const AddBookButton: Component<AddBookButtonProps> = (props) => {
   const closeDialog = () => setIsDialogOpen(false);
   const addBook = (values: FormValues) => {
     bookService
-      .createBook(library.id, {
+      .createBook(library().id, {
         name: values.name,
         dir: values.dirPath,
       })
@@ -53,7 +53,7 @@ interface AddBookDialogProps {
 const AddBookDialog: Component<AddBookDialogProps> = (props) => {
   const { library } = useLibraryDataContext();
   const libraryService = useService('library');
-  const [libSettings] = createResource(() => libraryService.loadLibrarySettings(library.id));
+  const [libSettings] = createResource(() => libraryService.loadLibrarySettings(library().id));
   const [nameValue, setName] = createSignal('');
   const [dirPath, setDirPath] = createSignal<string | null>(null);
   const canSave = createMemo(() => dirPath() !== null);

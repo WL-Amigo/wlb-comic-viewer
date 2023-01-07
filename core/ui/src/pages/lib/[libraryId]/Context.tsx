@@ -1,12 +1,12 @@
 import { LibraryForView } from '@local-core/interfaces';
 import { Outlet, useParams } from 'solid-app-router';
-import { createContext, createResource, ParentComponent, Show, useContext } from 'solid-js';
+import { Accessor, createContext, createResource, createSignal, ParentComponent, Show, useContext } from 'solid-js';
 import { SquareLoader } from '../../../component/Spinners/SquareLoader';
 import { useService } from '../../../compositions/Dependency';
 import { useLibraryBooksSearchParams } from './compositions/Filter';
 
 interface LibraryDataContextValues {
-  readonly library: LibraryForView;
+  library: Accessor<LibraryForView>;
   reloadLibrary(): Promise<void>;
 }
 const LibraryDataContext = createContext<LibraryDataContextValues>();
@@ -40,13 +40,11 @@ export const LibraryDataProvider: ParentComponent = () => {
   };
 
   return (
-    <Show when={data.latest}>
-      {(library) => (
-        <LibraryDataContext.Provider value={{ library, reloadLibrary }}>
-          <Outlet />
-          <SquareLoader isLoading={data.loading} size="2x" />
-        </LibraryDataContext.Provider>
-      )}
+    <Show when={data.latest} fallback={<SquareLoader isLoading size="2x" />}>
+      <LibraryDataContext.Provider value={{ library: () => data.latest!, reloadLibrary }}>
+        <Outlet />
+        <SquareLoader isLoading={data.loading} size="2x" />
+      </LibraryDataContext.Provider>
     </Show>
   );
 };

@@ -14,7 +14,7 @@ const useMarkAsReadEffect = (currentPage: Accessor<string | undefined>) => {
   createEffect(() => {
     const currentPageLocal = currentPage();
     if (currentPageLocal !== undefined) {
-      bookMutationService.markAsReadPage(libCtx.library.id, bookCtx.book().id, currentPageLocal);
+      bookMutationService.markAsReadPage(libCtx.library().id, bookCtx.book().id, currentPageLocal);
     }
   });
 };
@@ -78,15 +78,15 @@ const BookViewerBody: Component<Omit<Props, 'open'>> = (props) => {
     if (nextPage === undefined) {
       return;
     }
-    preloadImage(bookService.getBookPageUrl(libCtx.library.id, bookCtx.book().id, nextPage));
+    preloadImage(bookService.getBookPageUrl(libCtx.library().id, bookCtx.book().id, nextPage));
   });
 
   return (
     <div class="w-full h-full relative" onClick={(ev) => ev.stopPropagation()}>
-      <Show when={bookCtx.book().pages.at(currentImageIndex())}>
+      <Show when={bookCtx.book().pages.at(currentImageIndex())} keyed>
         {(pageName) => (
           <img
-            src={bookService.getBookPageUrl(libCtx.library.id, bookCtx.book().id, pageName)}
+            src={bookService.getBookPageUrl(libCtx.library().id, bookCtx.book().id, pageName)}
             class="w-full h-full object-contain"
           />
         )}
