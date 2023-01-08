@@ -46,13 +46,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Book struct {
-		Attributes func(childComplexity int) int
-		Bookmarks  func(childComplexity int) int
-		Dir        func(childComplexity int) int
-		ID         func(childComplexity int) int
-		IsRead     func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Pages      func(childComplexity int) int
+		Attributes        func(childComplexity int) int
+		Bookmarks         func(childComplexity int) int
+		BuiltinAttributes func(childComplexity int) int
+		Dir               func(childComplexity int) int
+		ID                func(childComplexity int) int
+		IsRead            func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Pages             func(childComplexity int) int
 	}
 
 	BookAttribute struct {
@@ -82,6 +83,10 @@ type ComplexityRoot struct {
 		Page  func(childComplexity int) int
 	}
 
+	BookBuiltinAttributes struct {
+		IsFavorite func(childComplexity int) int
+	}
+
 	Library struct {
 		Attributes func(childComplexity int) int
 		Books      func(childComplexity int, filter *model.BookFilterParams) int
@@ -102,6 +107,7 @@ type ComplexityRoot struct {
 		BookPageRecoveryBookmark    func(childComplexity int, libraryID string, bookID string) int
 		BookPageReorderBookmark     func(childComplexity int, libraryID string, bookID string, orderedPages []string) int
 		BookUpdateAttribute         func(childComplexity int, libraryID string, bookID string, input []*model.BookAttributeInput) int
+		BookUpdateBuiltinAttribute  func(childComplexity int, libraryID string, bookID string, input model.BookBuiltinAttributesInput) int
 		BookUpdateKnownPages        func(childComplexity int, libraryID string, bookID string) int
 		CreateBook                  func(childComplexity int, libraryID string, init model.BookInitInput, input model.BookInput, attributesInput []*model.BookAttributeInput) int
 		CreateBookAttributeSettings func(childComplexity int, libraryID string, input []*model.BookAttributeSettingCreateInput) int
@@ -130,6 +136,7 @@ type MutationResolver interface {
 	DeleteBook(ctx context.Context, libraryID string, bookID string) (string, error)
 	BookUpdateKnownPages(ctx context.Context, libraryID string, bookID string) ([]string, error)
 	BookPageMarkAsRead(ctx context.Context, libraryID string, bookID string, page string) (string, error)
+	BookUpdateBuiltinAttribute(ctx context.Context, libraryID string, bookID string, input model.BookBuiltinAttributesInput) (*model.BookBuiltinAttributes, error)
 	BookUpdateAttribute(ctx context.Context, libraryID string, bookID string, input []*model.BookAttributeInput) (string, error)
 	BookPageCreateBookmark(ctx context.Context, libraryID string, bookID string, page string, option *model.BookBookmarkInput) (string, error)
 	BookPageDeleteBookmark(ctx context.Context, libraryID string, bookID string, page string) (string, error)
@@ -176,6 +183,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Book.Bookmarks(childComplexity), true
+
+	case "Book.builtinAttributes":
+		if e.complexity.Book.BuiltinAttributes == nil {
+			break
+		}
+
+		return e.complexity.Book.BuiltinAttributes(childComplexity), true
 
 	case "Book.dir":
 		if e.complexity.Book.Dir == nil {
@@ -317,6 +331,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BookBookmark.Page(childComplexity), true
 
+	case "BookBuiltinAttributes.isFavorite":
+		if e.complexity.BookBuiltinAttributes.IsFavorite == nil {
+			break
+		}
+
+		return e.complexity.BookBuiltinAttributes.IsFavorite(childComplexity), true
+
 	case "Library.attributes":
 		if e.complexity.Library.Attributes == nil {
 			break
@@ -442,6 +463,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.BookUpdateAttribute(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["input"].([]*model.BookAttributeInput)), true
+
+	case "Mutation.bookUpdateBuiltinAttribute":
+		if e.complexity.Mutation.BookUpdateBuiltinAttribute == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_bookUpdateBuiltinAttribute_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BookUpdateBuiltinAttribute(childComplexity, args["libraryId"].(string), args["bookId"].(string), args["input"].(model.BookBuiltinAttributesInput)), true
 
 	case "Mutation.bookUpdateKnownPages":
 		if e.complexity.Mutation.BookUpdateKnownPages == nil {
@@ -606,6 +639,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBookAttributeSettingCreateInput,
 		ec.unmarshalInputBookAttributeSettingUpdateInput,
 		ec.unmarshalInputBookBookmarkInput,
+		ec.unmarshalInputBookBuiltinAttributesInput,
 		ec.unmarshalInputBookFilterAttributeParams,
 		ec.unmarshalInputBookFilterParams,
 		ec.unmarshalInputBookInitInput,
@@ -677,9 +711,14 @@ var sources = []*ast.Source{
   name: String!
   dir: String!
   pages: [String!]!
+  builtinAttributes: BookBuiltinAttributes!
   attributes: [BookAttribute!]!
   bookmarks: [BookBookmark!]!
   isRead: Boolean!
+}
+
+type BookBuiltinAttributes {
+  isFavorite: Boolean!
 }
 
 extend type Query {
@@ -694,12 +733,17 @@ input BookInitInput {
   dir: String!
 }
 
+input BookBuiltinAttributesInput {
+  isFavorite: Boolean
+}
+
 extend type Mutation {
   createBook(libraryId: ID!, init: BookInitInput!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   updateBook(libraryId: ID!, bookId: ID!, input: BookInput!, attributesInput: [BookAttributeInput!]): ID!
   deleteBook(libraryId: ID!, bookId: ID!): ID!
   bookUpdateKnownPages(libraryId: ID!, bookId: ID!): [String!]!
   bookPageMarkAsRead(libraryId: ID!, bookId: ID!, page: String!): String!
+  bookUpdateBuiltinAttribute(libraryId: ID!, bookId: ID!, input: BookBuiltinAttributesInput!): BookBuiltinAttributes!
   bookUpdateAttribute(libraryId: ID!, bookId: ID!, input: [BookAttributeInput!]!): ID!
   bookPageCreateBookmark(libraryId: ID!, bookId: ID!, page: String!, option: BookBookmarkInput): String!
   bookPageDeleteBookmark(libraryId: ID!, bookId: ID!, page: String!): String!
@@ -783,6 +827,7 @@ input BookBookmarkInput {
 
 input BookFilterParams {
   isRead: Boolean
+  isFavorite: Boolean
   attributes: [BookFilterAttributeParams!]
 }
 
@@ -1033,6 +1078,39 @@ func (ec *executionContext) field_Mutation_bookUpdateAttribute_args(ctx context.
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg2, err = ec.unmarshalNBookAttributeInput2ᚕᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookAttributeInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_bookUpdateBuiltinAttribute_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["libraryId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["libraryId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["bookId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bookId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bookId"] = arg1
+	var arg2 model.BookBuiltinAttributesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg2, err = ec.unmarshalNBookBuiltinAttributesInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1589,6 +1667,54 @@ func (ec *executionContext) fieldContext_Book_pages(ctx context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Book_builtinAttributes(ctx context.Context, field graphql.CollectedField, obj *model.Book) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Book_builtinAttributes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BuiltinAttributes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.BookBuiltinAttributes)
+	fc.Result = res
+	return ec.marshalNBookBuiltinAttributes2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributes(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Book_builtinAttributes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isFavorite":
+				return ec.fieldContext_BookBuiltinAttributes_isFavorite(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BookBuiltinAttributes", field.Name)
 		},
 	}
 	return fc, nil
@@ -2403,6 +2529,50 @@ func (ec *executionContext) fieldContext_BookBookmark_error(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _BookBuiltinAttributes_isFavorite(ctx context.Context, field graphql.CollectedField, obj *model.BookBuiltinAttributes) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BookBuiltinAttributes_isFavorite(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFavorite, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BookBuiltinAttributes_isFavorite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BookBuiltinAttributes",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Library_id(ctx context.Context, field graphql.CollectedField, obj *model.Library) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Library_id(ctx, field)
 	if err != nil {
@@ -2582,6 +2752,8 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 				return ec.fieldContext_Book_dir(ctx, field)
 			case "pages":
 				return ec.fieldContext_Book_pages(ctx, field)
+			case "builtinAttributes":
+				return ec.fieldContext_Book_builtinAttributes(ctx, field)
 			case "attributes":
 				return ec.fieldContext_Book_attributes(ctx, field)
 			case "bookmarks":
@@ -3007,6 +3179,65 @@ func (ec *executionContext) fieldContext_Mutation_bookPageMarkAsRead(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_bookPageMarkAsRead_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_bookUpdateBuiltinAttribute(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_bookUpdateBuiltinAttribute(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().BookUpdateBuiltinAttribute(rctx, fc.Args["libraryId"].(string), fc.Args["bookId"].(string), fc.Args["input"].(model.BookBuiltinAttributesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.BookBuiltinAttributes)
+	fc.Result = res
+	return ec.marshalNBookBuiltinAttributes2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributes(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_bookUpdateBuiltinAttribute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isFavorite":
+				return ec.fieldContext_BookBuiltinAttributes_isFavorite(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BookBuiltinAttributes", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_bookUpdateBuiltinAttribute_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3626,6 +3857,8 @@ func (ec *executionContext) fieldContext_Query_book(ctx context.Context, field g
 				return ec.fieldContext_Book_dir(ctx, field)
 			case "pages":
 				return ec.fieldContext_Book_pages(ctx, field)
+			case "builtinAttributes":
+				return ec.fieldContext_Book_builtinAttributes(ctx, field)
 			case "attributes":
 				return ec.fieldContext_Book_attributes(ctx, field)
 			case "bookmarks":
@@ -5876,6 +6109,34 @@ func (ec *executionContext) unmarshalInputBookBookmarkInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBookBuiltinAttributesInput(ctx context.Context, obj interface{}) (model.BookBuiltinAttributesInput, error) {
+	var it model.BookBuiltinAttributesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"isFavorite"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "isFavorite":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFavorite"))
+			it.IsFavorite, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBookFilterAttributeParams(ctx context.Context, obj interface{}) (model.BookFilterAttributeParams, error) {
 	var it model.BookFilterAttributeParams
 	asMap := map[string]interface{}{}
@@ -5919,7 +6180,7 @@ func (ec *executionContext) unmarshalInputBookFilterParams(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"isRead", "attributes"}
+	fieldsInOrder := [...]string{"isRead", "isFavorite", "attributes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5931,6 +6192,14 @@ func (ec *executionContext) unmarshalInputBookFilterParams(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isRead"))
 			it.IsRead, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isFavorite":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isFavorite"))
+			it.IsFavorite, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6160,6 +6429,13 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "builtinAttributes":
+
+			out.Values[i] = ec._Book_builtinAttributes(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "attributes":
 
 			out.Values[i] = ec._Book_attributes(ctx, field, obj)
@@ -6378,6 +6654,34 @@ func (ec *executionContext) _BookBookmark(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var bookBuiltinAttributesImplementors = []string{"BookBuiltinAttributes"}
+
+func (ec *executionContext) _BookBuiltinAttributes(ctx context.Context, sel ast.SelectionSet, obj *model.BookBuiltinAttributes) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookBuiltinAttributesImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BookBuiltinAttributes")
+		case "isFavorite":
+
+			out.Values[i] = ec._BookBuiltinAttributes_isFavorite(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var libraryImplementors = []string{"Library"}
 
 func (ec *executionContext) _Library(ctx context.Context, sel ast.SelectionSet, obj *model.Library) graphql.Marshaler {
@@ -6541,6 +6845,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_bookPageMarkAsRead(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bookUpdateBuiltinAttribute":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_bookUpdateBuiltinAttribute(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -7359,6 +7672,25 @@ func (ec *executionContext) marshalNBookBookmark2ᚖgithubᚗcomᚋprivateᚑgal
 		return graphql.Null
 	}
 	return ec._BookBookmark(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNBookBuiltinAttributes2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributes(ctx context.Context, sel ast.SelectionSet, v model.BookBuiltinAttributes) graphql.Marshaler {
+	return ec._BookBuiltinAttributes(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBookBuiltinAttributes2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributes(ctx context.Context, sel ast.SelectionSet, v *model.BookBuiltinAttributes) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._BookBuiltinAttributes(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBookBuiltinAttributesInput2githubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookBuiltinAttributesInput(ctx context.Context, v interface{}) (model.BookBuiltinAttributesInput, error) {
+	res, err := ec.unmarshalInputBookBuiltinAttributesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNBookFilterAttributeParams2ᚖgithubᚗcomᚋprivateᚑgalleryᚑserverᚋgraphqlᚋmodelᚐBookFilterAttributeParams(ctx context.Context, v interface{}) (*model.BookFilterAttributeParams, error) {

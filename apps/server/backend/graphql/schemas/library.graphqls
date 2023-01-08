@@ -5,6 +5,7 @@ type LibraryMin {
 
 input BookFilterParams {
   isRead: Boolean
+  isFavorite: Boolean
   attributes: [BookFilterAttributeParams!]
 }
 

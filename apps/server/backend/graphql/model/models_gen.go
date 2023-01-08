@@ -17,13 +17,14 @@ type IBookAttributeSetting interface {
 }
 
 type Book struct {
-	ID         string           `json:"id"`
-	Name       string           `json:"name"`
-	Dir        string           `json:"dir"`
-	Pages      []string         `json:"pages"`
-	Attributes []*BookAttribute `json:"attributes"`
-	Bookmarks  []*BookBookmark  `json:"bookmarks"`
-	IsRead     bool             `json:"isRead"`
+	ID                string                 `json:"id"`
+	Name              string                 `json:"name"`
+	Dir               string                 `json:"dir"`
+	Pages             []string               `json:"pages"`
+	BuiltinAttributes *BookBuiltinAttributes `json:"builtinAttributes"`
+	Attributes        []*BookAttribute       `json:"attributes"`
+	Bookmarks         []*BookBookmark        `json:"bookmarks"`
+	IsRead            bool                   `json:"isRead"`
 }
 
 type BookAttribute struct {
@@ -80,6 +81,14 @@ type BookBookmarkInput struct {
 	Name *string `json:"name"`
 }
 
+type BookBuiltinAttributes struct {
+	IsFavorite bool `json:"isFavorite"`
+}
+
+type BookBuiltinAttributesInput struct {
+	IsFavorite *bool `json:"isFavorite"`
+}
+
 type BookFilterAttributeParams struct {
 	ID    string `json:"id"`
 	Value string `json:"value"`
@@ -87,6 +96,7 @@ type BookFilterAttributeParams struct {
 
 type BookFilterParams struct {
 	IsRead     *bool                        `json:"isRead"`
+	IsFavorite *bool                        `json:"isFavorite"`
 	Attributes []*BookFilterAttributeParams `json:"attributes"`
 }
 

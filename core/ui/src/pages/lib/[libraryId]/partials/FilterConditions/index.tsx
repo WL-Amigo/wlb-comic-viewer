@@ -126,7 +126,7 @@ const ConditionsSetter: Component<SetterProps> = (props) => {
           onClick={() => setParams((prev) => ({ ...prev, isRead: null }))}
           color={!isNotNullOrUndefined(params().isRead) ? 'primary' : 'default'}
         >
-          指定なし
+          指定しない
         </Button>
         <Button
           onClick={() => setParams((prev) => ({ ...prev, isRead: true }))}
@@ -139,6 +139,27 @@ const ConditionsSetter: Component<SetterProps> = (props) => {
           color={params().isRead === false ? 'primary' : 'default'}
         >
           未読
+        </Button>
+      </div>
+      <div class="flex flex-row gap-x-1 items-center">
+        <div>お気に入り: </div>
+        <Button
+          onClick={() => setParams((prev) => ({ ...prev, isFavorite: null }))}
+          color={!isNotNullOrUndefined(params().isFavorite) ? 'primary' : 'default'}
+        >
+          指定しない
+        </Button>
+        <Button
+          onClick={() => setParams((prev) => ({ ...prev, isFavorite: true }))}
+          color={params().isFavorite === true ? 'primary' : 'default'}
+        >
+          ON
+        </Button>
+        <Button
+          onClick={() => setParams((prev) => ({ ...prev, isFavorite: false }))}
+          color={params().isFavorite === false ? 'primary' : 'default'}
+        >
+          OFF
         </Button>
       </div>
       <div class="col-span-full flex flex-col md:flex-row gap-1">

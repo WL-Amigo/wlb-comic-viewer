@@ -70,6 +70,21 @@ func (r *mutationResolver) BookPageMarkAsRead(ctx context.Context, libraryID str
 	return result[0], nil
 }
 
+// BookUpdateBuiltinAttribute is the resolver for the bookUpdateBuiltinAttribute field.
+func (r *mutationResolver) BookUpdateBuiltinAttribute(ctx context.Context, libraryID string, bookID string, input model.BookBuiltinAttributesInput) (*model.BookBuiltinAttributes, error) {
+	serviceInput := models.UpdateBookBuiltinAttributesInput{
+		IsFavorite: input.IsFavorite,
+	}
+	result, err := r.library.UpdateBookBuiltinAttributes(libraryID, bookID, serviceInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BookBuiltinAttributes{
+		IsFavorite: result.IsFavorite,
+	}, nil
+}
+
 // BookUpdateAttribute is the resolver for the bookUpdateAttribute field.
 func (r *mutationResolver) BookUpdateAttribute(ctx context.Context, libraryID string, bookID string, input []*model.BookAttributeInput) (string, error) {
 	attrInput := []models.BookAttribute{}
@@ -222,10 +237,13 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 	}
 
 	return &model.Book{
-		ID:         bookID,
-		Name:       bookDetail.Name,
-		Dir:        bookDetail.Dir,
-		Pages:      bookDetail.PageFilePaths,
+		ID:    bookID,
+		Name:  bookDetail.Name,
+		Dir:   bookDetail.Dir,
+		Pages: bookDetail.PageFilePaths,
+		BuiltinAttributes: &model.BookBuiltinAttributes{
+			IsFavorite: bookDetail.BuiltinAttributes.IsFavorite,
+		},
 		Attributes: attrs,
 		Bookmarks:  bookmarks,
 		IsRead:     r.library.CheckIsBookRead(bookDetail.BookModelBase),

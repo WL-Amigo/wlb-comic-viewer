@@ -29,6 +29,8 @@ import FolderIcon from 'virtual:icons/bx/folder';
 import FolderOpenIcon from 'virtual:icons/bx/folder-open';
 import SearchIcon from 'virtual:icons/bx/search';
 import ErrorIconRaw from 'virtual:icons/bxs/error';
+import StarIcon from 'virtual:icons/bxs/star';
+import StarOutlinedIcon from 'virtual:icons/bx/star';
 import type { ComponentProps } from 'solid-js';
 import type { JSX } from 'solid-js/jsx-runtime';
 import clsx from 'clsx';
@@ -67,6 +69,8 @@ export {
   FolderIcon,
   FolderOpenIcon,
   SearchIcon,
+  StarIcon,
+  StarOutlinedIcon,
 };
 
 export const ErrorIcon: IconComponent = (props) => {

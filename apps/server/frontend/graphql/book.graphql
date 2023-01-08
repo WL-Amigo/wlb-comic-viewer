@@ -9,6 +9,9 @@ query getBook($libraryId: ID!, $bookId: ID!) {
       error
     }
     isRead
+    builtinAttributes {
+      isFavorite
+    }
     attributes {
       id
       displayName
@@ -89,4 +92,18 @@ mutation updateBookAttribute(
     bookId: $bookId
     input: $attributesInput
   )
+}
+
+mutation updateBookBuiltinAttributes(
+  $libraryId: ID!
+  $bookId: ID!
+  $input: BookBuiltinAttributesInput!
+) {
+  bookUpdateBuiltinAttribute(
+    libraryId: $libraryId
+    bookId: $bookId
+    input: $input
+  ) {
+    isFavorite
+  }
 }

@@ -12,6 +12,7 @@ import (
 
 type BooksFilter struct {
 	IsRead     *bool
+	IsFavorite *bool
 	Attributes []BooksAttributeFilter
 }
 
@@ -49,10 +50,15 @@ func (s *LibraryService) QueryBooksInLibrary(libraryId string, filter BooksFilte
 	}
 
 	if filter.IsRead != nil {
-		books = filterBooks(books, func(b models.BookModelBase) bool { return s.CheckIsBookRead(b) == *filter.IsRead })
+		books = utils.SliceFilter(books, func(b models.BookModelBase) bool { return s.CheckIsBookRead(b) == *filter.IsRead })
+	}
+	if filter.IsFavorite != nil {
+		books = utils.SliceFilter(books, func(b models.BookModelBase) bool {
+			return b.BuiltinAttributes.IsFavorite == *filter.IsFavorite
+		})
 	}
 	for _, attrFilter := range filter.Attributes {
-		books = filterBooks(books, func(b models.BookModelBase) bool {
+		books = utils.SliceFilter(books, func(b models.BookModelBase) bool {
 			for _, attr := range b.Attributes {
 				if attr.Id == attrFilter.Id && strings.Contains(attr.Value, attrFilter.Value) {
 					return true
@@ -391,4 +397,25 @@ func (s *LibraryService) UpdateBookAttribute(libraryId string, bookId string, at
 		}
 	}
 	return latestAttrs, nil
+}
+
+func (s *LibraryService) UpdateBookBuiltinAttributes(libraryId string, bookId string, input models.UpdateBookBuiltinAttributesInput) (models.BookBuiltinAttributes, error) {
+	var latestBuiltinAttrs models.BookBuiltinAttributes
+	err := s.mutateBook(libraryId, bookId, func(book models.BookModelBase) (models.BookSettings, error) {
+		nextSettings := book.BookSettings
+		nextAttrs := book.BookSettings.BuiltinAttributes
+
+		if input.IsFavorite != nil {
+			nextAttrs.IsFavorite = utils.UnwrapBoolPtr(input.IsFavorite)
+		}
+
+		nextSettings.BuiltinAttributes = nextAttrs
+		latestBuiltinAttrs = nextAttrs
+		return nextSettings, nil
+	})
+	if err != nil {
+		return models.BookBuiltinAttributes{}, nil
+	}
+
+	return latestBuiltinAttrs, nil
 }

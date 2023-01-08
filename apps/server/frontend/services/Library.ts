@@ -68,6 +68,7 @@ export class LibraryService
       libraryId,
       booksFilter: {
         isRead: filter?.isRead,
+        isFavorite: filter?.isFavorite,
         attributes: filter?.attributes,
       },
     });

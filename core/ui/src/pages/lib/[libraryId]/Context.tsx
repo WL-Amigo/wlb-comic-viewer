@@ -32,6 +32,7 @@ export const LibraryDataProvider: ParentComponent = () => {
     ({ libraryId, searchParams }) =>
       libraryService.loadLibrary(libraryId, {
         isRead: searchParams.isRead ?? undefined,
+        isFavorite: searchParams.isFavorite ?? undefined,
         attributes: searchParams.attributes,
       }),
   );

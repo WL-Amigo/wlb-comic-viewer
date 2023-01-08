@@ -6,6 +6,7 @@ import { useBookDataContext } from '../../Context';
 import { UpdateKnownPagesButton } from './components/UpdateKnownPagesButton';
 import { BookAttributeViewAndEditor } from './components/AttributeViewAndEditor';
 import { BookNameViewAndEditor } from './components/NameViewAndEditor';
+import { BookFavoriteEditor } from './components/BookFavoriteButton';
 
 export const BookDescriptionTabContent: Component = () => {
   return (
@@ -35,7 +36,12 @@ const BookAttributeSection: Component = () => {
     <div class="w-full relative flex flex-col gap-y-6">
       <section>
         <h2 class="text-lg pb-2">基本情報</h2>
-        <BookNameViewAndEditor />
+        <div class="flex flex-col gap-y-1">
+          <BookNameViewAndEditor />
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+            <BookFavoriteEditor />
+          </div>
+        </div>
       </section>
       <section>
         <h2 class="text-lg pb-2">属性</h2>

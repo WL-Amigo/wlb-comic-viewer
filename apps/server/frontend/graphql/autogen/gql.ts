@@ -19,6 +19,7 @@ export type Book = {
   __typename?: 'Book';
   attributes: Array<BookAttribute>;
   bookmarks: Array<BookBookmark>;
+  builtinAttributes: BookBuiltinAttributes;
   dir: Scalars['String'];
   id: Scalars['ID'];
   isRead: Scalars['Boolean'];
@@ -86,6 +87,15 @@ export type BookBookmarkInput = {
   name?: InputMaybe<Scalars['String']>;
 };
 
+export type BookBuiltinAttributes = {
+  __typename?: 'BookBuiltinAttributes';
+  isFavorite: Scalars['Boolean'];
+};
+
+export type BookBuiltinAttributesInput = {
+  isFavorite?: InputMaybe<Scalars['Boolean']>;
+};
+
 export type BookFilterAttributeParams = {
   id: Scalars['ID'];
   value: Scalars['String'];
@@ -93,6 +103,7 @@ export type BookFilterAttributeParams = {
 
 export type BookFilterParams = {
   attributes?: InputMaybe<Array<BookFilterAttributeParams>>;
+  isFavorite?: InputMaybe<Scalars['Boolean']>;
   isRead?: InputMaybe<Scalars['Boolean']>;
 };
 
@@ -151,6 +162,7 @@ export type Mutation = {
   bookPageRecoveryBookmark: Array<BookBookmark>;
   bookPageReorderBookmark: Array<BookBookmark>;
   bookUpdateAttribute: Scalars['ID'];
+  bookUpdateBuiltinAttribute: BookBuiltinAttributes;
   bookUpdateKnownPages: Array<Scalars['String']>;
   createBook: Scalars['ID'];
   createBookAttributeSettings: Array<Scalars['ID']>;
@@ -201,6 +213,13 @@ export type MutationBookPageReorderBookmarkArgs = {
 export type MutationBookUpdateAttributeArgs = {
   bookId: Scalars['ID'];
   input: Array<BookAttributeInput>;
+  libraryId: Scalars['ID'];
+};
+
+
+export type MutationBookUpdateBuiltinAttributeArgs = {
+  bookId: Scalars['ID'];
+  input: BookBuiltinAttributesInput;
   libraryId: Scalars['ID'];
 };
 
@@ -294,7 +313,7 @@ export type GetBookQueryVariables = Exact<{
 }>;
 
 
-export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }>, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string, existingTags: Array<string> }> } };
+export type GetBookQuery = { __typename?: 'Query', book: { __typename?: 'Book', id: string, name: string, pages: Array<string>, isRead: boolean, bookmarks: Array<{ __typename?: 'BookBookmark', page: string, name: string, error?: BookmarkErrorTypeEnum | null }>, builtinAttributes: { __typename?: 'BookBuiltinAttributes', isFavorite: boolean }, attributes: Array<{ __typename?: 'BookAttribute', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, value: string, existingTags: Array<string> }> } };
 
 export type CreateBookMutationVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -369,6 +388,15 @@ export type UpdateBookAttributeMutationVariables = Exact<{
 
 export type UpdateBookAttributeMutation = { __typename?: 'Mutation', bookUpdateAttribute: string };
 
+export type UpdateBookBuiltinAttributesMutationVariables = Exact<{
+  libraryId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  input: BookBuiltinAttributesInput;
+}>;
+
+
+export type UpdateBookBuiltinAttributesMutation = { __typename?: 'Mutation', bookUpdateBuiltinAttribute: { __typename?: 'BookBuiltinAttributes', isFavorite: boolean } };
+
 export type GetDirsQueryVariables = Exact<{
   root: Scalars['String'];
 }>;
@@ -387,7 +415,7 @@ export type LoadLibraryQueryVariables = Exact<{
 }>;
 
 
-export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'Book', id: string, name: string, isRead: boolean }>, attributes: Array<{ __typename?: 'BookAttributeSettingBasic', id: string, displayName: string, valueType: BookAttributeValueTypeEnum } | { __typename?: 'BookAttributeSettingTag', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, tags: Array<string> }> } };
+export type LoadLibraryQuery = { __typename?: 'Query', library: { __typename?: 'Library', id: string, name: string, books: Array<{ __typename?: 'Book', id: string, name: string, isRead: boolean, builtinAttributes: { __typename?: 'BookBuiltinAttributes', isFavorite: boolean } }>, attributes: Array<{ __typename?: 'BookAttributeSettingBasic', id: string, displayName: string, valueType: BookAttributeValueTypeEnum } | { __typename?: 'BookAttributeSettingTag', id: string, displayName: string, valueType: BookAttributeValueTypeEnum, tags: Array<string> }> } };
 
 export type LoadLibrarySettingsQueryVariables = Exact<{
   libraryId: Scalars['ID'];
@@ -448,6 +476,9 @@ export const GetBookDocument = gql`
       error
     }
     isRead
+    builtinAttributes {
+      isFavorite
+    }
     attributes {
       id
       displayName
@@ -520,6 +551,17 @@ export const UpdateBookAttributeDocument = gql`
   )
 }
     `;
+export const UpdateBookBuiltinAttributesDocument = gql`
+    mutation updateBookBuiltinAttributes($libraryId: ID!, $bookId: ID!, $input: BookBuiltinAttributesInput!) {
+  bookUpdateBuiltinAttribute(
+    libraryId: $libraryId
+    bookId: $bookId
+    input: $input
+  ) {
+    isFavorite
+  }
+}
+    `;
 export const GetDirsDocument = gql`
     query getDirs($root: String!) {
   dirs(root: $root)
@@ -541,6 +583,9 @@ export const LoadLibraryDocument = gql`
     books(filter: $booksFilter) {
       id
       name
+      builtinAttributes {
+        isFavorite
+      }
       isRead
     }
     attributes {
@@ -642,6 +687,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     updateBookAttribute(variables: UpdateBookAttributeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookAttributeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookAttributeMutation>(UpdateBookAttributeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookAttribute', 'mutation');
+    },
+    updateBookBuiltinAttributes(variables: UpdateBookBuiltinAttributesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateBookBuiltinAttributesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateBookBuiltinAttributesMutation>(UpdateBookBuiltinAttributesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateBookBuiltinAttributes', 'mutation');
     },
     getDirs(variables: GetDirsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDirsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDirsQuery>(GetDirsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getDirs', 'query');

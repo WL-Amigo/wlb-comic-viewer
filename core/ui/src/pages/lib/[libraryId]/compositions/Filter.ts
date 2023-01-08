@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 interface LibraryBooksSearchParamsRaw {
   isRead: string;
+  isFavorite: string;
   attributes: string;
   [_: string]: string;
 }
@@ -13,6 +14,7 @@ export interface LibraryBooksAttributeSearchParams {
 }
 export interface LibraryBooksSearchParams {
   isRead: boolean | undefined | null;
+  isFavorite: boolean | undefined | null;
   attributes: LibraryBooksAttributeSearchParams[];
 }
 
@@ -39,6 +41,8 @@ export const useLibraryBooksSearchParams = (): Accessor<LibraryBooksSearchParams
   return createMemo((): LibraryBooksSearchParams => {
     return {
       isRead: searchParams.isRead === String(true) ? true : searchParams.isRead === String(false) ? false : undefined,
+      isFavorite:
+        searchParams.isFavorite === String(true) ? true : searchParams.isFavorite === String(false) ? false : undefined,
       attributes: parseAttributes(searchParams.attributes ?? ''),
     };
   });
@@ -50,11 +54,13 @@ export const useLibraryBooksSearchParamsSetter = (): ((params: Partial<LibraryBo
   return (params) => {
     const nextParams: LibraryBooksSearchParams = {
       isRead: params.isRead === null ? undefined : params.isRead ?? currentParams().isRead,
+      isFavorite: params.isFavorite === null ? undefined : params.isFavorite ?? currentParams().isFavorite,
       attributes:
         params.attributes?.filter((attr) => attr.id !== '' && attr.value !== '') ?? currentParams().attributes,
     };
     const nextParamsRaw: LibraryBooksSearchParamsRaw = {
       isRead: String(nextParams.isRead ?? ''),
+      isFavorite: String(nextParams.isFavorite ?? ''),
       attributes: serializeAttributes(nextParams.attributes),
     };
     setSearchParams(nextParamsRaw);

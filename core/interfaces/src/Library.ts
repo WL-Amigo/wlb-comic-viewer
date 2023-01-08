@@ -26,6 +26,7 @@ export interface LibrarySettings {
 
 export interface BooksFilterParams {
   readonly isRead?: boolean;
+  readonly isFavorite?: boolean;
   readonly attributes?: {
     id: string;
     value: string;

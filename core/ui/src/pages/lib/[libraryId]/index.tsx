@@ -1,6 +1,6 @@
 import { Link } from 'solid-app-router';
 import { Component, createSignal, For, onMount } from 'solid-js';
-import { BookIcon, CheckCircleIcon, CogIcon, UndoIcon } from '../../../component/Icons';
+import { BookIcon, CheckCircleIcon, CogIcon, StarIcon, UndoIcon } from '../../../component/Icons';
 import { useLibraryDataContext } from './Context';
 import { AddBookButton } from './partials/AddBook';
 import { LibraryBooksFilterConditions } from './partials/FilterConditions';
@@ -34,7 +34,11 @@ export const BookListPage: Component = () => {
                 href={`book/${encodeURIComponent(book.id)}/`}
               >
                 <div class="flex-1 flex flex-row items-center gap-x-1 overflow-hidden">
-                  <BookIcon class="w-6 h-6 flex-shrink-0" />
+                  {book.builtinAttributes.isFavorite ? (
+                    <StarIcon class="w-6 h-6 flex-shrink-0 text-yellow-500" />
+                  ) : (
+                    <BookIcon class="w-6 h-6 flex-shrink-0" />
+                  )}
                   <span class="truncate">{book.name}</span>
                 </div>
                 {book.isRead && (

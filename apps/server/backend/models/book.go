@@ -6,11 +6,12 @@ import (
 )
 
 type BookSettings struct {
-	Name       string
-	Attributes []BookAttribute
-	KnownPages []string
-	ReadPages  []string
-	Bookmarks  []Bookmark
+	Name              string
+	BuiltinAttributes BookBuiltinAttributes
+	Attributes        []BookAttribute
+	KnownPages        []string
+	ReadPages         []string
+	Bookmarks         []Bookmark
 }
 
 type BookSettingsUpdateInput struct {

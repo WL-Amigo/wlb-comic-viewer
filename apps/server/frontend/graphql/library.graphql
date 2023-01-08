@@ -12,6 +12,9 @@ query loadLibrary($libraryId: ID!, $booksFilter: BookFilterParams) {
     books(filter: $booksFilter) {
       id
       name
+      builtinAttributes {
+        isFavorite
+      }
       isRead
     }
     attributes {
@@ -48,7 +51,7 @@ query loadLibrarySettings($libraryId: ID!) {
 query getBooksDir($libraryId: ID!) {
   library(id: $libraryId) {
     books {
-			dir
+      dir
     }
   }
 }

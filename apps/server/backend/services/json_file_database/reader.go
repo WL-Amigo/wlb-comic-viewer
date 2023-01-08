@@ -69,11 +69,12 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 		Dir:         dirPath,
 		DirFullPath: filepath.Join(basePath, dirPath),
 		BookSettings: models.BookSettings{
-			Name:       jsonStruct.Name,
-			Attributes: attributes,
-			KnownPages: jsonStruct.KnownPages,
-			ReadPages:  jsonStruct.ReadPages,
-			Bookmarks:  bookmarks,
+			Name:              jsonStruct.Name,
+			BuiltinAttributes: jsonStruct.BuiltinAttributes.ToModel(),
+			Attributes:        attributes,
+			KnownPages:        jsonStruct.KnownPages,
+			ReadPages:         jsonStruct.ReadPages,
+			Bookmarks:         bookmarks,
 		},
 	}
 }

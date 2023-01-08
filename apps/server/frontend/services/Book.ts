@@ -10,6 +10,7 @@ import {
   BookmarkUpdateParams,
   BookmarkErrorType,
 } from "@local-core/interfaces";
+import { UpdateBookBuiltinAttributesInput, BookBuiltinAttributes } from "@local-core/interfaces/src/Book";
 import { match, P } from "ts-pattern";
 import {
   BookmarkErrorTypeEnum as GqlBookmarkErrorTypeEnum,
@@ -38,7 +39,7 @@ export class BookService implements IBookService, IBookMutationService {
     private readonly apiHost: string
   ) {}
 
-  async loadBook(libraryId: string, bookId: string): Promise<Book> {
+  public async loadBook(libraryId: string, bookId: string): Promise<Book> {
     const result = await this.gqlClient.getBook({ libraryId, bookId });
     return {
       ...result.book,
@@ -46,11 +47,11 @@ export class BookService implements IBookService, IBookMutationService {
     };
   }
 
-  loadBookSettings(libraryId: string, bookId: string): Promise<BookSettings> {
+  public loadBookSettings(libraryId: string, bookId: string): Promise<BookSettings> {
     throw new Error("Method not implemented.");
   }
 
-  getBookPageUrl(libraryId: string, bookId: string, pageName: string): string {
+  public getBookPageUrl(libraryId: string, bookId: string, pageName: string): string {
     return new URL(
       `/api/file/lib/${libraryId}/book/${bookId}/${encodeURIComponent(
         pageName
@@ -59,7 +60,7 @@ export class BookService implements IBookService, IBookMutationService {
     ).toString();
   }
 
-  async createBook(
+  public async createBook(
     libraryId: string,
     params: BookCreateParams
   ): Promise<string> {
@@ -77,7 +78,7 @@ export class BookService implements IBookService, IBookMutationService {
     return result.createBook;
   }
 
-  async updateBook(
+  public async updateBook(
     libraryId: string,
     bookId: string,
     params: BookUpdateParams
@@ -93,7 +94,7 @@ export class BookService implements IBookService, IBookMutationService {
     return result.updateBook;
   }
 
-  async updateKnownPages(libraryId: string, bookId: string): Promise<string[]> {
+  public async updateKnownPages(libraryId: string, bookId: string): Promise<string[]> {
     const result = await this.gqlClient.updateBookKnownPages({
       libraryId,
       bookId,
@@ -101,7 +102,7 @@ export class BookService implements IBookService, IBookMutationService {
     return result.bookUpdateKnownPages;
   }
 
-  async markAsReadPage(
+  public async markAsReadPage(
     libraryId: string,
     bookId: string,
     page: string
@@ -114,7 +115,7 @@ export class BookService implements IBookService, IBookMutationService {
     return result.bookPageMarkAsRead;
   }
 
-  async bookmarkPage(
+  public async bookmarkPage(
     libraryId: string,
     bookId: string,
     page: string,
@@ -137,7 +138,7 @@ export class BookService implements IBookService, IBookMutationService {
     }
   }
 
-  async updateBookmark(
+  public async updateBookmark(
     libraryId: string,
     bookId: string,
     page: string,
@@ -197,5 +198,12 @@ export class BookService implements IBookService, IBookMutationService {
       })),
     });
     return result.bookUpdateAttribute;
+  }
+
+  public async updateBuiltinAttributes(libraryId: string, bookId: string, params: UpdateBookBuiltinAttributesInput): Promise<BookBuiltinAttributes> {
+    const result = await this.gqlClient.updateBookBuiltinAttributes({
+      libraryId, bookId, input: params
+    })
+    return result.bookUpdateBuiltinAttribute;
   }
 }

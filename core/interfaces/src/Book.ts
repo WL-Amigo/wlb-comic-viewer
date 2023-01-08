@@ -5,6 +5,7 @@ import { BookId, LibraryId } from './Id';
 export interface BookMin {
   readonly id: string;
   readonly name: string;
+  readonly builtinAttributes: BookBuiltinAttributes;
   readonly isRead: boolean;
 }
 
@@ -22,7 +23,16 @@ export interface Book {
   readonly pages: readonly string[];
   readonly bookmarks: readonly Bookmark[];
   readonly isRead: boolean;
+  readonly builtinAttributes: BookBuiltinAttributes;
   readonly attributes: readonly BookAttribute[];
+}
+
+export interface BookBuiltinAttributes {
+  readonly isFavorite: boolean;
+}
+
+export interface UpdateBookBuiltinAttributesInput {
+  isFavorite?: boolean;
 }
 
 export interface BookSettings {
@@ -62,4 +72,9 @@ export interface IBookMutationService {
   deleteBookmark(libraryId: LibraryId, bookId: BookId, page: string): Promise<string>;
   reorderBookmark(libraryId: LibraryId, bookId: BookId, orderedPages: readonly string[]): Promise<readonly Bookmark[]>;
   updateAttributes(libraryId: LibraryId, bookId: BookId, params: readonly BookAttributeUpdateParams[]): Promise<BookId>;
+  updateBuiltinAttributes(
+    libraryId: LibraryId,
+    bookId: BookId,
+    params: UpdateBookBuiltinAttributesInput,
+  ): Promise<BookBuiltinAttributes>;
 }

@@ -19,6 +19,7 @@ func (r *libraryResolver) Books(ctx context.Context, obj *model.Library, filter 
 	booksFilter := library.BooksFilter{}
 	if filter != nil {
 		booksFilter.IsRead = filter.IsRead
+		booksFilter.IsFavorite = filter.IsFavorite
 		for _, af := range filter.Attributes {
 			booksFilter.Attributes = append(booksFilter.Attributes, library.BooksAttributeFilter{
 				Id:    models.BookAttributeId(af.ID),
@@ -34,10 +35,13 @@ func (r *libraryResolver) Books(ctx context.Context, obj *model.Library, filter 
 	resultBooks := []*model.Book{}
 	for _, book := range books {
 		resultBooks = append(resultBooks, &model.Book{
-			ID:         string(book.Id),
-			Name:       book.Name,
-			Dir:        book.Dir,
-			Pages:      book.KnownPages,
+			ID:    string(book.Id),
+			Name:  book.Name,
+			Dir:   book.Dir,
+			Pages: book.KnownPages,
+			BuiltinAttributes: &model.BookBuiltinAttributes{
+				IsFavorite: book.BuiltinAttributes.IsFavorite,
+			},
 			Attributes: []*model.BookAttribute{}, // TODO
 			Bookmarks:  []*model.BookBookmark{},  // TODO
 			IsRead:     r.library.CheckIsBookRead(book),
