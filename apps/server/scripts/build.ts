@@ -1,5 +1,6 @@
 import { execFile } from "child_process";
 import { join as pathJoin, resolve as pathResolve } from "path";
+import { writeFile } from "node:fs/promises";
 import { mkdirp, move, copy, remove } from "fs-extra";
 
 const targetOS = process.env.GOOS;
@@ -29,7 +30,9 @@ const buildBackend = (): Promise<void> => {
 
 (async () => {
   // copy frontend build artifacts to ./backend/static/ for embedding
+  await remove("./backend/static/");
   await copy("./frontend/dist/", "./backend/static/");
+  await writeFile("./backend/static/.gitkeep", "");
 
   // build backend
   await buildBackend();
