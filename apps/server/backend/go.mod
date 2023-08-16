@@ -8,7 +8,10 @@ require (
 	github.com/vektah/gqlparser/v2 v2.4.6
 )
 
-require github.com/twmb/murmur3 v1.1.5 // indirect
+require (
+	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
+	github.com/twmb/murmur3 v1.1.5 // indirect
+)
 
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect

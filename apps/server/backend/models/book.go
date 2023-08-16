@@ -12,11 +12,13 @@ type BookSettings struct {
 	KnownPages        []string
 	ReadPages         []string
 	Bookmarks         []Bookmark
+	IgnorePatterns    []string
 }
 
 type BookSettingsUpdateInput struct {
-	Name       *string
-	Attributes []BookAttribute
+	Name           *string
+	Attributes     []BookAttribute
+	IgnorePatterns []string
 }
 
 type BookId string

@@ -1,4 +1,4 @@
-import { useSearchParams } from 'solid-app-router';
+import { useSearchParams } from '@solidjs/router';
 import { Accessor, createMemo } from 'solid-js';
 import { z } from 'zod';
 

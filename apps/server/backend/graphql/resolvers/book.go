@@ -41,8 +41,9 @@ func (r *mutationResolver) UpdateBook(ctx context.Context, libraryID string, boo
 	}
 
 	updatedId, err := r.library.UpdateBook(libraryID, bookID, models.BookSettingsUpdateInput{
-		Name:       input.Name,
-		Attributes: attrs,
+		Name:           input.Name,
+		Attributes:     attrs,
+		IgnorePatterns: input.IgnorePatterns,
 	})
 	if err != nil {
 		return "", err
@@ -244,9 +245,10 @@ func (r *queryResolver) Book(ctx context.Context, libraryID string, bookID strin
 		BuiltinAttributes: &model.BookBuiltinAttributes{
 			IsFavorite: bookDetail.BuiltinAttributes.IsFavorite,
 		},
-		Attributes: attrs,
-		Bookmarks:  bookmarks,
-		IsRead:     r.library.CheckIsBookRead(bookDetail.BookModelBase),
+		Attributes:     attrs,
+		Bookmarks:      bookmarks,
+		IsRead:         r.library.CheckIsBookRead(bookDetail.BookModelBase),
+		IgnorePatterns: bookDetail.IgnorePatterns,
 	}, nil
 }
 

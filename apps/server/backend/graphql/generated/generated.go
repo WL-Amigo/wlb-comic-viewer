@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 		BuiltinAttributes func(childComplexity int) int
 		Dir               func(childComplexity int) int
 		ID                func(childComplexity int) int
+		IgnorePatterns    func(childComplexity int) int
 		IsRead            func(childComplexity int) int
 		Name              func(childComplexity int) int
 		Pages             func(childComplexity int) int
@@ -204,6 +205,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Book.ID(childComplexity), true
+
+	case "Book.ignorePatterns":
+		if e.complexity.Book.IgnorePatterns == nil {
+			break
+		}
+
+		return e.complexity.Book.IgnorePatterns(childComplexity), true
 
 	case "Book.isRead":
 		if e.complexity.Book.IsRead == nil {
@@ -715,6 +723,7 @@ var sources = []*ast.Source{
   attributes: [BookAttribute!]!
   bookmarks: [BookBookmark!]!
   isRead: Boolean!
+  ignorePatterns: [String!]!
 }
 
 type BookBuiltinAttributes {
@@ -727,6 +736,7 @@ extend type Query {
 
 input BookInput {
   name: String
+  ignorePatterns: [String!]
 }
 
 input BookInitInput {
@@ -1872,6 +1882,50 @@ func (ec *executionContext) fieldContext_Book_isRead(ctx context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Book_ignorePatterns(ctx context.Context, field graphql.CollectedField, obj *model.Book) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Book_ignorePatterns(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IgnorePatterns, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Book_ignorePatterns(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Book",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _BookAttribute_id(ctx context.Context, field graphql.CollectedField, obj *model.BookAttribute) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_BookAttribute_id(ctx, field)
 	if err != nil {
@@ -2760,6 +2814,8 @@ func (ec *executionContext) fieldContext_Library_books(ctx context.Context, fiel
 				return ec.fieldContext_Book_bookmarks(ctx, field)
 			case "isRead":
 				return ec.fieldContext_Book_isRead(ctx, field)
+			case "ignorePatterns":
+				return ec.fieldContext_Book_ignorePatterns(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
 		},
@@ -3865,6 +3921,8 @@ func (ec *executionContext) fieldContext_Query_book(ctx context.Context, field g
 				return ec.fieldContext_Book_bookmarks(ctx, field)
 			case "isRead":
 				return ec.fieldContext_Book_isRead(ctx, field)
+			case "ignorePatterns":
+				return ec.fieldContext_Book_ignorePatterns(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
 		},
@@ -6252,7 +6310,7 @@ func (ec *executionContext) unmarshalInputBookInput(ctx context.Context, obj int
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name"}
+	fieldsInOrder := [...]string{"name", "ignorePatterns"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6264,6 +6322,14 @@ func (ec *executionContext) unmarshalInputBookInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ignorePatterns":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ignorePatterns"))
+			it.IgnorePatterns, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6453,6 +6519,13 @@ func (ec *executionContext) _Book(ctx context.Context, sel ast.SelectionSet, obj
 		case "isRead":
 
 			out.Values[i] = ec._Book_isRead(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ignorePatterns":
+
+			out.Values[i] = ec._Book_ignorePatterns(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -8316,6 +8389,44 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	}
 	res := graphql.MarshalID(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

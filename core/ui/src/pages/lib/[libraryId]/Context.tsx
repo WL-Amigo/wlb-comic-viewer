@@ -1,5 +1,5 @@
 import { LibraryForView } from '@local-core/interfaces';
-import { Outlet, useParams } from 'solid-app-router';
+import { Outlet, useParams } from '@solidjs/router';
 import { Accessor, createContext, createResource, createSignal, ParentComponent, Show, useContext } from 'solid-js';
 import { SquareLoader } from '../../../component/Spinners/SquareLoader';
 import { useService } from '../../../compositions/Dependency';
@@ -30,7 +30,7 @@ export const LibraryDataProvider: ParentComponent = () => {
       searchParams: searchParams(),
     }),
     ({ libraryId, searchParams }) =>
-      libraryService.loadLibrary(libraryId, {
+      libraryService.loadLibrary(decodeURIComponent(libraryId), {
         isRead: searchParams.isRead ?? undefined,
         isFavorite: searchParams.isFavorite ?? undefined,
         attributes: searchParams.attributes,

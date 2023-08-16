@@ -88,6 +88,7 @@ export class BookService implements IBookService, IBookMutationService {
       bookId,
       bookInput: {
         name: params.name,
+        ignorePatterns: params.ignorePatterns !== undefined ? [...params.ignorePatterns] : undefined
       },
     });
 

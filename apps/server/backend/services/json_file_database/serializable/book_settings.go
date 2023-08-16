@@ -7,4 +7,5 @@ type BookSettingsJson struct {
 	KnownPages        []string                 `json:"knownPages"`
 	ReadPages         []string                 `json:"readPages"`
 	Bookmarks         []BookmarkJson           `json:"bookmarks"`
+	IgnorePatterns    []string                 `json:"ignorePatterns"`
 }

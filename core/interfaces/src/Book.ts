@@ -25,6 +25,7 @@ export interface Book {
   readonly isRead: boolean;
   readonly builtinAttributes: BookBuiltinAttributes;
   readonly attributes: readonly BookAttribute[];
+  readonly ignorePatterns: readonly string[];
 }
 
 export interface BookBuiltinAttributes {
@@ -50,6 +51,7 @@ export interface BookCreateParams {
 export interface BookUpdateParams {
   name?: string;
   attributes?: readonly BookAttributeUpdateParams[];
+  ignorePatterns?: readonly string[];
 }
 
 export interface BookmarkUpdateParams {

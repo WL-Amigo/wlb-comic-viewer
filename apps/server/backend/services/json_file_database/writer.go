@@ -112,6 +112,7 @@ func (db *JsonFileDatabase) UpdateBook(libraryId string, bookId models.BookId, s
 		KnownPages:        settings.KnownPages,
 		ReadPages:         settings.ReadPages,
 		Bookmarks:         bookmarks,
+		IgnorePatterns:    settings.IgnorePatterns,
 	}); err != nil {
 		return "", err
 	}

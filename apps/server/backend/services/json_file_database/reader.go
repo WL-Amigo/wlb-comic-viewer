@@ -75,6 +75,7 @@ func createBookModelFromJsonStructure(jsonStruct serializable.BookSettingsJson, 
 			KnownPages:        jsonStruct.KnownPages,
 			ReadPages:         jsonStruct.ReadPages,
 			Bookmarks:         bookmarks,
+			IgnorePatterns:    jsonStruct.IgnorePatterns,
 		},
 	}
 }

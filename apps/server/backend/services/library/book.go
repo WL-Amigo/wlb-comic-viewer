@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/private-gallery-server/models"
 	"github.com/private-gallery-server/utils"
 	"golang.org/x/exp/slices"
@@ -99,10 +100,33 @@ func (s *LibraryService) ReadBook(libraryId string, bookId models.BookId) (model
 		return models.BookModelDetail{}, err
 	}
 
+	filteredPages := filterPages(bookBase.KnownPages, bookBase.IgnorePatterns)
+
 	return models.BookModelDetail{
 		BookModelBase: bookBase,
-		PageFilePaths: utils.SortStringSlice(bookBase.KnownPages, utils.NaturalNumberOrder, false),
+		PageFilePaths: utils.SortStringSlice(filteredPages, utils.NaturalNumberOrder, false),
 	}, nil
+}
+
+func filterPages(pages []string, ignorePatterns []string) []string {
+	result := []string{}
+	for _, page := range pages {
+		shouldExclude := false
+		for _, ignorePattern := range ignorePatterns {
+			isMatch, err := doublestar.Match(ignorePattern, page)
+			if err != nil {
+				continue
+			}
+			if isMatch {
+				shouldExclude = true
+				break
+			}
+		}
+		if !shouldExclude {
+			result = append(result, page)
+		}
+	}
+	return result
 }
 
 func (s *LibraryService) CheckIsBookRead(bookBase models.BookModelBase) bool {
@@ -162,6 +186,10 @@ func (s *LibraryService) UpdateBook(libraryId string, bookId string, input model
 
 	if input.Name != nil {
 		settings.Name = *input.Name
+	}
+
+	if input.IgnorePatterns != nil {
+		settings.IgnorePatterns = input.IgnorePatterns
 	}
 
 	if len(input.Attributes) > 0 {

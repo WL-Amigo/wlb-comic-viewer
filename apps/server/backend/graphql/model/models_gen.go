@@ -25,6 +25,7 @@ type Book struct {
 	Attributes        []*BookAttribute       `json:"attributes"`
 	Bookmarks         []*BookBookmark        `json:"bookmarks"`
 	IsRead            bool                   `json:"isRead"`
+	IgnorePatterns    []string               `json:"ignorePatterns"`
 }
 
 type BookAttribute struct {
@@ -105,7 +106,8 @@ type BookInitInput struct {
 }
 
 type BookInput struct {
-	Name *string `json:"name"`
+	Name           *string  `json:"name"`
+	IgnorePatterns []string `json:"ignorePatterns"`
 }
 
 type Library struct {

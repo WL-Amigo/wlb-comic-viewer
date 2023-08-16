@@ -1,4 +1,4 @@
-import { Navigate, Route, Router, Routes } from 'solid-app-router';
+import { Navigate, Route, Router, Routes } from '@solidjs/router';
 import type { Component } from 'solid-js';
 import { ServiceProvider, Services } from './compositions/Dependency';
 import { LibraryListPage } from './pages/lib';

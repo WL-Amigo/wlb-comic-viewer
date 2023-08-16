@@ -1,4 +1,4 @@
-import { Link } from 'solid-app-router';
+import { Link } from '@solidjs/router';
 import { Component, createSignal, For, onMount } from 'solid-js';
 import { BookIcon, CheckCircleIcon, CogIcon, StarIcon, UndoIcon } from '../../../component/Icons';
 import { useLibraryDataContext } from './Context';

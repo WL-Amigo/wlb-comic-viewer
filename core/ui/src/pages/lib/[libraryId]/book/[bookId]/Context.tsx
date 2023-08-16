@@ -1,5 +1,5 @@
 import { Book } from '@local-core/interfaces';
-import { Outlet, useParams } from 'solid-app-router';
+import { Outlet, useParams } from '@solidjs/router';
 import { Accessor, Component, createContext, createResource, Show, useContext } from 'solid-js';
 import { SquareLoader } from '../../../../../component/Spinners/SquareLoader';
 import { useService } from '../../../../../compositions/Dependency';
@@ -25,7 +25,7 @@ export const BookDataProvider: Component = () => {
   const libCtx = useLibraryDataContext();
   const params = useParams<{ bookId: string }>();
   const [data, { refetch }] = createResource(
-    () => params.bookId,
+    () => decodeURIComponent(params.bookId),
     (bookId) => bookService.loadBook(libCtx.library().id, bookId),
   );
   const reloadBook = async () => {

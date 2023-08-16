@@ -1,4 +1,4 @@
-import { Link } from 'solid-app-router';
+import { Link } from '@solidjs/router';
 import { Component, createResource, For } from 'solid-js';
 import { LibraryIcon } from '../../component/Icons';
 import { useService } from '../../compositions/Dependency';

@@ -9,6 +9,7 @@ query getBook($libraryId: ID!, $bookId: ID!) {
       error
     }
     isRead
+    ignorePatterns
     builtinAttributes {
       isFavorite
     }

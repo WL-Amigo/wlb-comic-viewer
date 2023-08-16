@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'solid-app-router';
+import { useNavigate, useSearchParams } from '@solidjs/router';
 import { Accessor } from 'solid-js';
 
 interface BookViewerOpenStateSearchParamsRaw {

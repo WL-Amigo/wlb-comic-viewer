@@ -7,6 +7,7 @@ type Book {
   attributes: [BookAttribute!]!
   bookmarks: [BookBookmark!]!
   isRead: Boolean!
+  ignorePatterns: [String!]!
 }
 
 type BookBuiltinAttributes {
@@ -19,6 +20,7 @@ extend type Query {
 
 input BookInput {
   name: String
+  ignorePatterns: [String!]
 }
 
 input BookInitInput {

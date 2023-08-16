@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Link } from 'solid-app-router';
+import { Link } from '@solidjs/router';
 import { Component, createSignal, Match, ParentComponent, Switch } from 'solid-js';
 import { UndoIcon } from '../../../../../component/Icons';
 import { windi } from '../../../../../utils/windi';
